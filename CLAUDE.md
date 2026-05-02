@@ -67,6 +67,7 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 - **Maquettes** : nommage `[persona-id]-[slug].html` (ex : `rm-04-declarer-trajet.html`). Persona-id = `rm` rameneur, `ac` acheteur, `pr` producteur.
 - **Décisions** : datées en ISO (YYYY-MM-DD), une ligne par décision avec contexte court.
 - **Versions** : pas de suffixe `_v1` sur les fichiers vivants. Si un document est figé (ex: PRD à un instant T), créer un dossier `archives/` plutôt que renommer.
+- **Messages de commit** : phrase courte en français, forme "Verbe + objet" sans préfixe conventionnel (`feat:`, `chore:`, etc.). Exemples : `Ajout du fichier DESIGN.md`, `Mise à jour de CLAUDE.md`, `Archivage des user stories`.
 
 ## Workflow obligatoire
 
@@ -92,6 +93,16 @@ Règles à respecter sans qu'elles soient rappelées à chaque demande.
 - Demander confirmation si le fichier crée un nouveau dossier de premier niveau
 - Privilégier l'ajout dans un fichier existant plutôt que la fragmentation
 - Pas de suffixe `_v1`, `_final`, etc. sur les fichiers vivants
+
+### Modifications de `DESIGN.md` — règle impérative
+`DESIGN.md` est la source de vérité du design system et doit toujours être synchronisé avec le dépôt distant.
+
+**Avant toute modification :**
+- Présenter les changements envisagés (tokens, règles, composants) et obtenir une **confirmation explicite** avant d'éditer le fichier.
+
+**Après chaque modification confirmée et appliquée :**
+- Faire un `git add DESIGN.md && git commit -m "design: <description courte>" && git push origin main` immédiatement.
+- Ne jamais laisser une modification de `DESIGN.md` non commitée ou non poussée.
 
 ### Hiérarchie en cas de conflit entre sources
 1. `produit/decisions/decisions_produit.md` (dernière entrée datée)
