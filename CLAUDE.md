@@ -15,6 +15,7 @@ Charge ce fichier à l'ouverture du projet pour comprendre rapidement où on en 
 - **Phase** : conception produit, pré-développement
 - **Maquettes** : parcours rameneur (RM-04, RM-05, RM-06, RM-08) et parcours producteur (PR-04, PR-05, PR-06) posés. Reste à faire le parcours acheteur.
 - **Décisions structurantes** : prises (voir ci-dessous)
+- **Backlog** : structuré sur Jira (erkulaws.atlassian.net, projet KAN) — épics, features et subtasks créés pour l'ensemble du MVP
 - **Code** : pas commencé
 
 ## Modèle d'expérience (important — flip vs PRD initial)
@@ -30,7 +31,8 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 | Cahier des charges initial (historique) | `vision/cahier_des_charges.pdf` |
 | Carte des écrans MVP | `produit/sitemap.md` |
 | Cycle de vie d'une mission, machine à états, paiement, QR codes | `produit/flow_mission.md` |
-| User stories MVP (par epic) | `produit/user_stories.md` |
+| Backlog MVP (épics, features, subtasks) | Jira KAN — erkulaws.atlassian.net |
+| User stories archivées (référence, non maintenu) | `produit/archives/user_stories_v2_2026-05-02.md` |
 | Roadmap dev par phase et sprint | `produit/roadmap.md` |
 | Journal des arbitrages produit (avec dates) | `produit/decisions/decisions_produit.md` |
 | Maquettes HTML cliquables | `design/maquettes/rameneur/` |

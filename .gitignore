@@ -30,3 +30,6 @@ build/
 
 # Claude interne (ne pas versionner les sessions)
 .claude/settings.local.json
+
+# Claude Code (config locale, non versionné)
+.claude/
