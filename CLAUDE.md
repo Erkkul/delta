@@ -57,7 +57,6 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 - Multi-producteurs par mission
 - Wishlist publique / carte de la demande
 - Wallet interne / cashback
-- Web app acheteur (mobile-first assumé)
 - Matching algorithmique automatique commande → rameneur
 
 ## Conventions
@@ -68,6 +67,7 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 - **Décisions** : datées en ISO (YYYY-MM-DD), une ligne par décision avec contexte court.
 - **Versions** : pas de suffixe `_v1` sur les fichiers vivants. Si un document est figé (ex: PRD à un instant T), créer un dossier `archives/` plutôt que renommer.
 - **Messages de commit** : phrase courte en français, forme "Verbe + objet" sans préfixe conventionnel (`feat:`, `chore:`, etc.). Exemples : `Ajout du fichier DESIGN.md`, `Mise à jour de CLAUDE.md`, `Archivage des user stories`.
+- **Responsive obligatoire** : toute maquette ou écran doit être conçu pour desktop ET mobile. Pas de mobile-first ni de desktop-first — les deux déclinaisons sont livrées systématiquement. Les breakpoints de référence sont définis dans `DESIGN.md`.
 
 ## Workflow obligatoire
 
@@ -132,9 +132,9 @@ Règles à respecter sans qu'elles soient rappelées à chaque demande.
 
 ## Personas (rappel)
 
-- **Producteur** : agriculteur, artisan, petit transformateur. Vend ses produits sur Delta. Peut utiliser web (PC à la ferme) ou mobile.
-- **Acheteur** : citadin, sensible au local et au bio, souvent sans voiture. Mobile-first.
-- **Rameneur** : particulier qui fait des trajets réguliers ou ponctuels (navetteurs, étudiants, week-ends en famille). Mobile-first. Persona limitant — sans rameneurs, pas de plateforme.
+- **Producteur** : agriculteur, artisan, petit transformateur. Vend ses produits sur Delta. Desktop et mobile.
+- **Acheteur** : citadin, sensible au local et au bio, souvent sans voiture. Desktop et mobile.
+- **Rameneur** : particulier qui fait des trajets réguliers ou ponctuels (navetteurs, étudiants, week-ends en famille). Desktop et mobile. Persona limitant — sans rameneurs, pas de plateforme.
 
 ## Glossaire
 

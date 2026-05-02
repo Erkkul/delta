@@ -22,6 +22,10 @@ Ce document trace les arbitrages produit pris au fur et à mesure des itération
 - **2026-05-01** — Déclaration de trajet : **dates uniquement** au MVP, pas d'heure de départ ni de retour. Simplifie le formulaire. Heures envisagées en v2 si pertinence du matching le justifie.
 - **2026-05-01** — Saisie ville/code postal : **autocomplétion** via API Adresse Gouv.fr (gratuite). Note d'implémentation, transparent pour les maquettes.
 
+### Design & responsive
+
+- **2026-05-02** — **Abandon du mobile-first**. La plateforme doit être accessible sur tous les devices (desktop + mobile) pour tous les personas (rameneur, acheteur, producteur). Toute maquette est conçue avec les deux déclinaisons simultanément. Pas de hiérarchie mobile vs. desktop. Cette décision supersede l'hypothèse mobile-first initiale du PRD et retire la "Web app acheteur" de la liste hors scope MVP.
+
 ### Parcours producteur
 
 - **2026-05-01** — Layout producteur : **sidebar nav gauche persistante** (Tableau de bord, Catalogue, Récupérations, Ventes, Profil, Paramètres). Pattern back-office classique justifié par usage long et récurrent. Rupture visuelle assumée vs header simple côté rameneur.
