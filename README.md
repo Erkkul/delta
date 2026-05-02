@@ -3,7 +3,7 @@
 Plateforme de produits locaux par covoiturage. Met en relation producteurs locaux, acheteurs urbains et rameneurs (particuliers en déplacement) pour acheminer des produits locaux via des trajets déjà existants.
 
 **Statut** : conception produit, pré-développement
-**Pilote envisagé** : axe Normandie ↔ Paris
+**Déploiement** : national, tous axes ruraux-urbains
 
 ---
 

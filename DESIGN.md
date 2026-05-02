@@ -3,7 +3,7 @@ name: Delta Design System
 version: 1.0.0
 description: >
   Design system de la plateforme Delta — mise en relation de producteurs locaux,
-  acheteurs urbains et rameneurs sur l'axe Normandie ↔ Paris. Mobile-first.
+  acheteurs urbains et rameneurs sur l'ensemble du territoire national. Responsive desktop + mobile.
   Trois personas : Rameneur (rm), Acheteur (ac), Producteur (pr).
 
 colors:
@@ -118,14 +118,14 @@ shadows:
   shadow-badge:    "0 2px 6px rgba(212,160,23,0.3)"
 
 breakpoints:
-  mobile:  "390px"   # iPhone 14 — cible primaire (rameneur + acheteur)
+  mobile:  "390px"   # iPhone 14
   tablet:  "768px"
-  desktop: "1280px"  # Cible secondaire (producteur à la ferme)
+  desktop: "1280px"
 ---
 
 # Delta — Design System
 
-Plateforme de covoiturage de produits locaux. Pilote Normandie ↔ Paris.
+Plateforme de covoiturage de produits locaux. Déploiement national.
 
 ## Philosophie visuelle
 
@@ -135,7 +135,7 @@ Delta repose sur **trois piliers esthétiques** qui doivent transparaître dans 
 2. **Simplicité rameneur** — le rameneur est le persona limitant. Tout geste doit être évident en 3 secondes, même au volant ou en déplacement.
 3. **Local d'abord** — la palette verte (terroir) et les accents terre évoquent la campagne et les produits artisanaux. Pas de bleu tech, pas de gris corporate.
 
-Le produit est **mobile-first** pour les rameneurs et acheteurs, desktop accepté pour les producteurs.
+Le produit est **responsive** — chaque écran est conçu simultanément pour desktop et mobile, pour tous les personas.
 
 ---
 
@@ -281,20 +281,18 @@ Grille mobile :
 ## Personas & contextes d'usage
 
 ### Rameneur (rm-*)
-- Mobile exclusivement. Souvent en déplacement.
-- Densité d'information réduite. CTA très visibles.
-- Pas de texte long. Données clés en premier.
+- Desktop et mobile. Souvent en déplacement — l'interface mobile doit être particulièrement fluide et les CTA très visibles.
+- Densité d'information réduite. Données clés en premier.
 - Validation par QR code (pickup + delivery).
 
 ### Acheteur (ac-*)
-- Mobile-first. Navigation par envies/wishlist.
+- Desktop et mobile. Navigation par envies/wishlist.
 - Design plus éditorial, mise en avant des produits et producteurs.
 - Aucun cash : tout le paiement passe par Stripe (escrow).
 
 ### Producteur (pr-*)
-- Accepte le desktop (PC à la ferme).
-- Plus de densité acceptable, formulaires plus longs.
-- Ton professionnel mais chaleureux.
+- Desktop et mobile. Usage long et récurrent — une densité plus élevée est acceptable sur desktop.
+- Formulaires plus longs, ton professionnel mais chaleureux.
 
 ---
 

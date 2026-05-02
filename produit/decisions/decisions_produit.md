@@ -25,6 +25,7 @@ Ce document trace les arbitrages produit pris au fur et à mesure des itération
 ### Design & responsive
 
 - **2026-05-02** — **Abandon du mobile-first**. La plateforme doit être accessible sur tous les devices (desktop + mobile) pour tous les personas (rameneur, acheteur, producteur). Toute maquette est conçue avec les deux déclinaisons simultanément. Pas de hiérarchie mobile vs. desktop. Cette décision supersede l'hypothèse mobile-first initiale du PRD et retire la "Web app acheteur" de la liste hors scope MVP.
+- **2026-05-02** — **Abandon de la restriction géographique Normandie ↔ Paris**. Delta est ouvert sur tous les axes ruraux-urbains nationaux dès le MVP. Pas de territoire pilote unique. Le choix du premier axe d'activation est une décision opérationnelle, non une contrainte produit. Tous les documents produit sont mis à jour en conséquence ; l'étude de marché initiale (axe Normandie-Paris) est conservée en archives comme données de référence illustratives.
 
 ### Parcours producteur
 

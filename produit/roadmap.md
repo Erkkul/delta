@@ -3,7 +3,7 @@
 
 ## Vue d'ensemble
 **Durée estimée totale**: 4-5 mois  
-**Territoire pilote**: Axe Normandie ↔ Paris  
+**Déploiement**: National, tous axes ruraux-urbains  
 **Objectif**: Lancer une plateforme fonctionnelle permettant de relier vendeurs locaux, acheteurs urbains et rameneurs particuliers
 
 ---
@@ -219,8 +219,8 @@ Compléter l'expérience utilisateur et préparer le lancement
 Lancer en production avec un groupe limité
 
 **Actions**
-- Recrutement 10-15 vendeurs pilotes (Normandie)
-- Recrutement 20-30 rameneurs (axe Normandie-Paris)
+- Recrutement 10-15 vendeurs pilotes (territoire à définir)
+- Recrutement 20-30 rameneurs sur le territoire de lancement
 - Communication locale ciblée
 - Lancement progressif (invitation only)
 - Support réactif
@@ -273,7 +273,7 @@ Une fois le MVP stabilisé (3 mois après lancement), considérer :
 2. **Produits frais** (chaîne du froid)
 3. **Web app** (en complément mobile)
 4. **Analytics CO₂** (argument écologique mesurable)
-5. **Extension géographique** (Bretagne-Paris)
+5. **Extension géographique** (nouveaux axes ruraux-urbains)
 
 ---
 

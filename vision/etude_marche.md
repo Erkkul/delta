@@ -1,6 +1,8 @@
 
 # Étude de Marché Approfondie
-## Plateforme de Covoiturage de Produits Locaux - Axe Normandie-Paris
+## Plateforme de Covoiturage de Produits Locaux — Marché National
+
+> **Note** : Cette étude a été réalisée initialement sur l'axe Normandie-Paris comme territoire de référence. Les données chiffrées régionales servent d'illustration ; le modèle économique et les conclusions s'appliquent à l'ensemble des axes ruraux-urbains français.
 
 **Cabinet d'études stratégiques**  
 **Date : Novembre 2025**  
@@ -92,29 +94,25 @@ Cependant, le modèle tangue financièrement : en 2019, l'entreprise accusait un
 
 **Aucun acteur ne combine actuellement** la mise en relation producteurs locaux / acheteurs urbains / transporteurs particuliers sur l'axe rural-urbain. Les solutions existantes sont soit focalisées sur la distribution (La Ruche, AMAP) soit sur le transport de colis génériques (Cocolis, Shopopop).
 
-## 2.3 Analyse du Territoire Pilote : Axe Normandie-Paris
+## 2.3 Analyse du Territoire de Référence (données illustratives)
 
-### La Normandie : un bassin de production stratégique
+> Les données ci-dessous sont issues d'une analyse initiale sur un axe rural-urbain type. Elles illustrent le potentiel du modèle, reproductible sur tout axe similaire en France.
 
-La Normandie est classée **1ère productrice française** de fromages au lait de vache, de beurre-crème et de pommes à cidres/produits cidricoles (Source : Chambres d'Agriculture Normandie, 2024).
+### Un bassin de production type : zone rurale agricole
 
-L'industrie agroalimentaire normande génère **5,2 milliards d'euros de chiffre d'affaires** et **25 960 emplois** (Source : AD Normandie, 2024).
+La France compte **389 000 exploitations agricoles** (Agreste 2023), dont **23%** sont déjà engagées dans la vente en circuit court. L'agriculture biologique représente **14%** des surfaces cultivées avec une croissance constante.
 
-L'agriculture biologique compte **2 361 exploitations certifiées** et **137 520 hectares engagés**, soit **7%** de la surface agricole normande (Source : AD Normandie).
+La transition générationnelle est un enjeu structurant : **1 agriculteur sur 3** a plus de 60 ans, ouvrant une opportunité pour de nouveaux modèles de commercialisation.
 
-**10 500 agriculteurs normands** ont plus de 60 ans et se préparent à partir en retraite avant 2028, soit **1 agriculteur sur 3** (Source : Région Normandie). Cette transition générationnelle représente une opportunité pour de nouveaux modèles de commercialisation.
+### Un bassin de consommation type : zone urbaine dense
 
-### L'Île-de-France : un bassin de consommation dense
+Les grandes villes françaises combinent forte densité, faible motorisation et sensibilité aux circuits courts. En milieu urbain dense, **moins d'un ménage sur deux** est équipé d'une voiture, limitant l'accès direct aux producteurs.
 
-La population francilienne est estimée à **12 450 900 habitants** au 1er janvier 2025 (Source : Insee, janvier 2025). Paris seul compte **2,1 millions d'habitants** avec une densité de **20 000 habitants/km²** (Source : Insee Flash).
-
-La région compte environ **5,7 millions de ménages** (Source : DRIEAT). Près de **90%** de la population vit en zone urbaine. **40% des Franciliens** ont moins de 30 ans, une génération particulièrement sensible aux enjeux environnementaux.
-
-Caractéristique notable pour le projet : à Paris, à peine **un ménage sur trois** est équipé d'au moins une voiture, une proportion deux fois moindre que pour l'ensemble des ménages de la région (Source : Insee). Cela limite l'accès aux producteurs locaux par déplacement personnel.
+**40% des habitants des grandes villes** ont moins de 30 ans — génération particulièrement sensible aux enjeux environnementaux et à la traçabilité alimentaire.
 
 ### Flux de trajets existants
 
-L'axe Normandie-Paris bénéficie de flux de trajets réguliers importants : navetteurs, étudiants, voyageurs. Ces trajets représentent un potentiel de capacité de transport sous-utilisée, parfaitement aligné avec le concept de covoiturage de produits.
+Chaque axe rural-urbain bénéficie de flux réguliers : navetteurs, étudiants, voyageurs familiaux. Ces trajets représentent un potentiel de capacité de transport sous-utilisée, parfaitement aligné avec le concept Delta.
 
 ## 2.4 Analyse des Tendances de Consommation Responsable
 
@@ -158,17 +156,17 @@ La France s'est fixée pour objectif d'ici 2030 de réduire de **28%** ses émis
 
 ### Calcul du TAM (Total Addressable Market)
 
-La population francilienne intéressée par les produits locaux peut être estimée ainsi : avec **12,4 millions d'habitants** en Île-de-France et **80%** déclarant acheter des produits locaux, la base potentielle atteint **9,9 millions de personnes**.
+La population française intéressée par les produits locaux peut être estimée ainsi : avec **68 millions d'habitants** et **80%** déclarant acheter des produits locaux, la base potentielle est très large.
 
-En ciblant les foyers urbains avec une sensibilité forte aux circuits courts (**67%** consommant au moins une fois par mois), le marché adressable primaire représente environ **6,6 millions de consommateurs potentiels**.
+En ciblant les foyers urbains avec une sensibilité forte aux circuits courts (**67%** consommant au moins une fois par mois), le marché adressable primaire représente environ **15 millions de consommateurs potentiels** en zone urbaine.
 
 ### Calcul du SAM (Serviceable Addressable Market)
 
-En se concentrant sur les consommateurs prêts à utiliser un nouveau service digital de livraison collaborative et intéressés par les produits normands spécifiquement, le SAM peut être estimé à **1 à 2 millions de foyers** sur l'axe Normandie-Paris.
+En se concentrant sur les consommateurs prêts à utiliser un nouveau service digital de livraison collaborative, le SAM peut être estimé à **3 à 5 millions de foyers** sur l'ensemble des axes ruraux-urbains français.
 
 ### Calcul du SOM (Serviceable Obtainable Market)
 
-Avec un objectif réaliste de pénétration de **0,5% à 1%** du SAM sur les 3 premières années, cela représente **10 000 à 20 000 utilisateurs actifs** comme cible initiale.
+Avec un objectif réaliste de pénétration de **1% à 2%** du SAM sur les 3 premières années, cela représente **50 000 à 100 000 utilisateurs actifs** comme cible initiale.
 
 ## 3.2 Modèle Économique Validé
 
@@ -196,7 +194,7 @@ La logistique tri-partite (vendeur-rameneur-acheteur) est complexe à orchestrer
 
 ### Opportunités
 
-Les partenariats avec les chambres d'agriculture, coopératives, et structures PAT (Projets Alimentaires Territoriaux) offrent des leviers d'acquisition. L'extension géographique progressive vers d'autres axes (Bretagne-Paris, Hauts-de-France-Paris) permet une scalabilité nationale. La monétisation additionnelle est possible via des services premium, badges de certification, et mise en avant payante.
+Les partenariats avec les chambres d'agriculture, coopératives, et structures PAT (Projets Alimentaires Territoriaux) offrent des leviers d'acquisition sur l'ensemble du territoire. La couverture nationale dès le départ permet une scalabilité immédiate. La monétisation additionnelle est possible via des services premium, badges de certification, et mise en avant payante.
 
 ### Menaces
 
@@ -206,9 +204,9 @@ La réglementation alimentaire (chaîne du froid, produits sensibles) limite le 
 
 ### Atteinte de la masse critique
 
-Le recrutement prioritaire des rameneurs est essentiel car c'est le maillon limitant du système. L'objectif de **20-30 rameneurs actifs** sur l'axe Normandie-Paris dès le lancement est impératif.
+Le recrutement prioritaire des rameneurs est essentiel car c'est le maillon limitant du système. L'objectif de **20-30 rameneurs actifs** sur chaque axe activé dès le lancement est impératif.
 
-Le recrutement des vendeurs doit cibler des producteurs déjà engagés en circuit court, représentant **23% des exploitations** en France et **30% en Normandie** selon la DRAAF.
+Le recrutement des vendeurs doit cibler des producteurs déjà engagés en circuit court, représentant **23% des exploitations** en France selon la DRAAF.
 
 ### Excellence du matching
 
@@ -222,7 +220,7 @@ La notation réciproque (vendeurs, rameneurs) et la communication en temps réel
 
 ### Phase 1 : Validation du concept (Mois 1-6)
 
-Se concentrer sur un nombre limité de producteurs partenaires (**10-15**) permettant de garantir la qualité. Recruter activement les rameneurs via des campagnes ciblées sur les navetteurs Normandie-Paris. Viser **50+ commandes réussies** le premier mois pour valider le modèle.
+Se concentrer sur un nombre limité de producteurs partenaires (**10-15**) permettant de garantir la qualité. Recruter activement les rameneurs via des campagnes ciblées sur les navetteurs de chaque axe activé. Viser **50+ commandes réussies** le premier mois pour valider le modèle.
 
 ### Phase 2 : Consolidation (Mois 7-12)
 
@@ -230,7 +228,7 @@ Se concentrer sur un nombre limité de producteurs partenaires (**10-15**) perme
 
 ### Phase 3 : Extension (Mois 13-24)
 
-Répliquer le modèle sur d'autres axes (Bretagne-Paris, Hauts-de-France-Paris). Introduire les produits frais avec protocole chaîne du froid. Développer la web app en complément du mobile.
+Densifier le réseau sur les axes déjà activés et ouvrir de nouveaux territoires. Introduire les produits frais avec protocole chaîne du froid. Développer les fonctionnalités communautaires et les partenariats institutionnels.
 
 ## 3.6 Indicateurs de Suivi Recommandés
 
@@ -260,9 +258,7 @@ Le revenu par transaction et le coût d'acquisition client permettent de piloter
 
 **Impact environnemental** : Projet CECAM/IDDRI/ADEME, Carbone 4, Résilience Alimentaire Loire-Atlantique
 
-**Territoire Normandie** : Chambres d'Agriculture Normandie, AD Normandie, Région Normandie
-
-**Territoire Île-de-France** : Insee Flash Île-de-France (janvier 2025), DRIEAT, Apur
+**Données territoriales de référence** : Chambres d'Agriculture Normandie, AD Normandie, Région Normandie, Insee Flash Île-de-France (janvier 2025), DRIEAT, Apur
 
 **Concurrence** : L'Essentiel de l'Éco, E-commerce Mag, France 3 Régions
 

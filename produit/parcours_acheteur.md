@@ -22,7 +22,7 @@ Trois hypothèses structurent tout le parcours.
 
 ## Contexte persona
 
-**Acheteur Delta** : citadin parisien (cible pilote), 25-50 ans, sensible au local et au bio, souvent sans voiture. Frustré par le prix des AMAP saturées et la qualité décevante des supermarchés bio. Achète déjà occasionnellement sur La Ruche Qui Dit Oui ou en marché. **Mobile-first** : il consulte l'appli dans les transports, ajoute des envies pendant les temps morts.
+**Acheteur Delta** : citadin, 25-50 ans, sensible au local et au bio, souvent sans voiture. Frustré par le prix des AMAP saturées et la qualité décevante des supermarchés bio. Achète déjà occasionnellement sur La Ruche Qui Dit Oui ou en marché. Consulte l'appli dans les transports, ajoute des envies pendant les temps morts.
 
 Ce qu'il cherche dans Delta vs alternatives :
 - **Vs AMAP** : pas d'engagement contraignant, pas de panier imposé

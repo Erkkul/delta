@@ -6,7 +6,7 @@ Charge ce fichier à l'ouverture du projet pour comprendre rapidement où on en 
 
 ## Le projet en 30 secondes
 
-**Delta** (nom de code provisoire) est une plateforme qui met en relation **producteurs locaux**, **acheteurs urbains** et **rameneurs** (particuliers en déplacement) pour acheminer des produits locaux via des trajets déjà existants. Pilote sur l'axe **Normandie ↔ Paris**.
+**Delta** (nom de code provisoire) est une plateforme qui met en relation **producteurs locaux**, **acheteurs urbains** et **rameneurs** (particuliers en déplacement) pour acheminer des produits locaux via des trajets déjà existants. Déploiement national, sur tous les axes ruraux-urbains.
 
 **Valeur unique** : utiliser des trajets que les gens font de toute façon, plutôt que créer une nouvelle logistique. Trois bénéfices : juste rémunération producteur, accessibilité urbaine, réduction CO₂.
 

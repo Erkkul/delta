@@ -55,7 +55,7 @@ Ce PRD est le document de référence produit pour la plateforme Delta. Il décr
 | **Zone géographique** | Périmètre d'action défini par un centre (ville/code postal) et un rayon en km, sans adresse exacte |
 | **Commission plateforme** | Part du montant de la commande retenue par Delta (5%) |
 | **Panier moyen** | Montant moyen d'une commande sur la plateforme |
-| **Territoire pilote** | Axe Normandie ↔ Paris, premier périmètre géographique de lancement |
+| **Territoire** | National — tous les axes ruraux-urbains |
 | **MVP** | Minimum Viable Product — première version lançable de la plateforme |
 
 ### 1.4 Conventions
@@ -77,7 +77,7 @@ Un monde où acheter des produits locaux de qualité est aussi simple que comman
 
 ### 2.2 Mission
 
-Connecter vendeurs de produits locaux, acheteurs urbains et particuliers en déplacement (rameneurs) sur l'axe rural-urbain, en commençant par l'axe Normandie ↔ Paris.
+Connecter vendeurs de produits locaux, acheteurs urbains et particuliers en déplacement (rameneurs) sur tous les axes ruraux-urbains de France.
 
 ### 2.3 Principes Produit
 
@@ -123,26 +123,26 @@ Ces principes guident **tous les arbitrages** quand deux options s'opposent :
 
 **Positionnement Blue Ocean** : Aucun acteur ne combine la mise en relation producteurs locaux / acheteurs urbains / transporteurs particuliers sur l'axe rural-urbain.
 
-### 3.4 Territoire pilote : axe Normandie ↔ Paris
+### 3.4 Modèle territorial
 
-**Côté offre (Normandie)** :
-- 1ère région française pour fromages, beurre-crème, cidre
-- IAA : 5,2 Md€ CA, 25 960 emplois
-- 2 361 exploitations bio, 10 500 agriculteurs proches de la retraite (opportunité transition)
+Delta opère sur tous les axes ruraux-urbains de France, sans restriction géographique. Le modèle repose sur la densité de trajets existants entre zones de production et bassins de consommation urbains.
 
-**Côté demande (Île-de-France)** :
-- 12,4 M habitants, 5,7 M ménages
-- Seulement 1 ménage parisien sur 3 motorisé → accès limité aux producteurs
-- 40% de moins de 30 ans, sensibles aux enjeux environnementaux
-- Flux de navetteurs réguliers Normandie ↔ Paris (potentiel rameneurs)
+**Côté offre (zones rurales/périurbaines)** :
+- Producteurs agricoles, artisans, petits transformateurs en circuits courts
+- Exploitations bio, labels qualité, diversité des terroirs
+
+**Côté demande (zones urbaines)** :
+- Ménages urbains avec accès limité aux producteurs locaux
+- Fort intérêt pour traçabilité, qualité et relation directe producteur
+- Rameneurs : navetteurs, étudiants, actifs en déplacement régulier
 
 ### 3.5 TAM / SAM / SOM
 
 | Niveau | Estimation | Base de calcul |
 |--------|-----------|---------------|
-| **TAM** | 6,6 M consommateurs | Franciliens consommant local ≥1x/mois |
-| **SAM** | 1-2 M foyers | Prêts à utiliser un service digital sur l'axe Normandie-Paris |
-| **SOM** | 10 000-20 000 utilisateurs actifs | Pénétration 0,5-1% du SAM sur 3 ans |
+| **TAM** | ~15 M consommateurs | Français consommant local ≥1x/mois en zone urbaine |
+| **SAM** | 3-5 M foyers | Prêts à utiliser un service digital de circuit court |
+| **SOM** | 50 000-100 000 utilisateurs actifs | Pénétration 1-2% du SAM sur 3 ans |
 
 ### 3.6 Impact environnemental
 
@@ -169,16 +169,16 @@ Ces principes guident **tous les arbitrages** quand deux options s'opposent :
 | **Digital** | Smartphone Android, utilise Facebook et WhatsApp, pas de site web |
 | **Canaux actuels** | Marché hebdomadaire (60%), vente à la ferme (30%), AMAP (10%) |
 | **Douleurs** | Zone de chalandise limitée à 20 km ; 1 jour/semaine perdu au marché pour un CA incertain ; pas les moyens de livrer elle-même ; dépendante de la météo pour le marché |
-| **Objectifs** | Toucher des clients parisiens sans logistique ; vendre ses surplus de saison ; fidéliser une clientèle régulière à distance ; être payée rapidement |
+| **Objectifs** | Toucher des clients urbains sans logistique ; vendre ses surplus de saison ; fidéliser une clientèle régulière à distance ; être payée rapidement |
 | **Comportement clé** | Disponible tôt le matin, prépare les commandes la veille, préfère les interactions simples et rapides |
-| **Citation** | *« Je voudrais vendre à Paris mais je ne peux pas y aller chaque semaine. »* |
+| **Citation** | *« Je voudrais vendre en ville mais je ne peux pas y aller chaque semaine. »* |
 
 ### 4.2 Persona Vendeur Secondaire — « Jean-Pierre, apiculteur artisan »
 
 | Attribut | Détail |
 |----------|--------|
 | **Âge** | 62 ans |
-| **Situation** | Apiculteur près d'Évreux, activité complémentaire à la retraite |
+| **Situation** | Apiculteur en zone rurale, activité complémentaire à la retraite |
 | **Digital** | Smartphone basique, usage limité (appels, SMS, WhatsApp) |
 | **Canaux actuels** | Vente à la ferme, bouche-à-oreille, marchés ponctuels |
 | **Douleurs** | Faible volume mais produit premium ; ne sait pas utiliser les outils numériques complexes ; clientèle vieillissante |
@@ -186,12 +186,12 @@ Ces principes guident **tous les arbitrages** quand deux options s'opposent :
 | **Comportement clé** | A besoin d'un onboarding très guidé, met en ligne peu de produits (3-5), fréquence de mise à jour faible |
 | **Citation** | *« Mon miel est excellent mais je ne touche que les gens du coin. »* |
 
-### 4.3 Persona Acheteur Principal — « Sophie, cadre parisienne »
+### 4.3 Persona Acheteur Principal — « Sophie, cadre urbaine »
 
 | Attribut | Détail |
 |----------|--------|
 | **Âge** | 34 ans |
-| **Situation** | Cadre dans le 11e arrondissement, couple sans enfant, pas de voiture |
+| **Situation** | Cadre en centre-ville, couple sans enfant, pas de voiture |
 | **Revenus** | 3 200 €/mois nets |
 | **Digital** | iPhone, très à l'aise (Uber Eats, Vinted, Too Good To Go) |
 | **Habitudes alimentaires** | Courses chez Monoprix + marché du dimanche quand elle a le temps |
@@ -200,12 +200,12 @@ Ces principes guident **tous les arbitrages** quand deux options s'opposent :
 | **Comportement clé** | Commande le soir ou le week-end, compare les avis, sensible à l'histoire du producteur, panier moyen 40-60 € |
 | **Citation** | *« J'adorerais acheter directement au producteur mais c'est impossible sans voiture. »* |
 
-### 4.4 Persona Acheteur Secondaire — « Fatima, mère de famille en banlieue »
+### 4.4 Persona Acheteur Secondaire — « Fatima, mère de famille en périphérie urbaine »
 
 | Attribut | Détail |
 |----------|--------|
 | **Âge** | 41 ans |
-| **Situation** | Mère de 3 enfants à Créteil, travaille à mi-temps |
+| **Situation** | Mère de 3 enfants en périphérie d'une grande ville, travaille à mi-temps |
 | **Revenus** | Foyer 3 500 €/mois |
 | **Digital** | Smartphone Android, utilise les apps de courses en ligne |
 | **Douleurs** | Budget serré, veut de la qualité pour ses enfants mais le bio en supermarché est cher ; peu de temps |
@@ -213,12 +213,12 @@ Ces principes guident **tous les arbitrages** quand deux options s'opposent :
 | **Comportement clé** | Sensible aux prix, commande en quantité, cherche des produits basiques (légumes, œufs, miel), fidèle si satisfaite |
 | **Citation** | *« Si c'est moins cher qu'en bio au supermarché et livré chez moi, je signe tout de suite. »* |
 
-### 4.5 Persona Rameneur Principal — « Thomas, navetteur Rouen-Paris »
+### 4.5 Persona Rameneur Principal — « Thomas, navetteur régulier »
 
 | Attribut | Détail |
 |----------|--------|
 | **Âge** | 29 ans |
-| **Situation** | Développeur en télétravail partiel, fait Paris-Rouen 2-3x/semaine en voiture |
+| **Situation** | Développeur en télétravail partiel, fait un trajet ville-campagne 2-3x/semaine en voiture |
 | **Revenus** | 2 800 €/mois nets |
 | **Digital** | iPhone, power user (BlaBlaCar, Waze, apps mobilité) |
 | **Motivation** | Rentabiliser ses trajets, coffre souvent vide ; sensibilité écologique |
@@ -227,12 +227,12 @@ Ces principes guident **tous les arbitrages** quand deux options s'opposent :
 | **Comportement clé** | Consulte l'app la veille de son trajet, accepte en < 30s si le détour est < 10 min, veut un processus simple (collecter → déposer) |
 | **Citation** | *« Mon coffre est vide 3 jours sur 5, autant que ça serve à quelque chose. »* |
 
-### 4.6 Persona Rameneur Secondaire — « Nadia, étudiante Le Havre-Paris »
+### 4.6 Persona Rameneur Secondaire — « Nadia, étudiante en déplacement »
 
 | Attribut | Détail |
 |----------|--------|
 | **Âge** | 22 ans |
-| **Situation** | Étudiante, rentre chez ses parents au Havre 2x/mois en voiture partagée ou train |
+| **Situation** | Étudiante, rentre chez ses parents en zone rurale 2x/mois en voiture partagée ou train |
 | **Revenus** | 600 €/mois (bourse + job étudiant) |
 | **Digital** | iPhone, très connectée (réseaux sociaux, apps collaboratives) |
 | **Motivation** | Chaque euro compte ; aime l'idée d'entraide et d'écologie |
@@ -438,8 +438,8 @@ Delta est une marketplace tri-face : sans vendeurs, pas de produits ; sans achet
 
 | Action | Objectif | Levier |
 |--------|----------|--------|
-| Partenariat Chambre d'Agriculture Normandie | 5-8 vendeurs pilotes | Contact institutionnel, crédibilité |
-| Démarchage direct marchés normands | 5-7 vendeurs complémentaires | Rencontre terrain, démo app |
+| Partenariat Chambres d'Agriculture locales | 5-8 vendeurs pilotes | Contact institutionnel, crédibilité |
+| Démarchage direct marchés locaux | 5-7 vendeurs complémentaires | Rencontre terrain, démo app |
 | Ciblage producteurs déjà en circuit court | Profils habitués à la vente directe | Base Agreste / réseaux AMAP |
 
 **Objectif Phase 1** : 10-15 vendeurs actifs, ≥50 produits en catalogue
@@ -448,8 +448,8 @@ Delta est une marketplace tri-face : sans vendeurs, pas de produits ; sans achet
 
 | Action | Objectif | Levier |
 |--------|----------|--------|
-| Campagne ciblée aires de covoiturage Normandie | 10-15 rameneurs | Flyers + QR code |
-| Publicité réseaux sociaux (navetteurs, étudiants) | 10-15 rameneurs | Géo-ciblage axe Normandie-Paris |
+| Campagne ciblée aires de covoiturage et gares | 10-15 rameneurs | Flyers + QR code |
+| Publicité réseaux sociaux (navetteurs, étudiants) | 10-15 rameneurs | Ciblage zones rurales-urbaines |
 | Partenariat BlaBlaCar / groupes Facebook covoiturage | Visibilité | Communautés existantes |
 | Bonus de lancement : +5 € par mission les 30 premiers jours | Incitation économique | Budget d'amorce |
 
@@ -460,7 +460,7 @@ Delta est une marketplace tri-face : sans vendeurs, pas de produits ; sans achet
 | Action | Objectif | Levier |
 |--------|----------|--------|
 | Lancement invitation-only (liste d'attente) | 50-100 premiers acheteurs | Effet de rareté |
-| Partenariats influenceurs food/local Paris | Notoriété | Contenu authentique |
+| Partenariats influenceurs food/local | Notoriété | Contenu authentique |
 | Première commande offerte (frais de livraison) | Conversion | Réduction du risque perçu |
 
 **Objectif Phase 3** : 50-100 acheteurs inscrits, 50+ premières commandes le mois 1
@@ -1263,7 +1263,7 @@ Onboarding → Configurer zone + disponibilités → Ajouter IBAN → (attente p
 | Back-office complet (utilisateurs, produits, commandes, litiges, stats) | EP12 |
 | Machine à états 17 états avec timeouts | Section 9 |
 | Application mobile (iOS + Android) | — |
-| Territoire : axe Normandie ↔ Paris | — |
+| Territoire : national, tous axes ruraux-urbains | — |
 | Conformité RGPD (consentement, suppression, minimisation) | EP01 |
 
 ### 14.2 OUT — Exclu du MVP avec justification
@@ -1444,7 +1444,7 @@ Cette métrique unique reflète la santé globale du système tri-face : elle ne
 
 ### Jalon 4 — « Le pilote est lancé » (Semaines 19-22)
 
-**Résultat** : La plateforme est en production sur l'axe Normandie-Paris avec de vrais utilisateurs.
+**Résultat** : La plateforme est en production avec de vrais utilisateurs.
 
 | Capacité livrée | Epics concernés |
 |----------------|----------------|
@@ -1468,8 +1468,8 @@ Cette métrique unique reflète la santé globale du système tri-face : elle ne
 | Phase | Horizon | Fonctionnalités clés |
 |-------|---------|---------------------|
 | **Post-MVP Phase 1** | M4-M6 après lancement | Badge rameneur certifié, vérification SIRET vendeur, filtres avancés, connexion sociale, analytics CO₂ |
-| **Post-MVP Phase 2** | M7-M12 | Produits frais (protocole chaîne du froid), panier multi-vendeurs, matching par itinéraires, web app, extension Bretagne-Paris |
-| **Post-MVP Phase 3** | M13-M24 | Achats groupés, wallet interne, système d'assurance, extension nationale, partenariats grande distribution locale |
+| **Post-MVP Phase 2** | M7-M12 | Produits frais (protocole chaîne du froid), panier multi-vendeurs, matching par itinéraires, densification du réseau |
+| **Post-MVP Phase 3** | M13-M24 | Achats groupés, wallet interne, système d'assurance, partenariats grande distribution locale |
 
 ---
 
