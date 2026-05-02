@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC-07 · Notification match + paiement — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50: #FAF7F2;
+    --gold: #D4A017; --rose: #C75B5B;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream-50);
+    color: var(--cream-950);
+    min-height: 100vh;
+    padding-bottom: 110px;
+  }
+
+  /* ══ DEMO NAV ══ */
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); margin-right: 4px; }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-weight: 500; font-size: 12px; transition: all 150ms; }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ══ HEADER ══ */
+  .header {
+    background: rgba(250,247,242,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 18px; height: 56px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .icon-back {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: white;
+    border: 1px solid var(--cream-200);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cream-800); cursor: pointer;
+  }
+  .icon-back svg { width: 18px; height: 18px; }
+  .header-title {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green-900);
+    flex: 1;
+    text-align: center;
+  }
+  .header-right { width: 38px; }
+
+  /* ══ COUNTDOWN BANNER (top — urgency) ══ */
+  .countdown {
+    background: linear-gradient(90deg, var(--green-700) 0%, var(--green-800) 100%);
+    color: white;
+    padding: 12px 18px;
+    text-align: center;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+  .countdown svg { width: 16px; height: 16px; }
+  .countdown strong { font-weight: 700; }
+  .countdown-time {
+    background: rgba(255,255,255,0.15);
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  /* ══ PAGE ══ */
+  .page {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 22px 18px 24px;
+  }
+
+  /* ══ HERO MATCH ══ */
+  .match-hero {
+    background: linear-gradient(135deg, var(--green-50) 0%, var(--earth-50) 100%);
+    border: 1px solid var(--green-200);
+    border-radius: 20px;
+    padding: 22px;
+    text-align: center;
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .match-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, var(--green-200) 0%, transparent 70%);
+    opacity: 0.5;
+  }
+  .match-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green-700);
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .match-hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .match-hero h1 strong { color: var(--earth-800); }
+  .match-hero p {
+    font-size: 13px;
+    color: var(--cream-700);
+    line-height: 1.5;
+    position: relative;
+  }
+
+  /* ══ CARDS GENERIC ══ */
+  .card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .card-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cream-500);
+    margin-bottom: 8px;
+  }
+
+  /* ══ PRODUCT RECAP ══ */
+  .product-row {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .product-img {
+    flex-shrink: 0;
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #F5C842 0%, #D4901A 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+  }
+  .product-info { flex: 1; min-width: 0; }
+  .product-name {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--cream-950);
+    line-height: 1.25;
+    margin-bottom: 2px;
+  }
+  .product-sub {
+    font-size: 13px;
+    color: var(--cream-600);
+  }
+  .product-qty {
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .product-price {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--earth-800);
+  }
+  .product-qty-label {
+    font-size: 11px;
+    color: var(--cream-500);
+    margin-top: 2px;
+  }
+
+  /* ══ ACTORS GRID ══ */
+  .actors-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .actor-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .actor-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cream-500);
+    margin-bottom: 6px;
+  }
+  .actor-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .actor-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .actor-avatar.producer { background: linear-gradient(135deg, var(--earth-400) 0%, var(--earth-600) 100%); }
+  .actor-avatar.rameneur { background: linear-gradient(135deg, var(--green-500) 0%, var(--green-700) 100%); }
+  .actor-info { min-width: 0; }
+  .actor-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cream-950);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .actor-meta {
+    font-size: 11px;
+    color: var(--cream-600);
+    display: flex; align-items: center; gap: 4px;
+    margin-top: 2px;
+  }
+  .actor-meta svg { width: 10px; height: 10px; color: var(--gold); }
+
+  /* ══ TIMELINE ══ */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 8px; bottom: 8px; left: 7px;
+    width: 2px;
+    background: var(--green-200);
+  }
+  .timeline-item {
+    position: relative;
+    padding-bottom: 18px;
+  }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -21px; top: 4px;
+    width: 14px; height: 14px;
+    background: var(--green-500);
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--green-200);
+  }
+  .timeline-when {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green-700);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
+  }
+  .timeline-what {
+    font-size: 14px;
+    color: var(--cream-950);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .timeline-where {
+    font-size: 12px;
+    color: var(--cream-600);
+    margin-top: 2px;
+  }
+
+  /* ══ PRICE BREAKDOWN ══ */
+  .breakdown { padding-top: 4px; }
+  .breakdown-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+  }
+  .breakdown-row.detail {
+    padding: 4px 0 4px 14px;
+    color: var(--cream-600);
+    font-size: 12px;
+  }
+  .breakdown-row.detail .label {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .breakdown-row.detail .label::before {
+    content: '';
+    width: 4px; height: 4px;
+    background: var(--cream-400);
+    border-radius: 50%;
+  }
+  .breakdown-divider { height: 1px; background: var(--cream-200); margin: 6px 0; }
+  .breakdown-row.total {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green-900);
+    padding-top: 12px;
+  }
+  .breakdown-row.total .value { color: var(--earth-800); }
+
+  /* ══ TRANSPARENCY NOTE ══ */
+  .transparency-note {
+    background: var(--earth-50);
+    border: 1px dashed var(--earth-200);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--earth-800);
+    line-height: 1.5;
+    margin-top: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+  }
+  .transparency-note svg {
+    flex-shrink: 0;
+    width: 14px; height: 14px;
+    color: var(--earth-600);
+    margin-top: 1px;
+  }
+
+  /* ══ STICKY CTA ══ */
+  .cta-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid var(--cream-200);
+    padding: 14px 18px;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  }
+  .cta-bar-inner {
+    max-width: 540px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: var(--green-600);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    height: 54px;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(53,127,67,0.26);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 200ms ease;
+  }
+  .btn-primary:hover {
+    background: var(--green-700);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(53,127,67,0.32);
+  }
+  .btn-primary svg { width: 18px; height: 18px; }
+  .btn-secondary {
+    background: transparent;
+    border: none;
+    color: var(--cream-600);
+    height: 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .btn-secondary:hover { color: var(--rose); }
+
+  /* ══ STRIPE PREVIEW (modal-like) ══ */
+  .stripe-preview {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .stripe-icon {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: #635BFF;
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .stripe-text {
+    font-size: 12px;
+    color: var(--cream-700);
+    line-height: 1.4;
+  }
+  .stripe-text strong { color: var(--cream-950); }
+
+  /* ══ DESKTOP RESPONSIVE ══ */
+  @media (min-width: 720px) {
+    body { padding-bottom: 32px; }
+
+    .header { display: none; }
+
+    .desktop-shell {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .desktop-header-bar {
+      display: flex;
+      background: rgba(250,247,242,0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--cream-200);
+      padding: 0 32px; height: 64px;
+      align-items: center; justify-content: space-between; gap: 24px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .desktop-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .desktop-logo-icon {
+      width: 32px; height: 32px; background: var(--green-800); border-radius: 9px;
+      display: flex; align-items: center; justify-content: center; font-size: 17px;
+    }
+    .desktop-logo-text { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; color: var(--green-800); }
+    .desktop-logo-text .dot { color: var(--earth-500); }
+    .desktop-nav-links { display: flex; gap: 4px; }
+    .desktop-nav-link {
+      font-size: 14px; font-weight: 500; color: var(--cream-700);
+      text-decoration: none; padding: 6px 12px; border-radius: 8px;
+    }
+    .desktop-nav-link.active { color: var(--green-700); font-weight: 600; }
+    .desktop-nav-link:hover { color: var(--green-700); background: var(--green-50); }
+    .desktop-avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--green-100);
+      border: 2px solid var(--green-200); display: flex; align-items: center;
+      justify-content: center; font-size: 14px; font-weight: 600; color: var(--green-800);
+    }
+
+    .page {
+      max-width: 920px;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .col-left { grid-column: 1; }
+    .col-right { grid-column: 2; position: sticky; top: 84px; }
+
+    .countdown { padding: 14px 32px; font-size: 14px; }
+    .countdown-time { font-size: 16px; }
+
+    .match-hero h1 { font-size: 26px; }
+
+    .cta-bar {
+      position: static;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+    }
+    .actors-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 719px) {
+    .desktop-header-bar { display: none; }
+    .col-right .card-eyebrow.recap-only { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS ACHETEUR</span>
+    <a href="ac-03-accueil.html" class="demo-nav-link">1 · Accueil</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-05-fiche-produit.html" class="demo-nav-link">2 · Fiche produit</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-07-notification-match.html" class="demo-nav-link active">3 · Match + paiement</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-08-mes-commandes.html" class="demo-nav-link">4 · Mes commandes</a>
+  </div>
+</div>
+
+<!-- ══════════ MOBILE HEADER ══════════ -->
+<header class="header">
+  <button class="icon-back" aria-label="Retour">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <div class="header-title">Confirmation de mission</div>
+  <div class="header-right"></div>
+</header>
+
+<!-- ══════════ DESKTOP HEADER ══════════ -->
+<header class="desktop-header-bar">
+  <a href="#" class="desktop-logo">
+    <div class="desktop-logo-icon">🐜</div>
+    <span class="desktop-logo-text">Delta<span class="dot">.</span></span>
+  </a>
+  <nav class="desktop-nav-links">
+    <a href="ac-03-accueil.html" class="desktop-nav-link">Accueil</a>
+    <a href="#" class="desktop-nav-link">Catalogue</a>
+    <a href="#" class="desktop-nav-link active">Mes envies</a>
+    <a href="ac-08-mes-commandes.html" class="desktop-nav-link">Commandes</a>
+  </nav>
+  <div class="desktop-avatar">M</div>
+</header>
+
+<!-- Countdown banner -->
+<div class="countdown">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+  Réservé pour vous —
+  <span class="countdown-time">23 h 47 min</span>
+  <strong>restantes</strong>
+</div>
+
+<!-- ══════════ PAGE ══════════ -->
+<main class="page">
+
+  <div class="col-left">
+
+    <!-- Hero -->
+    <div class="match-hero">
+      <div class="match-eyebrow">🚜 Match trouvé</div>
+      <h1>
+        <strong>Sophie</strong> peut vous ramener votre miel <strong>jeudi 14 mai</strong>
+      </h1>
+      <p>Elle fait Évreux → Paris jeudi en fin de journée. Confirmez avant demain 18h pour valider la mission.</p>
+    </div>
+
+    <!-- Product recap -->
+    <div class="card">
+      <div class="card-eyebrow">Le produit</div>
+      <div class="product-row">
+        <div class="product-img">🍯</div>
+        <div class="product-info">
+          <div class="product-name">Miel d'acacia</div>
+          <div class="product-sub">Pierre Dupont · Évreux (27)</div>
+        </div>
+        <div class="product-qty">
+          <div class="product-price">8,50 €</div>
+          <div class="product-qty-label">1 × pot 500g</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actors -->
+    <div class="actors-grid" style="margin-bottom: 14px;">
+      <div class="actor-card">
+        <div class="actor-eyebrow">Producteur</div>
+        <div class="actor-row">
+          <div class="actor-avatar producer">P</div>
+          <div class="actor-info">
+            <div class="actor-name">Pierre Dupont</div>
+            <div class="actor-meta">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              4.9 · 47 missions
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="actor-card">
+        <div class="actor-eyebrow">Rameneuse</div>
+        <div class="actor-row">
+          <div class="actor-avatar rameneur">S</div>
+          <div class="actor-info">
+            <div class="actor-name">Sophie M.</div>
+            <div class="actor-meta">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              4.8 · 23 missions
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="card">
+      <div class="card-eyebrow">Déroulé prévu</div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-when">Jeudi 14 mai · matin</div>
+          <div class="timeline-what">Sophie récupère le miel chez Pierre</div>
+          <div class="timeline-where">Évreux (27)</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-when">Jeudi 14 mai · 18h-21h</div>
+          <div class="timeline-what">Sophie vous livre près de chez vous</div>
+          <div class="timeline-where">75011 — point de RDV à confirmer dans le chat</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-when">À la remise</div>
+          <div class="timeline-what">Vous présentez votre QR — c'est livré</div>
+          <div class="timeline-where">Le paiement est libéré au producteur et au rameneur</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-right">
+
+    <!-- Price breakdown -->
+    <div class="card">
+      <div class="card-eyebrow recap-only">Récapitulatif financier</div>
+      <div class="breakdown">
+        <div class="breakdown-row">
+          <span class="label">Miel d'acacia 500g</span>
+          <span class="value">8,50 €</span>
+        </div>
+        <div class="breakdown-row detail">
+          <span class="label">Producteur (85%)</span>
+          <span class="value">7,23 €</span>
+        </div>
+        <div class="breakdown-row detail">
+          <span class="label">Rameneur (10%)</span>
+          <span class="value">0,85 €</span>
+        </div>
+        <div class="breakdown-row detail">
+          <span class="label">Delta (5%)</span>
+          <span class="value">0,42 €</span>
+        </div>
+        <div class="breakdown-divider"></div>
+        <div class="breakdown-row total">
+          <span class="label">Total à régler</span>
+          <span class="value">8,50 €</span>
+        </div>
+      </div>
+
+      <div class="transparency-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Votre paiement est <strong>retenu en escrow</strong>. Le producteur et la rameneuse ne sont payés qu'<strong>une fois la livraison confirmée</strong>. Si la mission échoue, vous êtes remboursée.</span>
+      </div>
+    </div>
+
+    <!-- Stripe preview -->
+    <div class="stripe-preview">
+      <div class="stripe-icon">S</div>
+      <div class="stripe-text">
+        Paiement sécurisé par <strong>Stripe</strong>. Carte, Apple Pay ou Google Pay. Aucune information n'est conservée par Delta.
+      </div>
+    </div>
+
+    <!-- CTA bar -->
+    <div class="cta-bar">
+      <div class="cta-bar-inner">
+        <button class="btn-primary">
+          Confirmer et payer 8,50 €
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="btn-secondary">
+          Refuser cette mission
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC-03 · Accueil acheteur — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50: #FAF7F2;
+    --gold: #D4A017; --rose: #C75B5B;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream-50);
+    color: var(--cream-950);
+    min-height: 100vh;
+    padding-bottom: 80px; /* space for bottom nav on mobile */
+  }
+
+  /* ══════════ DEMO NAV ══════════ */
+  .demo-nav {
+    background: var(--cream-950); color: white;
+    padding: 8px 16px; font-size: 12px;
+  }
+  .demo-nav-inner {
+    max-width: 1080px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .demo-nav-label {
+    font-weight: 700; letter-spacing: 0.08em; font-size: 10px;
+    color: rgba(255,255,255,0.5); margin-right: 4px;
+  }
+  .demo-nav-link {
+    color: rgba(255,255,255,0.65); text-decoration: none;
+    padding: 4px 11px; border-radius: 100px;
+    font-weight: 500; font-size: 12px;
+    transition: all 150ms;
+  }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ══ HEADER ══ */
+  .header {
+    background: rgba(250,247,242,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 24px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(53,127,67,0.04);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+  .logo-icon {
+    width: 32px; height: 32px; background: var(--green-800); border-radius: 9px;
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
+    box-shadow: 0 2px 6px rgba(14,53,26,0.25);
+  }
+  .logo-text { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; color: var(--green-800); letter-spacing: -0.02em; }
+  .logo-dot { color: var(--earth-500); }
+  .header-actions { display: flex; align-items: center; gap: 6px; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: transparent; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cream-700); position: relative;
+    transition: background 150ms, color 150ms;
+  }
+  .icon-btn:hover { background: var(--green-50); color: var(--green-700); }
+  .icon-btn svg { width: 20px; height: 20px; }
+  .badge-dot {
+    position: absolute; top: 8px; right: 9px;
+    width: 8px; height: 8px;
+    background: var(--rose); border: 2px solid var(--cream-50);
+    border-radius: 50%;
+  }
+  .avatar-btn {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--green-100);
+    border: 2px solid var(--green-200); display: flex; align-items: center;
+    justify-content: center; font-size: 15px; cursor: pointer;
+  }
+
+  /* ══ DESKTOP NAV (caché en mobile) ══ */
+  .desktop-nav { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .nav-link {
+    font-size: 14px; font-weight: 500; color: var(--cream-700);
+    text-decoration: none; padding: 6px 12px; border-radius: 8px;
+    transition: color 150ms, background 150ms;
+  }
+  .nav-link:hover { color: var(--green-700); background: var(--green-50); }
+  .nav-link.active { color: var(--green-700); font-weight: 600; }
+  .nav-sep { width: 1px; height: 20px; background: var(--cream-200); margin: 0 4px; }
+
+  /* ══ PAGE LAYOUT ══ */
+  .page {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 18px 18px 32px;
+  }
+
+  /* ══ GREETING ══ */
+  .greeting {
+    margin-bottom: 22px;
+  }
+  .greeting h1 {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.2;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .greeting p {
+    font-size: 14px;
+    color: var(--cream-600);
+    line-height: 1.5;
+  }
+
+  /* ══ SECTIONS ══ */
+  .section { margin-bottom: 32px; }
+  .section-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 16px;
+  }
+  .section-title {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green-900);
+    letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .dot {
+    width: 7px; height: 7px;
+    background: var(--green-500);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .section-link {
+    font-size: 13px; font-weight: 500; color: var(--green-700);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .section-link:hover { color: var(--green-800); }
+  .section-link svg { width: 12px; height: 12px; }
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--cream-600);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  /* ══ HORIZONTAL SCROLL CARDS (this week) ══ */
+  .scroll-row {
+    display: flex; gap: 12px;
+    overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    margin: 0 -18px;
+    padding: 4px 18px 14px;
+    scrollbar-width: none;
+  }
+  .scroll-row::-webkit-scrollbar { display: none; }
+
+  .opp-card {
+    flex: 0 0 240px;
+    scroll-snap-align: start;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--cream-200);
+    box-shadow: 0 2px 14px rgba(53,127,67,0.06);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform 200ms, box-shadow 200ms;
+    cursor: pointer;
+  }
+  .opp-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(53,127,67,0.12);
+  }
+  .opp-card-img {
+    width: 100%; height: 140px;
+    background-size: cover; background-position: center;
+    position: relative;
+  }
+  .opp-card-img.miel {
+    background: linear-gradient(135deg, #F5C842 0%, #D4901A 100%);
+  }
+  .opp-card-img.tomates {
+    background: linear-gradient(135deg, #E55B4F 0%, #A03028 100%);
+  }
+  .opp-card-img.fromage {
+    background: linear-gradient(135deg, #F7E8D6 0%, #D4A063 100%);
+  }
+  .opp-card-img.lentilles {
+    background: linear-gradient(135deg, #6DB87A 0%, #357F43 100%);
+  }
+  .opp-card-img-emoji {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 56px;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
+  }
+  .opp-card-flag {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(6px);
+    color: var(--green-800);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .opp-card-flag.urgent { background: var(--rose); color: white; }
+  .opp-card-content {
+    padding: 12px 14px 14px;
+    display: flex; flex-direction: column; gap: 6px;
+    flex: 1;
+  }
+  .opp-card-name {
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.25;
+  }
+  .opp-card-producer {
+    font-size: 12px;
+    color: var(--cream-600);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .opp-card-producer svg { width: 11px; height: 11px; color: var(--cream-400); }
+  .opp-card-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: auto;
+    padding-top: 8px;
+  }
+  .opp-card-price {
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--earth-800);
+  }
+  .opp-card-price small { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; color: var(--cream-500); }
+  .opp-card-cta {
+    width: 32px; height: 32px;
+    background: var(--green-600);
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 600;
+    box-shadow: 0 2px 8px rgba(53,127,67,0.25);
+    transition: all 150ms;
+  }
+  .opp-card-cta:hover { background: var(--green-700); transform: scale(1.05); }
+  .opp-card-when {
+    font-size: 11px;
+    color: var(--green-700);
+    font-weight: 600;
+    background: var(--green-50);
+    padding: 3px 8px;
+    border-radius: 100px;
+    align-self: flex-start;
+  }
+
+  /* ══ WISHLIST CARDS ══ */
+  .wish-list { display: flex; flex-direction: column; gap: 10px; }
+  .wish-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex; align-items: center; gap: 12px;
+    transition: border-color 150ms, box-shadow 150ms;
+    cursor: pointer;
+  }
+  .wish-card:hover {
+    border-color: var(--green-300);
+    box-shadow: 0 4px 14px rgba(53,127,67,0.08);
+  }
+  .wish-card-img {
+    flex-shrink: 0;
+    width: 56px; height: 56px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    overflow: hidden;
+  }
+  .wish-card-img.miel { background: linear-gradient(135deg, #F5C842 0%, #D4901A 100%); }
+  .wish-card-img.fromage { background: linear-gradient(135deg, #F7E8D6 0%, #D4A063 100%); }
+  .wish-card-img.farine { background: linear-gradient(135deg, #EFE4D2 0%, #C7A87A 100%); }
+
+  .wish-card-content { flex: 1; min-width: 0; }
+  .wish-card-name {
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cream-950);
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+  .wish-card-producer {
+    font-size: 12px;
+    color: var(--cream-600);
+  }
+  .wish-card-status {
+    flex-shrink: 0;
+    text-align: right;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+  }
+  .status-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 100px;
+    display: inline-flex; align-items: center; gap: 5px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .status-pill svg { width: 10px; height: 10px; }
+  .status-pill.pending {
+    background: var(--cream-100); color: var(--cream-700);
+  }
+  .status-pill.matchable {
+    background: var(--earth-100); color: var(--earth-800);
+  }
+  .status-pill.matched {
+    background: var(--green-600); color: white;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .status-detail {
+    font-size: 10px;
+    color: var(--cream-500);
+  }
+
+  /* ══ PRODUCER DISCOVERY ══ */
+  .discover-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .producer-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    padding: 14px;
+    text-decoration: none;
+    color: inherit;
+    display: flex; flex-direction: column; gap: 8px;
+    transition: all 150ms;
+  }
+  .producer-card:hover {
+    border-color: var(--green-300);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(53,127,67,0.1);
+  }
+  .producer-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    background: var(--earth-100);
+    border: 2px solid var(--earth-200);
+  }
+  .producer-name {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cream-950);
+    line-height: 1.3;
+  }
+  .producer-zone {
+    font-size: 11px;
+    color: var(--cream-600);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .producer-zone svg { width: 10px; height: 10px; }
+  .producer-meta {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px;
+    color: var(--cream-700);
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--cream-100);
+  }
+  .producer-rating {
+    display: flex; align-items: center; gap: 3px;
+    font-weight: 600;
+    color: var(--earth-800);
+  }
+  .producer-rating svg { width: 10px; height: 10px; color: var(--gold); }
+
+  /* ══ EMPTY-STATE-LIKE PROMO BANNER ══ */
+  .promo-banner {
+    background: linear-gradient(135deg, var(--green-700) 0%, var(--green-900) 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .promo-banner::before {
+    content: '🌱';
+    position: absolute;
+    right: -8px; bottom: -16px;
+    font-size: 90px;
+    opacity: 0.18;
+    transform: rotate(-12deg);
+  }
+  .promo-banner-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green-200);
+    margin-bottom: 6px;
+  }
+  .promo-banner-title {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .promo-banner-text {
+    font-size: 13px;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.5;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .promo-banner-cta {
+    display: inline-flex;
+    align-items: center; gap: 6px;
+    background: white;
+    color: var(--green-800);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 100px;
+    text-decoration: none;
+    transition: transform 150ms, box-shadow 150ms;
+    position: relative;
+  }
+  .promo-banner-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  }
+  .promo-banner-cta svg { width: 14px; height: 14px; }
+
+  /* ══ BOTTOM NAV (mobile) ══ */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(250,247,242,0.97);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--cream-200);
+    padding: 8px 12px 12px;
+    display: flex; justify-content: space-around;
+    z-index: 100;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    text-decoration: none;
+    color: var(--cream-500);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 10px;
+    flex: 1;
+    transition: color 150ms;
+    position: relative;
+  }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-item.active { color: var(--green-700); font-weight: 600; }
+  .nav-item.active svg { color: var(--green-600); }
+  .nav-item:hover { color: var(--green-700); }
+  .nav-item .badge {
+    position: absolute;
+    top: 2px;
+    right: calc(50% - 18px);
+    background: var(--rose);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 100px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--cream-50);
+  }
+
+  /* ══ RESPONSIVE DESKTOP ══ */
+  @media (min-width: 720px) {
+    .page { max-width: 920px; padding: 28px 32px 64px; }
+    .header { padding: 0 32px; height: 64px; }
+    .scroll-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      overflow: visible;
+      margin: 0;
+      padding: 4px 0 0;
+    }
+    .opp-card { flex: none; }
+    .greeting h1 { font-size: 30px; }
+    .section-title { font-size: 20px; }
+    .discover-grid { grid-template-columns: repeat(4, 1fr); }
+    .bottom-nav { display: none; }
+    body { padding-bottom: 0; }
+  }
+
+  @media (max-width: 719px) {
+    .desktop-nav { display: none; }
+  }
+
+  /* Sub-grid layout side-by-side on wide screens */
+  @media (min-width: 1000px) {
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+    .two-col .section { margin-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS ACHETEUR</span>
+    <a href="ac-03-accueil.html" class="demo-nav-link active">1 · Accueil</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-05-fiche-produit.html" class="demo-nav-link">2 · Fiche produit</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-07-notification-match.html" class="demo-nav-link">3 · Match + paiement</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-08-mes-commandes.html" class="demo-nav-link">4 · Mes commandes</a>
+  </div>
+</div>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="header">
+  <a href="#" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+  <nav class="desktop-nav">
+    <a href="ac-03-accueil.html" class="nav-link active">Accueil</a>
+    <a href="#" class="nav-link">Catalogue</a>
+    <a href="#" class="nav-link">Mes envies</a>
+    <a href="ac-08-mes-commandes.html" class="nav-link">Commandes</a>
+    <div class="nav-sep"></div>
+  </nav>
+  <div class="header-actions">
+    <button class="icon-btn" aria-label="Notifications">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      <span class="badge-dot"></span>
+    </button>
+    <div class="avatar-btn">M</div>
+  </div>
+</header>
+
+<!-- ══════════ PAGE ══════════ -->
+<main class="page">
+
+  <!-- Greeting -->
+  <div class="greeting">
+    <h1>Bonjour Marie</h1>
+    <p>Voici ce qui peut arriver chez vous cette semaine.</p>
+  </div>
+
+  <div class="two-col">
+    <div>
+
+      <!-- Section : Disponible cette semaine -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="dot"></span>
+            Disponible cette semaine
+          </h2>
+          <a href="#" class="section-link">
+            Tout voir
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+        <p class="section-subtitle">Des rameneurs ont déclaré un trajet compatible avec votre quartier. Ajoutez à vos envies pour activer le match.</p>
+
+        <div class="scroll-row">
+          <div class="opp-card">
+            <div class="opp-card-img miel">
+              <span class="opp-card-flag">3 rameneurs</span>
+              <span class="opp-card-img-emoji">🍯</span>
+            </div>
+            <div class="opp-card-content">
+              <div>
+                <div class="opp-card-name">Miel toutes fleurs</div>
+                <div class="opp-card-producer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Pierre Dupont · Évreux
+                </div>
+              </div>
+              <span class="opp-card-when">Match probable jeudi</span>
+              <div class="opp-card-meta">
+                <div class="opp-card-price">8,50 € <small>/ pot 500g</small></div>
+                <div class="opp-card-cta" title="Ajouter aux envies">+</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="opp-card">
+            <div class="opp-card-img tomates">
+              <span class="opp-card-flag urgent">Trajet demain</span>
+              <span class="opp-card-img-emoji">🍅</span>
+            </div>
+            <div class="opp-card-content">
+              <div>
+                <div class="opp-card-name">Tomates anciennes</div>
+                <div class="opp-card-producer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Ferme du Bocage · Lisieux
+                </div>
+              </div>
+              <span class="opp-card-when">Disponible demain</span>
+              <div class="opp-card-meta">
+                <div class="opp-card-price">6,20 € <small>/ kg</small></div>
+                <div class="opp-card-cta" title="Ajouter aux envies">+</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="opp-card">
+            <div class="opp-card-img lentilles">
+              <span class="opp-card-flag">2 rameneurs</span>
+              <span class="opp-card-img-emoji">🌾</span>
+            </div>
+            <div class="opp-card-content">
+              <div>
+                <div class="opp-card-name">Lentilles vertes du Perche</div>
+                <div class="opp-card-producer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Les Champs d'Élise · Mortagne
+                </div>
+              </div>
+              <span class="opp-card-when">Cette semaine</span>
+              <div class="opp-card-meta">
+                <div class="opp-card-price">5,80 € <small>/ 500g</small></div>
+                <div class="opp-card-cta" title="Ajouter aux envies">+</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section : Découvrir -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Découvrir des producteurs</h2>
+          <a href="#" class="section-link">
+            Catalogue
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <div class="discover-grid">
+          <a href="#" class="producer-card">
+            <div class="producer-avatar">🧀</div>
+            <div>
+              <div class="producer-name">Fromagerie Lefèvre</div>
+              <div class="producer-zone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Camembert
+              </div>
+            </div>
+            <div class="producer-meta">
+              <div class="producer-rating">
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                4.8
+              </div>
+              <span>· 8 produits</span>
+            </div>
+          </a>
+
+          <a href="#" class="producer-card">
+            <div class="producer-avatar">🌾</div>
+            <div>
+              <div class="producer-name">Moulin de Vimoutiers</div>
+              <div class="producer-zone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Vimoutiers
+              </div>
+            </div>
+            <div class="producer-meta">
+              <div class="producer-rating">
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                4.6
+              </div>
+              <span>· 5 produits</span>
+            </div>
+          </a>
+
+          <a href="#" class="producer-card">
+            <div class="producer-avatar">🍎</div>
+            <div>
+              <div class="producer-name">Cidrerie Le Verger</div>
+              <div class="producer-zone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Pays d'Auge
+              </div>
+            </div>
+            <div class="producer-meta">
+              <div class="producer-rating">
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                4.9
+              </div>
+              <span>· 12 produits</span>
+            </div>
+          </a>
+
+          <a href="#" class="producer-card">
+            <div class="producer-avatar">🥚</div>
+            <div>
+              <div class="producer-name">Poulailler Rouvres</div>
+              <div class="producer-zone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Bernay
+              </div>
+            </div>
+            <div class="producer-meta">
+              <div class="producer-rating">
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                4.7
+              </div>
+              <span>· 4 produits</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+    </div>
+
+    <div>
+
+      <!-- Section : Mes envies -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Mes envies</h2>
+          <a href="#" class="section-link">
+            Tout voir (5)
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <div class="wish-list">
+          <a href="ac-07-notification-match.html" class="wish-card">
+            <div class="wish-card-img miel">🍯</div>
+            <div class="wish-card-content">
+              <div class="wish-card-name">Miel d'acacia 500g</div>
+              <div class="wish-card-producer">Pierre Dupont</div>
+            </div>
+            <div class="wish-card-status">
+              <span class="status-pill matched">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Match !
+              </span>
+              <span class="status-detail">Confirmer sous 23h</span>
+            </div>
+          </a>
+
+          <div class="wish-card">
+            <div class="wish-card-img fromage">🧀</div>
+            <div class="wish-card-content">
+              <div class="wish-card-name">Camembert AOP</div>
+              <div class="wish-card-producer">Fromagerie Lefèvre</div>
+            </div>
+            <div class="wish-card-status">
+              <span class="status-pill matchable">
+                Probable
+              </span>
+              <span class="status-detail">Trajets cette semaine</span>
+            </div>
+          </div>
+
+          <div class="wish-card">
+            <div class="wish-card-img farine">🌾</div>
+            <div class="wish-card-content">
+              <div class="wish-card-name">Farine T80 1kg</div>
+              <div class="wish-card-producer">Moulin de Vimoutiers</div>
+            </div>
+            <div class="wish-card-status">
+              <span class="status-pill pending">
+                En attente
+              </span>
+              <span class="status-detail">Ajouté il y a 4 j</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Promo CO2 -->
+      <div class="promo-banner">
+        <div class="promo-banner-eyebrow">Votre impact</div>
+        <div class="promo-banner-title">12 km évités cette semaine</div>
+        <div class="promo-banner-text">Vos achats locaux ont voyagé sur des trajets que des rameneurs faisaient déjà.</div>
+        <a href="#" class="promo-banner-cta">
+          Voir mon bilan
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════ BOTTOM NAV (mobile) ══════════ -->
+<nav class="bottom-nav">
+  <a href="ac-03-accueil.html" class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Accueil
+  </a>
+  <a href="#" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Catalogue
+  </a>
+  <a href="#" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    Envies
+    <span class="badge">5</span>
+  </a>
+  <a href="ac-08-mes-commandes.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    Commandes
+  </a>
+  <a href="#" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profil
+  </a>
+</nav>
+
+</body>
+</html>

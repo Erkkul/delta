@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC-05 · Fiche produit — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50: #FAF7F2;
+    --gold: #D4A017; --rose: #C75B5B;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream-50);
+    color: var(--cream-950);
+    min-height: 100vh;
+    padding-bottom: 96px;
+  }
+
+  /* ══ DEMO NAV ══ */
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); margin-right: 4px; }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-weight: 500; font-size: 12px; transition: all 150ms; }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ══ HEADER ══ */
+  .header {
+    background: rgba(250,247,242,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 18px; height: 56px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .icon-back, .icon-share, .icon-wish {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: white;
+    border: 1px solid var(--cream-200);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cream-800); cursor: pointer;
+    transition: all 150ms;
+  }
+  .icon-back svg, .icon-share svg, .icon-wish svg { width: 18px; height: 18px; }
+  .icon-back:hover, .icon-share:hover, .icon-wish:hover {
+    background: var(--green-50); color: var(--green-700); border-color: var(--green-200);
+  }
+  .header-actions { display: flex; gap: 8px; }
+  .header-title {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green-900);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 200ms;
+  }
+  .header.scrolled .header-title { opacity: 1; }
+
+  /* ══ DESKTOP HEADER ══ */
+  .desktop-header { display: none; }
+
+  /* ══ PHOTOS CAROUSEL ══ */
+  .photos {
+    background: linear-gradient(135deg, #F5C842 0%, #D4901A 100%);
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+  }
+  .photos-emoji {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 140px;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.15));
+  }
+  .photos-dots {
+    position: absolute;
+    bottom: 14px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 6px;
+  }
+  .photos-dot {
+    width: 7px; height: 7px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
+  }
+  .photos-dot.active {
+    background: white;
+    width: 22px;
+    border-radius: 100px;
+  }
+  .photos-counter {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: rgba(28,25,23,0.55);
+    backdrop-filter: blur(6px);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  /* ══ MAIN CONTENT ══ */
+  .main {
+    background: var(--cream-50);
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    margin-top: -22px;
+    position: relative;
+    padding: 20px 18px 24px;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .badges-row {
+    display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .badge.bio { background: var(--green-100); color: var(--green-800); }
+  .badge.bio svg { width: 11px; height: 11px; }
+  .badge.local { background: var(--earth-100); color: var(--earth-800); }
+
+  .product-name {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.2;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .product-meta-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px;
+  }
+  .price {
+    font-family: 'Lora', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--earth-800);
+  }
+  .price small {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cream-600);
+  }
+  .price-sep { color: var(--cream-300); }
+  .product-stock {
+    font-size: 13px;
+    color: var(--cream-700);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .product-stock .dot {
+    width: 7px; height: 7px;
+    background: var(--green-500);
+    border-radius: 50%;
+  }
+
+  /* ══ MATCH INDICATOR (the killer feature box) ══ */
+  .match-card {
+    background: linear-gradient(135deg, var(--green-50) 0%, var(--earth-50) 100%);
+    border: 1px solid var(--green-200);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 22px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .match-card-icon {
+    flex-shrink: 0;
+    width: 42px; height: 42px;
+    background: white;
+    border: 2px solid var(--green-300);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    color: var(--green-700);
+  }
+  .match-card-content { flex: 1; }
+  .match-card-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green-700);
+    margin-bottom: 3px;
+  }
+  .match-card-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--green-900);
+    line-height: 1.4;
+  }
+  .match-card-text strong { font-weight: 700; color: var(--green-800); }
+
+  /* ══ PRODUCER ══ */
+  .producer-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 22px;
+    text-decoration: none;
+    color: inherit;
+    display: flex; gap: 14px; align-items: center;
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+  .producer-card:hover {
+    border-color: var(--green-300);
+    box-shadow: 0 6px 18px rgba(53,127,67,0.08);
+  }
+  .producer-avatar {
+    flex-shrink: 0;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--earth-200) 0%, var(--earth-400) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    color: white;
+    font-family: 'Lora', serif;
+    font-weight: 700;
+  }
+  .producer-content { flex: 1; min-width: 0; }
+  .producer-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cream-500);
+    margin-bottom: 2px;
+  }
+  .producer-name {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--cream-950);
+    line-height: 1.25;
+    margin-bottom: 4px;
+  }
+  .producer-meta-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px;
+    color: var(--cream-700);
+  }
+  .producer-rating {
+    display: flex; align-items: center; gap: 3px;
+    font-weight: 600;
+    color: var(--earth-800);
+  }
+  .producer-rating svg { width: 12px; height: 12px; color: var(--gold); }
+  .producer-zone {
+    display: flex; align-items: center; gap: 4px;
+  }
+  .producer-zone svg { width: 11px; height: 11px; color: var(--cream-400); }
+  .producer-arrow {
+    flex-shrink: 0;
+    color: var(--cream-400);
+  }
+  .producer-arrow svg { width: 16px; height: 16px; }
+
+  /* ══ DESCRIPTION ══ */
+  .section-title {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green-900);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .description {
+    font-size: 14px;
+    color: var(--cream-800);
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+
+  /* ══ INFO GRID ══ */
+  .info-grid {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 22px;
+  }
+  .info-row {
+    display: flex; align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--cream-100);
+    font-size: 13px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label {
+    color: var(--cream-600);
+    flex: 0 0 130px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .info-label svg { width: 14px; height: 14px; color: var(--cream-500); }
+  .info-value {
+    color: var(--cream-950);
+    font-weight: 500;
+  }
+
+  /* ══ HOW IT WORKS ══ */
+  .how-card {
+    background: linear-gradient(135deg, var(--earth-50) 0%, var(--cream-50) 100%);
+    border: 1px solid var(--earth-100);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 24px;
+  }
+  .how-card h3 {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--earth-800);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .how-card h3 svg { width: 14px; height: 14px; }
+  .how-step {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 13px;
+    color: var(--cream-800);
+    line-height: 1.5;
+    margin-bottom: 9px;
+  }
+  .how-step:last-child { margin-bottom: 0; }
+  .how-step-num {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--earth-200);
+    color: var(--earth-800);
+    font-weight: 700;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .how-step strong { color: var(--green-800); font-weight: 600; }
+
+  /* ══ STICKY CTA BAR (mobile) ══ */
+  .cta-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(250,247,242,0.97);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--cream-200);
+    padding: 12px 18px 16px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  }
+  .cta-price {
+    flex-shrink: 0;
+    display: flex; flex-direction: column;
+    justify-content: center;
+  }
+  .cta-price-label {
+    font-size: 10px;
+    color: var(--cream-500);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .cta-price-value {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--earth-800);
+  }
+  .btn-primary {
+    flex: 1;
+    background: var(--green-600);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    height: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(53,127,67,0.26);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 200ms ease;
+  }
+  .btn-primary:hover {
+    background: var(--green-700);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(53,127,67,0.32);
+  }
+  .btn-primary svg { width: 18px; height: 18px; }
+
+  /* ══ DESKTOP RESPONSIVE ══ */
+  @media (min-width: 720px) {
+    body { padding-bottom: 32px; }
+
+    .header { display: none; }
+    .desktop-header {
+      display: flex;
+      background: rgba(250,247,242,0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--cream-200);
+      padding: 0 32px; height: 64px;
+      align-items: center; justify-content: space-between; gap: 24px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo-icon {
+      width: 32px; height: 32px; background: var(--green-800); border-radius: 9px;
+      display: flex; align-items: center; justify-content: center; font-size: 17px;
+    }
+    .logo-text { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; color: var(--green-800); }
+    .logo-dot { color: var(--earth-500); }
+    .desktop-nav-links { display: flex; gap: 4px; }
+    .desktop-nav-link {
+      font-size: 14px; font-weight: 500; color: var(--cream-700);
+      text-decoration: none; padding: 6px 12px; border-radius: 8px;
+    }
+    .desktop-nav-link.active { color: var(--green-700); font-weight: 600; }
+    .desktop-nav-link:hover { color: var(--green-700); background: var(--green-50); }
+    .desktop-avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--green-100);
+      border: 2px solid var(--green-200); display: flex; align-items: center;
+      justify-content: center; font-size: 14px; font-weight: 600; color: var(--green-800);
+    }
+
+    .breadcrumb {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 16px 32px 0;
+      font-size: 13px; color: var(--cream-500);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .breadcrumb a { color: var(--cream-600); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--green-700); }
+    .breadcrumb svg { width: 11px; height: 11px; color: var(--cream-400); }
+    .breadcrumb .current { color: var(--cream-800); font-weight: 500; }
+
+    .product-shell {
+      max-width: 1080px;
+      margin: 24px auto 0;
+      padding: 0 32px;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 36px;
+      align-items: start;
+    }
+
+    .photos {
+      height: 480px;
+      border-radius: 22px;
+      box-shadow: 0 8px 30px rgba(53,127,67,0.1);
+    }
+    .photos-emoji { font-size: 200px; }
+
+    .main {
+      background: transparent;
+      border-radius: 0;
+      margin-top: 0;
+      padding: 0;
+      max-width: none;
+    }
+
+    .product-name { font-size: 32px; }
+    .price { font-size: 28px; }
+
+    .cta-bar {
+      position: static;
+      background: white;
+      border: 1px solid var(--cream-200);
+      border-top: 1px solid var(--cream-200);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 18px rgba(53,127,67,0.06);
+      margin-top: 22px;
+    }
+  }
+
+  @media (max-width: 719px) {
+    .desktop-header { display: none; }
+    .breadcrumb { display: none; }
+    .product-shell { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS ACHETEUR</span>
+    <a href="ac-03-accueil.html" class="demo-nav-link">1 · Accueil</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-05-fiche-produit.html" class="demo-nav-link active">2 · Fiche produit</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-07-notification-match.html" class="demo-nav-link">3 · Match + paiement</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-08-mes-commandes.html" class="demo-nav-link">4 · Mes commandes</a>
+  </div>
+</div>
+
+<!-- ══════════ MOBILE HEADER ══════════ -->
+<header class="header">
+  <button class="icon-back" aria-label="Retour">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <div class="header-title">Miel d'acacia 500g</div>
+  <div class="header-actions">
+    <button class="icon-share" aria-label="Partager">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ══════════ DESKTOP HEADER ══════════ -->
+<header class="desktop-header">
+  <a href="#" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+  <nav class="desktop-nav-links">
+    <a href="ac-03-accueil.html" class="desktop-nav-link">Accueil</a>
+    <a href="#" class="desktop-nav-link active">Catalogue</a>
+    <a href="#" class="desktop-nav-link">Mes envies</a>
+    <a href="ac-08-mes-commandes.html" class="desktop-nav-link">Commandes</a>
+  </nav>
+  <div class="desktop-avatar">M</div>
+</header>
+
+<nav class="breadcrumb">
+  <a href="ac-03-accueil.html">Accueil</a>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  <a href="#">Catalogue</a>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  <a href="#">Miels & sirops</a>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  <span class="current">Miel d'acacia</span>
+</nav>
+
+<div class="product-shell">
+
+  <!-- ══════════ PHOTOS ══════════ -->
+  <div class="photos">
+    <span class="photos-counter">1 / 4</span>
+    <span class="photos-emoji">🍯</span>
+    <div class="photos-dots">
+      <span class="photos-dot active"></span>
+      <span class="photos-dot"></span>
+      <span class="photos-dot"></span>
+      <span class="photos-dot"></span>
+    </div>
+  </div>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <div class="main">
+
+    <div class="badges-row">
+      <span class="badge bio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Bio AB
+      </span>
+      <span class="badge local">Normandie</span>
+    </div>
+
+    <h1 class="product-name">Miel d'acacia 500g</h1>
+
+    <div class="product-meta-row">
+      <div class="price">8,50 € <small>/ pot 500g</small></div>
+      <span class="price-sep">·</span>
+      <div class="product-stock"><span class="dot"></span>En stock chez le producteur</div>
+    </div>
+
+    <!-- Match indicator -->
+    <div class="match-card">
+      <div class="match-card-icon">🚗</div>
+      <div class="match-card-content">
+        <div class="match-card-label">Probabilité de match</div>
+        <div class="match-card-text">
+          <strong>3 rameneurs</strong> font régulièrement le trajet Évreux ↔ Paris. Match estimé sous <strong>1 à 2 semaines</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Producer link -->
+    <a href="#" class="producer-card">
+      <div class="producer-avatar">P</div>
+      <div class="producer-content">
+        <div class="producer-eyebrow">Producteur</div>
+        <div class="producer-name">Pierre Dupont — Apiculteur</div>
+        <div class="producer-meta-row">
+          <div class="producer-rating">
+            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            4.9 · 47 avis
+          </div>
+          <span class="price-sep">·</span>
+          <div class="producer-zone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Évreux (27)
+          </div>
+        </div>
+      </div>
+      <div class="producer-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </a>
+
+    <!-- Description -->
+    <h2 class="section-title">Description</h2>
+    <p class="description">
+      Miel d'acacia récolté en juin 2025 dans les ruches familiales du domaine de la Vallée. Couleur claire, saveur douce et fluide, parfait pour sucrer thés et infusions sans en altérer le goût. Pot en verre consigné — possibilité de retour au producteur via votre rameneur lors d'un prochain trajet.
+    </p>
+
+    <!-- Info grid -->
+    <div class="info-grid">
+      <div class="info-row">
+        <div class="info-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Disponibilité
+        </div>
+        <div class="info-value">Toute l'année</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Conditionnement
+        </div>
+        <div class="info-value">Pot verre 500g</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Origine
+        </div>
+        <div class="info-value">Évreux, Eure (27)</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Conservation
+        </div>
+        <div class="info-value">Sec, à l'abri lumière — 24 mois</div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="how-card">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Comment ça marche
+      </h3>
+      <div class="how-step">
+        <div class="how-step-num">1</div>
+        <div>Vous ajoutez ce miel à <strong>vos envies</strong> — sans engagement, sans paiement.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">2</div>
+        <div>Quand un rameneur déclare un trajet Évreux → Paris, on vous notifie : <strong>« Pierre peut vous ramener du miel jeudi »</strong>.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">3</div>
+        <div>Vous avez <strong>24h pour confirmer et payer</strong>. Le rameneur récupère, vous livre, vous validez par QR.</div>
+      </div>
+    </div>
+
+    <!-- CTA bar -->
+    <div class="cta-bar">
+      <div class="cta-price">
+        <div class="cta-price-label">Prix</div>
+        <div class="cta-price-value">8,50 €</div>
+      </div>
+      <button class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Ajouter à mes envies
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

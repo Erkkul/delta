@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM-05 · Liste des opportunités — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50: #FAF7F2;
+    --gold: #D4A017;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream-50);
+    color: var(--cream-950);
+    min-height: 100vh;
+  }
+
+  /* ══ HEADER ══ */
+  .header {
+    background: rgba(250,247,242,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 32px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(53,127,67,0.04);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+  .logo-icon {
+    width: 34px; height: 34px; background: var(--green-800); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    box-shadow: 0 2px 6px rgba(14,53,26,0.25);
+  }
+  .logo-text { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-800); letter-spacing: -0.02em; }
+  .logo-dot { color: var(--earth-500); }
+  .nav-links { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .nav-link {
+    font-size: 14px; font-weight: 500; color: var(--cream-700);
+    text-decoration: none; padding: 6px 12px; border-radius: 8px;
+    transition: color 150ms, background 150ms;
+  }
+  .nav-link:hover { color: var(--green-700); background: var(--green-50); }
+  .nav-link.active { color: var(--green-700); font-weight: 600; }
+  .nav-sep { width: 1px; height: 20px; background: var(--cream-200); margin: 0 4px; }
+  .avatar-btn {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--green-100);
+    border: 2px solid var(--green-200); display: flex; align-items: center;
+    justify-content: center; font-size: 15px; cursor: pointer;
+  }
+
+  /* ══ PAGE LAYOUT ══ */
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 24px 32px 64px;
+  }
+
+  .breadcrumb {
+    font-size: 13px; color: var(--cream-500);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .breadcrumb a { color: var(--cream-600); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--green-700); }
+  .breadcrumb svg { width: 12px; height: 12px; color: var(--cream-400); }
+  .breadcrumb .current { color: var(--cream-800); font-weight: 500; }
+
+  .preview-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--cream-500);
+    margin-bottom: 6px;
+  }
+
+  .hero {
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.2;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .hero p {
+    font-size: 14px;
+    color: var(--cream-600);
+  }
+
+  /* ══ TRIP RECAP CARD ══ */
+  .trip-recap {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-left: 4px solid var(--green-500);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .trip-route {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Lora', serif;
+    font-size: 16px; font-weight: 700;
+    color: var(--green-800);
+  }
+  .trip-route svg { color: var(--green-500); width: 16px; height: 16px; }
+  .trip-meta {
+    font-size: 13px;
+    color: var(--cream-700);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .trip-meta-sep { color: var(--cream-300); }
+  .trip-edit {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green-700);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 100px;
+    background: var(--green-50);
+    border: 1px solid var(--green-100);
+    transition: background 150ms;
+  }
+  .trip-edit:hover { background: var(--green-100); }
+  .trip-edit svg { width: 12px; height: 12px; }
+
+  /* ══ RESULTS HEADER ══ */
+  .results-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; gap: 16px; flex-wrap: wrap;
+  }
+  .results-count {
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .results-count-num {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-700);
+  }
+  .results-count-label {
+    font-size: 14px; color: var(--cream-700);
+  }
+  .sort-wrapper { display: flex; align-items: center; gap: 8px; }
+  .sort-label { font-size: 13px; color: var(--cream-600); }
+  .sort-select-wrapper { position: relative; }
+  .sort-select {
+    height: 34px;
+    padding: 0 30px 0 12px;
+    border: 1.5px solid var(--cream-200);
+    border-radius: 8px;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cream-800);
+    cursor: pointer;
+    appearance: none;
+    outline: none;
+    transition: border-color 150ms;
+  }
+  .sort-select:hover { border-color: var(--green-300); }
+  .sort-select:focus { border-color: var(--green-400); box-shadow: 0 0 0 3px rgba(53,127,67,0.10); }
+  .sort-arrow {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; color: var(--cream-400); width: 12px; height: 12px;
+  }
+
+  /* ══ DEMO TABS (states) ══ */
+  .demo-tabs {
+    display: flex; gap: 8px; padding: 8px;
+    margin-bottom: 16px;
+    background: var(--cream-100);
+    border-radius: 10px;
+    border: 1px solid var(--cream-200);
+  }
+  .demo-tab {
+    padding: 6px 14px; border-radius: 6px; border: none;
+    font-family: 'DM Sans'; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 150ms; white-space: nowrap;
+  }
+  .demo-tab.on  { background: white; color: var(--green-800); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .demo-tab.off { background: transparent; color: var(--cream-600); }
+  .demo-tab.off:hover { color: var(--green-700); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ══ OPPORTUNITY CARD ══ */
+  .opp-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .opp-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: all 200ms ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .opp-card:hover {
+    border-color: var(--green-300);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(53,127,67,0.10);
+  }
+  .opp-card.featured {
+    border-color: var(--green-300);
+    background: linear-gradient(180deg, var(--green-50) 0%, white 50%);
+  }
+  .opp-card.featured:hover { border-color: var(--green-500); }
+
+  /* Top row: producer + featured badge */
+  .opp-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .producer-avatar {
+    flex-shrink: 0;
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .producer-avatar.miel { background: linear-gradient(135deg, var(--earth-200), var(--earth-400)); }
+  .producer-avatar.cidre { background: linear-gradient(135deg, var(--earth-100), var(--earth-200)); }
+  .producer-avatar.fruits { background: linear-gradient(135deg, var(--green-100), var(--earth-100)); }
+  .producer-avatar.epicerie { background: linear-gradient(135deg, var(--cream-200), var(--earth-100)); }
+
+  .producer-info { flex: 1; min-width: 0; }
+  .producer-name {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.25;
+    margin-bottom: 3px;
+  }
+  .producer-meta {
+    font-size: 12.5px;
+    color: var(--cream-600);
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  .producer-meta svg { width: 12px; height: 12px; color: var(--cream-400); }
+  .producer-meta-sep { color: var(--cream-300); }
+
+  .featured-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--gold);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 100px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 6px rgba(212,160,23,0.3);
+  }
+  .easy-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--green-100);
+    color: var(--green-800);
+    border: 1px solid var(--green-200);
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 100px;
+  }
+
+  /* Description */
+  .opp-desc {
+    font-size: 14px;
+    color: var(--cream-800);
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+  .opp-desc strong { font-weight: 600; color: var(--cream-950); }
+
+  /* Voisins line */
+  .opp-voisins {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: var(--cream-50);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--cream-700);
+  }
+  .opp-voisins-icon {
+    width: 28px; height: 28px;
+    background: var(--green-100);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--green-700);
+    flex-shrink: 0;
+  }
+  .opp-voisins strong { color: var(--green-800); font-weight: 700; }
+
+  /* Stats row */
+  .opp-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid var(--cream-100);
+  }
+  .stat {
+    display: flex; flex-direction: column;
+    gap: 2px;
+  }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cream-500);
+    font-weight: 500;
+  }
+  .stat-value {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.1;
+  }
+  .stat-value.gain { color: var(--green-600); }
+  .stat-value small { font-size: 11px; color: var(--cream-500); font-weight: 400; margin-left: 3px; font-family: 'DM Sans', sans-serif; }
+  .stat-detail {
+    font-size: 11px;
+    color: var(--cream-500);
+    font-weight: 400;
+    margin-top: 3px;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.3;
+  }
+  .stat-detail .minus { color: var(--earth-500); margin: 0 2px; }
+
+  /* ── Product chips (alternative display) ── */
+  .opp-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .product-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--cream-900);
+  }
+  .product-chip-emoji { font-size: 14px; line-height: 1; }
+  .product-chip-qty {
+    color: var(--cream-500);
+    font-weight: 400;
+    font-size: 11.5px;
+    padding-left: 4px;
+    border-left: 1px solid var(--cream-200);
+    margin-left: 2px;
+  }
+  .opp-card.featured .product-chip {
+    background: white;
+    border-color: var(--green-200);
+  }
+
+  .opp-cta {
+    background: var(--green-600);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    padding: 0 18px;
+    height: 40px;
+    font-family: 'DM Sans';
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(53,127,67,0.25);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 200ms;
+    white-space: nowrap;
+  }
+  .opp-cta:hover {
+    background: var(--green-700);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(53,127,67,0.32);
+  }
+
+  /* ══ NOTIFICATION HINT (bottom) ══ */
+  .notify-hint {
+    margin-top: 24px;
+    padding: 18px 22px;
+    background: var(--earth-50);
+    border: 1px dashed var(--earth-200);
+    border-radius: 14px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .notify-icon {
+    flex-shrink: 0;
+    width: 40px; height: 40px;
+    background: var(--earth-100);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .notify-content { flex: 1; }
+  .notify-title { font-family: 'Lora', serif; font-weight: 700; color: var(--earth-800); font-size: 14px; margin-bottom: 2px; }
+  .notify-desc { font-size: 13px; color: var(--cream-700); line-height: 1.45; }
+  .notify-action {
+    font-size: 13px; font-weight: 600; color: var(--earth-800);
+    background: white; border: 1px solid var(--earth-200);
+    padding: 8px 14px; border-radius: 100px;
+    cursor: pointer; white-space: nowrap;
+    transition: background 150ms;
+  }
+  .notify-action:hover { background: var(--earth-100); }
+
+  /* ══ EMPTY STATE ══ */
+  .empty-state {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    padding: 56px 32px;
+    text-align: center;
+  }
+  .empty-icon { font-size: 56px; opacity: 0.5; margin-bottom: 12px; }
+  .empty-title {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--green-900);
+    margin-bottom: 8px;
+  }
+  .empty-desc {
+    font-size: 14px;
+    color: var(--cream-600);
+    line-height: 1.55;
+    max-width: 380px;
+    margin: 0 auto 20px;
+  }
+  .empty-actions {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  }
+  .empty-cta-primary {
+    background: var(--green-600); color: white; border: none;
+    border-radius: 100px; padding: 0 22px; height: 42px;
+    font-family: 'DM Sans'; font-size: 14px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 3px 10px rgba(53,127,67,0.25);
+    display: flex; align-items: center; gap: 6px;
+    transition: all 200ms;
+  }
+  .empty-cta-primary:hover { background: var(--green-700); transform: translateY(-1px); }
+  .empty-cta-secondary {
+    background: white; color: var(--cream-700); border: 1.5px solid var(--cream-200);
+    border-radius: 100px; padding: 0 20px; height: 42px;
+    font-family: 'DM Sans'; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 150ms;
+  }
+  .empty-cta-secondary:hover { border-color: var(--cream-400); color: var(--cream-950); }
+
+  /* ══ SKELETON ══ */
+  .skel-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
+  .skel-line { background: var(--cream-100); border-radius: 100px; height: 12px; }
+  .skel-circle { background: var(--cream-100); border-radius: 12px; width: 48px; height: 48px; }
+  .skel-row { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
+  .skel-stack { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+  /* ── Demo nav bar ── */
+  .demo-nav {
+    background: var(--cream-950); color: white;
+    padding: 8px 16px; font-size: 12px;
+  }
+  .demo-nav-inner {
+    max-width: 1080px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .demo-nav-label {
+    font-weight: 700; letter-spacing: 0.08em; font-size: 10px;
+    color: rgba(255,255,255,0.5); margin-right: 4px;
+  }
+  .demo-nav-link {
+    color: rgba(255,255,255,0.65); text-decoration: none;
+    padding: 4px 11px; border-radius: 100px;
+    font-weight: 500; font-size: 12px;
+    transition: all 150ms;
+  }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .page { padding: 18px 16px 48px; }
+    .hero h1 { font-size: 22px; }
+    .trip-recap { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .trip-edit { margin-left: 0; }
+    .opp-card { padding: 16px; }
+    .opp-stats {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+    }
+    .opp-stats .opp-cta {
+      grid-column: 1 / -1;
+      width: 100%;
+      justify-content: center;
+    }
+    .nav-link:not(.active) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS RAMENEUR</span>
+    <a href="rm-04-declarer-trajet.html" class="demo-nav-link">1 · Déclarer trajet</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-05-liste-opportunites.html" class="demo-nav-link active">2 · Opportunités</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-06-detail-opportunite.html" class="demo-nav-link">3 · Détail mission</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-08-mission-active.html" class="demo-nav-link">4 · Mission active</a>
+  </div>
+</div>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="header">
+  <a href="#" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#" class="nav-link active">Mes trajets</a>
+    <a href="#" class="nav-link">Missions actives</a>
+    <a href="#" class="nav-link">Revenus</a>
+    <div class="nav-sep"></div>
+    <div class="avatar-btn">🌿</div>
+  </nav>
+</header>
+
+<div class="page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="rm-04-declarer-trajet.html">Mes trajets</a>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    <a href="rm-04-declarer-trajet.html">Trajet du 14 mai</a>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    <span class="current">Opportunités</span>
+  </div>
+
+  <div class="preview-label">RM-05 · Parcours rameneur</div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>Opportunités sur votre trajet</h1>
+    <p>Voici ce que vous pouvez ramener depuis vos producteurs vers vos voisins. Aucun engagement avant de réserver.</p>
+  </div>
+
+  <!-- ══════════ TRIP RECAP ══════════ -->
+  <div class="trip-recap">
+    <div class="trip-route">
+      <span>Paris 11<sup>e</sup></span>
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+      </svg>
+      <span>Caen</span>
+    </div>
+    <div class="trip-meta">
+      <span>jeu 14 mai</span>
+      <span class="trip-meta-sep">→</span>
+      <span>ven 15 mai</span>
+      <span class="trip-meta-sep">·</span>
+      <span>🚗 Coffre</span>
+    </div>
+    <a href="rm-04-declarer-trajet.html" class="trip-edit">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+      </svg>
+      Modifier
+    </a>
+  </div>
+
+  <!-- ══════════ DEMO TABS (états + variantes) ══════════ -->
+  <div class="demo-tabs">
+    <button class="demo-tab on" onclick="showPanel('normal', this)">📝 Variante texte</button>
+    <button class="demo-tab off" onclick="showPanel('chips', this)">🔖 Variante chips</button>
+    <button class="demo-tab off" onclick="showPanel('empty', this)">🌵 Aucune opportunité</button>
+    <button class="demo-tab off" onclick="showPanel('loading', this)">⏳ Chargement</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- PANEL : ÉTAT NORMAL (avec opportunités)         -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div id="panel-normal" class="panel active">
+
+    <!-- Results header -->
+    <div class="results-header">
+      <div class="results-count">
+        <span class="results-count-num">4</span>
+        <span class="results-count-label">opportunités sur votre trajet</span>
+      </div>
+      <div class="sort-wrapper">
+        <span class="sort-label">Trier par</span>
+        <div class="sort-select-wrapper">
+          <select class="sort-select">
+            <option selected>Gain net</option>
+            <option>Détour minimal</option>
+            <option>Nombre de voisins</option>
+            <option>Date la plus proche</option>
+          </select>
+          <svg class="sort-arrow" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des opportunités -->
+    <div class="opp-list">
+
+      <!-- ── OPPORTUNITÉ 1 — featured (meilleur gain) ── -->
+      <div class="opp-card featured">
+        <div class="opp-top">
+          <div class="producer-avatar miel">🐝</div>
+          <div class="producer-info">
+            <div class="producer-name">La Ruche du Bessin</div>
+            <div class="producer-meta">
+              <span>Apiculteur</span>
+              <span class="producer-meta-sep">·</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span>Bayeux (14)</span>
+              <span class="producer-meta-sep">·</span>
+              <span>à 12 km de Caen</span>
+            </div>
+          </div>
+          <span class="featured-badge">★ Meilleur gain</span>
+        </div>
+
+        <div class="opp-desc">
+          <strong>9 pots de miel</strong> de printemps et acacia + <strong>1 pot de pollen frais</strong>
+        </div>
+
+        <div class="opp-voisins">
+          <div class="opp-voisins-icon">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <span><strong>4 voisins intéressés</strong> autour de Paris 11<sup>e</sup> et 12<sup>e</sup></span>
+        </div>
+
+        <div class="opp-stats">
+          <div class="stat">
+            <span class="stat-label">Gain net</span>
+            <span class="stat-value gain">+18,00 €</span>
+            <span class="stat-detail">22 €<span class="minus">−</span>4 € carburant</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Détour</span>
+            <span class="stat-value">+12 km <small>· 8 min</small></span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Date suggérée</span>
+            <span class="stat-value" style="font-size:14px">Jeu. 14 mai <small>matin</small></span>
+          </div>
+          <button class="opp-cta">
+            Voir détail
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── OPPORTUNITÉ 2 — sur le chemin ── -->
+      <div class="opp-card">
+        <div class="opp-top">
+          <div class="producer-avatar cidre">🍎</div>
+          <div class="producer-info">
+            <div class="producer-name">Cidrerie des Marais</div>
+            <div class="producer-meta">
+              <span>Cidrerie artisanale</span>
+              <span class="producer-meta-sep">·</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span>Évrecy (14)</span>
+              <span class="producer-meta-sep">·</span>
+              <span>à 6 km de Caen</span>
+            </div>
+          </div>
+          <span class="easy-badge">⚡ Sur votre chemin</span>
+        </div>
+
+        <div class="opp-desc">
+          <strong>4 bouteilles de cidre brut</strong> + <strong>2 bouteilles de jus de pomme</strong>
+        </div>
+
+        <div class="opp-voisins">
+          <div class="opp-voisins-icon">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <span><strong>2 voisins intéressés</strong> dans Paris 11<sup>e</sup></span>
+        </div>
+
+        <div class="opp-stats">
+          <div class="stat">
+            <span class="stat-label">Gain net</span>
+            <span class="stat-value gain">+12,40 €</span>
+            <span class="stat-detail">13 €<span class="minus">−</span>0,60 € carburant</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Détour</span>
+            <span class="stat-value">+2 km <small>· 3 min</small></span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Date suggérée</span>
+            <span class="stat-value" style="font-size:14px">Ven. 15 mai <small>retour</small></span>
+          </div>
+          <button class="opp-cta">
+            Voir détail
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── OPPORTUNITÉ 3 — petite mais simple ── -->
+      <div class="opp-card">
+        <div class="opp-top">
+          <div class="producer-avatar fruits">🍏</div>
+          <div class="producer-info">
+            <div class="producer-name">Verger de Saint-Pierre</div>
+            <div class="producer-meta">
+              <span>Producteur fruitier</span>
+              <span class="producer-meta-sep">·</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span>Saint-Pierre-sur-Dives (14)</span>
+              <span class="producer-meta-sep">·</span>
+              <span>à 33 km de Caen</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="opp-desc">
+          <strong>5 kg de pommes</strong> bio (Reine des Reinettes)
+        </div>
+
+        <div class="opp-voisins">
+          <div class="opp-voisins-icon">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <span><strong>1 voisin intéressé</strong> dans Paris 11<sup>e</sup></span>
+        </div>
+
+        <div class="opp-stats">
+          <div class="stat">
+            <span class="stat-label">Gain net</span>
+            <span class="stat-value gain">+5,50 €</span>
+            <span class="stat-detail">7 €<span class="minus">−</span>1,50 € carburant</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Détour</span>
+            <span class="stat-value">+22 km <small>· 18 min</small></span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Date suggérée</span>
+            <span class="stat-value" style="font-size:14px">Jeu. 14 mai</span>
+          </div>
+          <button class="opp-cta">
+            Voir détail
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── OPPORTUNITÉ 4 — épicerie sèche ── -->
+      <div class="opp-card">
+        <div class="opp-top">
+          <div class="producer-avatar epicerie">🫙</div>
+          <div class="producer-info">
+            <div class="producer-name">L'Atelier des Saveurs</div>
+            <div class="producer-meta">
+              <span>Confitures et biscuits</span>
+              <span class="producer-meta-sep">·</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span>Caen centre</span>
+              <span class="producer-meta-sep">·</span>
+              <span>à 0 km</span>
+            </div>
+          </div>
+          <span class="easy-badge">⚡ Sur votre chemin</span>
+        </div>
+
+        <div class="opp-desc">
+          <strong>6 pots de confiture</strong> (mirabelle, fraise) + <strong>3 paquets de biscuits</strong> sablés
+        </div>
+
+        <div class="opp-voisins">
+          <div class="opp-voisins-icon">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <span><strong>3 voisins intéressés</strong> autour de Paris 11<sup>e</sup>, 12<sup>e</sup>, 20<sup>e</sup></span>
+        </div>
+
+        <div class="opp-stats">
+          <div class="stat">
+            <span class="stat-label">Gain net</span>
+            <span class="stat-value gain">+9,80 €</span>
+            <span class="stat-detail">9,80 € · pas de détour</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Détour</span>
+            <span class="stat-value">+0 km</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Date suggérée</span>
+            <span class="stat-value" style="font-size:14px">Ven. 15 mai <small>retour</small></span>
+          </div>
+          <button class="opp-cta">
+            Voir détail
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Notification hint -->
+    <div class="notify-hint">
+      <div class="notify-icon">🔔</div>
+      <div class="notify-content">
+        <div class="notify-title">Pas la bonne opportunité ?</div>
+        <div class="notify-desc">On vous prévient si de nouvelles opportunités apparaissent sur ce trajet d'ici votre départ.</div>
+      </div>
+      <button class="notify-action">Activer les alertes</button>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- PANEL : VARIANTE CHIPS                           -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div id="panel-chips" class="panel">
+
+    <div class="results-header">
+      <div class="results-count">
+        <span class="results-count-num">4</span>
+        <span class="results-count-label">opportunités sur votre trajet</span>
+      </div>
+      <div class="sort-wrapper">
+        <span class="sort-label">Trier par</span>
+        <div class="sort-select-wrapper">
+          <select class="sort-select">
+            <option selected>Gain net</option>
+            <option>Détour minimal</option>
+            <option>Nombre de voisins</option>
+            <option>Date la plus proche</option>
+          </select>
+          <svg class="sort-arrow" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="opp-list">
+
+      <!-- ── OPPORTUNITÉ 1 (chips) ── -->
+      <div class="opp-card featured">
+        <div class="opp-top">
+          <div class="producer-avatar miel">🐝</div>
+          <div class="producer-info">
+            <div class="producer-name">La Ruche du Bessin</div>
+            <div class="producer-meta">
+              <span>Apiculteur</span><span class="producer-meta-sep">·</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span>Bayeux (14)</span><span class="producer-meta-sep">·</span><span>à 12 km de Caen</span>
+            </div>
+          </div>
+          <span class="featured-badge">★ Meilleur gain</span>
+        </div>
+
+        <div class="opp-chips">
+          <span class="product-chip"><span class="product-chip-emoji">🍯</span>Miel printemps<span class="product-chip-qty">6 pots</span></span>
+          <span class="product-chip"><span class="product-chip-emoji">🍯</span>Miel acacia<span class="product-chip-qty">3 pots</span></span>
+          <span class="product-chip"><span class="product-chip-emoji">🐝</span>Pollen frais<span class="product-chip-qty">1 pot</span></span>
+        </div>
+
+        <div class="opp-voisins">
+          <div class="opp-voisins-icon">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <span><strong>4 voisins intéressés</strong> autour de Paris 11<sup>e</sup> et 12<sup>e</sup></span>
+        </div>
+
+        <div class="opp-stats">
+          <div class="stat">
+            <span class="stat-label">Gain net</span>
+            <span class="stat-value gain">+18,00 €</span>
+            <span class="stat-detail">22 €<span class="minus">−</span>4 € carburant</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Détour</span>
+            <span class="stat-value">+12 km <small>· 8 min</small></span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Date suggérée</span>
+            <span class="stat-value" style="font-size:14px">Jeu. 14 mai <small>matin</small></span>
+          </div>
+          <button class="opp-cta">Voir détail
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── OPPORTUNITÉ 2 (chips) ── -->
+      <div class="opp-card">
+        <div class="opp-top">
+          <div class="producer-avatar cidre">🍎</div>
+          <div class="producer-info">
+            <div class="producer-name">Cidrerie des Marais</div>
+            <div class="producer-meta">
+              <span>Cidrerie artisanale</span><span class="producer-meta-sep">·</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span>Évrecy (14)</span><span class="producer-meta-sep">·</span><span>à 6 km de Caen</span>
+            </div>
+          </div>
+          <span class="easy-badge">⚡ Sur votre chemin</span>
+        </div>
+
+        <div class="opp-chips">
+          <span class="product-chip"><span class="product-chip-emoji">🍎</span>Cidre brut<span class="product-chip-qty">4 bouteilles</span></span>
+          <span class="product-chip"><span class="product-chip-emoji">🥤</span>Jus de pomme<span class="product-chip-qty">2 bouteilles</span></span>
+        </div>
+
+        <div class="opp-voisins">
+          <div class="opp-voisins-icon">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <span><strong>2 voisins intéressés</strong> dans Paris 11<sup>e</sup></span>
+        </div>
+
+        <div class="opp-stats">
+          <div class="stat">
+            <span class="stat-label">Gain net</span>
+            <span class="stat-value gain">+12,40 €</span>
+            <span class="stat-detail">13 €<span class="minus">−</span>0,60 € carburant</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Détour</span>
+            <span class="stat-value">+2 km <small>· 3 min</small></span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Date suggérée</span>
+            <span class="stat-value" style="font-size:14px">Ven. 15 mai <small>retour</small></span>
+          </div>
+          <button class="opp-cta">Voir détail
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── OPPORTUNITÉ 3 (chips) ── -->
+      <div class="opp-card">
+        <div class="opp-top">
+          <div class="producer-avatar fruits">🍏</div>
+          <div class="producer-info">
+            <div class="producer-name">Verger de Saint-Pierre</div>
+            <div class="producer-meta">
+              <span>Producteur fruitier</span><span class="producer-meta-sep">·</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span>Saint-Pierre-sur-Dives (14)</span><span class="producer-meta-sep">·</span><span>à 33 km de Caen</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="opp-chips">
+          <span class="product-chip"><span class="product-chip-emoji">🍏</span>Pommes Reine des Reinettes (bio)<span class="product-chip-qty">5 kg</span></span>
+        </div>
+
+        <div class="opp-voisins">
+          <div class="opp-voisins-icon">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <span><strong>1 voisin intéressé</strong> dans Paris 11<sup>e</sup></span>
+        </div>
+
+        <div class="opp-stats">
+          <div class="stat">
+            <span class="stat-label">Gain net</span>
+            <span class="stat-value gain">+5,50 €</span>
+            <span class="stat-detail">7 €<span class="minus">−</span>1,50 € carburant</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Détour</span>
+            <span class="stat-value">+22 km <small>· 18 min</small></span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Date suggérée</span>
+            <span class="stat-value" style="font-size:14px">Jeu. 14 mai</span>
+          </div>
+          <button class="opp-cta">Voir détail
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── OPPORTUNITÉ 4 (chips) ── -->
+      <div class="opp-card">
+        <div class="opp-top">
+          <div class="producer-avatar epicerie">🫙</div>
+          <div class="producer-info">
+            <div class="producer-name">L'Atelier des Saveurs</div>
+            <div class="producer-meta">
+              <span>Confitures et biscuits</span><span class="producer-meta-sep">·</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span>Caen centre</span><span class="producer-meta-sep">·</span><span>à 0 km</span>
+            </div>
+          </div>
+          <span class="easy-badge">⚡ Sur votre chemin</span>
+        </div>
+
+        <div class="opp-chips">
+          <span class="product-chip"><span class="product-chip-emoji">🫙</span>Confiture mirabelle<span class="product-chip-qty">3 pots</span></span>
+          <span class="product-chip"><span class="product-chip-emoji">🫙</span>Confiture fraise<span class="product-chip-qty">3 pots</span></span>
+          <span class="product-chip"><span class="product-chip-emoji">🍪</span>Biscuits sablés<span class="product-chip-qty">3 paquets</span></span>
+        </div>
+
+        <div class="opp-voisins">
+          <div class="opp-voisins-icon">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <span><strong>3 voisins intéressés</strong> autour de Paris 11<sup>e</sup>, 12<sup>e</sup>, 20<sup>e</sup></span>
+        </div>
+
+        <div class="opp-stats">
+          <div class="stat">
+            <span class="stat-label">Gain net</span>
+            <span class="stat-value gain">+9,80 €</span>
+            <span class="stat-detail">9,80 € · pas de détour</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Détour</span>
+            <span class="stat-value">+0 km</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Date suggérée</span>
+            <span class="stat-value" style="font-size:14px">Ven. 15 mai <small>retour</small></span>
+          </div>
+          <button class="opp-cta">Voir détail
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- PANEL : ÉTAT VIDE                                -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div id="panel-empty" class="panel">
+    <div class="empty-state">
+      <div class="empty-icon">🌾</div>
+      <div class="empty-title">Aucune opportunité pour ce trajet</div>
+      <p class="empty-desc">
+        Pour le moment, aucun de vos voisins n'a d'envie active correspondant à un producteur de Caen.
+        Pas d'inquiétude : c'est normal au lancement, et ça peut bouger d'ici jeudi.
+      </p>
+      <div class="empty-actions">
+        <button class="empty-cta-primary">
+          🔔 Me prévenir si ça change
+        </button>
+        <button class="empty-cta-secondary" onclick="location.href='rm-04-declarer-trajet.html'">Modifier le trajet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- PANEL : CHARGEMENT                                -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div id="panel-loading" class="panel">
+    <div class="skel-card">
+      <div class="skel-row">
+        <div class="skel-circle"></div>
+        <div class="skel-stack">
+          <div class="skel-line" style="width:55%"></div>
+          <div class="skel-line" style="width:35%; height:10px"></div>
+        </div>
+      </div>
+      <div class="skel-line" style="width:80%; margin-bottom:14px"></div>
+      <div class="skel-line" style="width:45%; margin-bottom:14px"></div>
+      <div style="display:flex;gap:18px;padding-top:14px;border-top:1px solid var(--cream-100)">
+        <div class="skel-line" style="width:60px"></div>
+        <div class="skel-line" style="width:60px"></div>
+        <div class="skel-line" style="width:80px"></div>
+        <div class="skel-line" style="width:80px;margin-left:auto"></div>
+      </div>
+    </div>
+    <div class="skel-card" style="animation-delay:0.15s">
+      <div class="skel-row">
+        <div class="skel-circle"></div>
+        <div class="skel-stack">
+          <div class="skel-line" style="width:50%"></div>
+          <div class="skel-line" style="width:38%; height:10px"></div>
+        </div>
+      </div>
+      <div class="skel-line" style="width:75%; margin-bottom:14px"></div>
+      <div class="skel-line" style="width:40%; margin-bottom:14px"></div>
+      <div style="display:flex;gap:18px;padding-top:14px;border-top:1px solid var(--cream-100)">
+        <div class="skel-line" style="width:60px"></div>
+        <div class="skel-line" style="width:60px"></div>
+        <div class="skel-line" style="width:80px"></div>
+        <div class="skel-line" style="width:80px;margin-left:auto"></div>
+      </div>
+    </div>
+    <div class="skel-card" style="animation-delay:0.3s">
+      <div class="skel-row">
+        <div class="skel-circle"></div>
+        <div class="skel-stack">
+          <div class="skel-line" style="width:60%"></div>
+          <div class="skel-line" style="width:30%; height:10px"></div>
+        </div>
+      </div>
+      <div class="skel-line" style="width:70%; margin-bottom:14px"></div>
+      <div class="skel-line" style="width:42%; margin-bottom:14px"></div>
+      <div style="display:flex;gap:18px;padding-top:14px;border-top:1px solid var(--cream-100)">
+        <div class="skel-line" style="width:60px"></div>
+        <div class="skel-line" style="width:60px"></div>
+        <div class="skel-line" style="width:80px"></div>
+        <div class="skel-line" style="width:80px;margin-left:auto"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function showPanel(name, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelectorAll('.demo-tab').forEach(t => { t.classList.remove('on'); t.classList.add('off'); });
+    btn.classList.remove('off'); btn.classList.add('on');
+  }
+
+  // Clic sur carte ou bouton "Voir détail" → RM-06
+  document.querySelectorAll('.opp-card, .opp-cta').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      location.href = 'rm-06-detail-opportunite.html';
+    });
+  });
+</script>
+
+</body>
+</html>

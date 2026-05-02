@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM-08 · Mission active — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50: #FAF7F2;
+    --gold: #D4A017;
+    --blue-500: #3B82F6;
+    --blue-100: #DBEAFE;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream-50);
+    color: var(--cream-950);
+    min-height: 100vh;
+  }
+
+  /* ══ HEADER ══ */
+  .header {
+    background: rgba(250,247,242,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 32px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(53,127,67,0.04);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-icon { width: 34px; height: 34px; background: var(--green-800); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 6px rgba(14,53,26,0.25); }
+  .logo-text { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-800); letter-spacing: -0.02em; }
+  .logo-dot { color: var(--earth-500); }
+  .nav-links { display: flex; align-items: center; gap: 4px; }
+  .nav-link { font-size: 14px; font-weight: 500; color: var(--cream-700); text-decoration: none; padding: 6px 12px; border-radius: 8px; transition: color 150ms, background 150ms; }
+  .nav-link:hover { color: var(--green-700); background: var(--green-50); }
+  .nav-link.active { color: var(--green-700); font-weight: 600; }
+  .nav-sep { width: 1px; height: 20px; background: var(--cream-200); margin: 0 4px; }
+  .avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--green-100); border: 2px solid var(--green-200); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+
+  /* ══ PAGE ══ */
+  .page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 24px 32px 64px;
+  }
+
+  .breadcrumb {
+    font-size: 13px; color: var(--cream-500);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  .breadcrumb a { color: var(--cream-600); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--green-700); }
+  .breadcrumb svg { width: 12px; height: 12px; color: var(--cream-400); }
+  .breadcrumb .current { color: var(--cream-800); font-weight: 500; }
+
+  .preview-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--cream-500);
+    margin-bottom: 6px;
+  }
+
+  /* ══ STATUS HEADER ══ */
+  .status-header {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(53,127,67,0.05);
+  }
+  .status-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .status-mission { flex: 1; min-width: 250px; }
+  .status-mission-label {
+    font-size: 11px;
+    color: var(--cream-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .status-mission-title {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-900);
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .status-mission-meta {
+    font-size: 13px;
+    color: var(--cream-600);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .status-meta-sep { color: var(--cream-300); }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+  .status-badge.confirmed { background: var(--green-100); color: var(--green-800); border: 1px solid var(--green-200); }
+  .status-badge.delivering { background: var(--blue-100); color: var(--blue-500); border: 1px solid #BFDBFE; }
+  .status-badge.completed { background: var(--cream-100); color: var(--cream-700); border: 1px solid var(--cream-200); }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .status-badge.confirmed .status-dot { background: var(--green-500); animation: pulse-dot 2s ease-in-out infinite; }
+  .status-badge.delivering .status-dot { background: var(--blue-500); animation: pulse-dot 2s ease-in-out infinite; }
+  .status-badge.completed .status-dot { background: var(--cream-500); }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── Stepper ── */
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+  }
+  .step-circle {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    background: white;
+    border: 2px solid var(--cream-300);
+    color: var(--cream-500);
+    transition: all 200ms;
+  }
+  .step.done .step-circle {
+    background: var(--green-600);
+    border-color: var(--green-600);
+    color: white;
+  }
+  .step.current .step-circle {
+    background: white;
+    border-color: var(--green-600);
+    color: var(--green-700);
+    box-shadow: 0 0 0 4px var(--green-100);
+  }
+  .step-label {
+    font-size: 11px;
+    color: var(--cream-500);
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+  .step.done .step-label { color: var(--green-700); font-weight: 600; }
+  .step.current .step-label { color: var(--green-800); font-weight: 700; }
+  .step-bar {
+    flex: 1;
+    height: 2px;
+    background: var(--cream-200);
+    border-radius: 100px;
+    margin-top: -22px;
+  }
+  .step-bar.done { background: var(--green-500); }
+
+  /* ══ DEMO TABS ══ */
+  .demo-tabs {
+    display: flex; gap: 8px; padding: 8px;
+    margin-bottom: 18px;
+    background: var(--cream-100);
+    border-radius: 10px;
+    border: 1px solid var(--cream-200);
+  }
+  .demo-tab {
+    padding: 6px 14px; border-radius: 6px; border: none;
+    font-family: 'DM Sans'; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 150ms; white-space: nowrap;
+  }
+  .demo-tab.on  { background: white; color: var(--green-800); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .demo-tab.off { background: transparent; color: var(--cream-600); }
+  .demo-tab.off:hover { color: var(--green-700); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ══ MAIN GRID ══ */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 22px;
+    align-items: flex-start;
+  }
+  .main-col { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+  .side-col { display: flex; flex-direction: column; gap: 18px; }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--cream-200);
+    padding: 22px;
+    box-shadow: 0 2px 12px rgba(53,127,67,0.05);
+  }
+
+  /* ══ QR CARD ══ */
+  .qr-card {
+    background: white;
+    border-radius: 18px;
+    border: 1px solid var(--cream-200);
+    box-shadow: 0 4px 20px rgba(53,127,67,0.08);
+    overflow: hidden;
+  }
+  .qr-header {
+    background: linear-gradient(135deg, var(--green-800) 0%, var(--green-700) 100%);
+    color: white;
+    padding: 18px 22px;
+  }
+  .qr-header-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    margin-bottom: 4px;
+  }
+  .qr-header-title {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .qr-header-sub {
+    font-size: 13px;
+    opacity: 0.85;
+  }
+
+  .qr-body {
+    padding: 28px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .qr-frame {
+    background: white;
+    padding: 14px;
+    border-radius: 14px;
+    border: 3px solid var(--green-100);
+    box-shadow: 0 4px 16px rgba(53,127,67,0.12);
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .qr-frame img {
+    display: block;
+    width: 220px;
+    height: 220px;
+  }
+  .qr-corners::before, .qr-corners::after,
+  .qr-corners > span::before, .qr-corners > span::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid var(--green-600);
+  }
+  .qr-corners::before { top: -1px; left: -1px; border-right: none; border-bottom: none; border-top-left-radius: 8px; }
+  .qr-corners::after { top: -1px; right: -1px; border-left: none; border-bottom: none; border-top-right-radius: 8px; }
+  .qr-corners > span::before { bottom: -1px; left: -1px; border-right: none; border-top: none; border-bottom-left-radius: 8px; }
+  .qr-corners > span::after { bottom: -1px; right: -1px; border-left: none; border-top: none; border-bottom-right-radius: 8px; }
+
+  .qr-instruction {
+    font-size: 14px;
+    color: var(--cream-700);
+    line-height: 1.5;
+    max-width: 320px;
+    margin: 0 auto 14px;
+  }
+  .qr-instruction strong { color: var(--green-800); font-weight: 600; }
+
+  .qr-id {
+    font-family: 'DM Sans', monospace;
+    font-size: 11px;
+    color: var(--cream-500);
+    background: var(--cream-50);
+    border: 1px solid var(--cream-200);
+    border-radius: 100px;
+    padding: 5px 12px;
+    letter-spacing: 0.04em;
+  }
+
+  .qr-cta-row {
+    display: flex;
+    gap: 8px;
+    padding: 14px 22px;
+    background: var(--cream-50);
+    border-top: 1px solid var(--cream-200);
+  }
+  .qr-cta-btn {
+    flex: 1;
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 100px;
+    padding: 10px 14px;
+    font-family: 'DM Sans';
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--cream-800);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 150ms;
+  }
+  .qr-cta-btn:hover { border-color: var(--green-300); color: var(--green-700); background: var(--green-50); }
+  .qr-cta-btn svg { width: 14px; height: 14px; }
+
+  /* ══ PRODUCER CARD COMPACT ══ */
+  .card-title {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green-800);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .producer-compact {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .producer-avatar-sm {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--earth-200), var(--earth-400));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .producer-name-sm { font-family: 'Lora', serif; font-size: 15px; font-weight: 700; color: var(--green-900); margin-bottom: 1px; }
+  .producer-loc-sm { font-size: 12px; color: var(--cream-600); display: flex; align-items: center; gap: 4px; }
+  .producer-loc-sm svg { width: 11px; height: 11px; color: var(--cream-400); }
+
+  .contact-row {
+    display: flex;
+    gap: 8px;
+  }
+  .contact-btn {
+    flex: 1;
+    background: var(--cream-50);
+    border: 1px solid var(--cream-200);
+    border-radius: 100px;
+    padding: 8px 12px;
+    font-family: 'DM Sans';
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--cream-800);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 150ms;
+    text-decoration: none;
+  }
+  .contact-btn:hover { border-color: var(--green-300); color: var(--green-700); background: var(--green-50); }
+  .contact-btn svg { width: 13px; height: 13px; }
+  .contact-btn .badge-num {
+    background: var(--earth-500);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 100px;
+    padding: 1px 6px;
+    margin-left: 2px;
+  }
+
+  /* ══ COUNTDOWN ══ */
+  .countdown {
+    background: linear-gradient(135deg, var(--earth-50), var(--cream-50));
+    border: 1px solid var(--earth-100);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .countdown-label {
+    font-size: 11px;
+    color: var(--earth-700);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .countdown-value {
+    font-family: 'Lora', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--earth-800);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .countdown-date {
+    font-size: 12px;
+    color: var(--cream-600);
+  }
+
+  /* ══ VOISINS LIST ══ */
+  .voisins-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .voisin-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--cream-50);
+    border: 1px solid var(--cream-200);
+    border-radius: 12px;
+    transition: all 150ms;
+  }
+  .voisin-row.active {
+    background: var(--blue-100);
+    border-color: #BFDBFE;
+  }
+  .voisin-row.done {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    opacity: 0.85;
+  }
+  .voisin-row-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--cream-200);
+    color: var(--cream-700);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .voisin-row.active .voisin-row-avatar { background: var(--blue-500); color: white; }
+  .voisin-row.done .voisin-row-avatar { background: var(--green-600); color: white; }
+  .voisin-row-info { flex: 1; min-width: 0; }
+  .voisin-row-name { font-size: 13.5px; font-weight: 600; color: var(--cream-950); margin-bottom: 1px; }
+  .voisin-row-meta { font-size: 11.5px; color: var(--cream-500); }
+  .voisin-row.active .voisin-row-meta { color: var(--blue-500); font-weight: 600; }
+  .voisin-row.done .voisin-row-meta { color: var(--green-700); font-weight: 600; }
+  .voisin-row-status {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .voisin-row.active .voisin-row-status { background: var(--blue-500); color: white; }
+  .voisin-row.done .voisin-row-status { background: var(--green-600); color: white; }
+  .voisin-row:not(.active):not(.done) .voisin-row-status { background: var(--cream-200); color: var(--cream-700); }
+
+  /* ══ ACTION CARD (alerts, instructions) ══ */
+  .action-info {
+    background: var(--green-50);
+    border: 1px solid var(--green-200);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .action-info-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--green-200);
+    color: var(--green-800);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .action-info-content { flex: 1; }
+  .action-info-title { font-family: 'Lora', serif; font-size: 14px; font-weight: 700; color: var(--green-800); margin-bottom: 3px; }
+  .action-info-desc { font-size: 13px; color: var(--green-900); line-height: 1.5; }
+
+  /* ══ SUCCESS / COMPLETED PANEL ══ */
+  .success-card {
+    background: linear-gradient(135deg, var(--green-50), white);
+    border: 1.5px solid var(--green-200);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .success-icon {
+    width: 80px; height: 80px;
+    background: var(--green-600);
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+    box-shadow: 0 8px 24px rgba(53,127,67,0.30);
+  }
+  .success-icon svg { width: 40px; height: 40px; stroke-width: 3; }
+  .success-title {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-900);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .success-sub {
+    font-size: 14px;
+    color: var(--cream-700);
+    line-height: 1.6;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .summary-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  .summary-stat {
+    text-align: center;
+    padding: 16px 12px;
+    background: var(--cream-50);
+    border-radius: 10px;
+  }
+  .summary-stat-label { font-size: 11px; color: var(--cream-500); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .summary-stat-value { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--green-700); line-height: 1; }
+  .summary-stat-value.gain { color: var(--green-600); }
+
+  .next-steps {
+    background: var(--earth-50);
+    border: 1px dashed var(--earth-200);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .next-steps-icon { font-size: 22px; flex-shrink: 0; }
+  .next-steps-text { font-size: 13px; color: var(--cream-700); line-height: 1.5; }
+  .next-steps-text strong { color: var(--earth-800); font-weight: 700; }
+
+  .actions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    flex: 1;
+    min-width: 140px;
+    background: var(--green-600);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    height: 44px;
+    font-family: 'DM Sans';
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(53,127,67,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 200ms;
+    text-decoration: none;
+  }
+  .btn-primary:hover { background: var(--green-700); transform: translateY(-1px); box-shadow: 0 5px 14px rgba(53,127,67,0.32); }
+  .btn-secondary {
+    flex: 1;
+    min-width: 140px;
+    background: white;
+    color: var(--cream-700);
+    border: 1.5px solid var(--cream-200);
+    border-radius: 100px;
+    height: 44px;
+    font-family: 'DM Sans';
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 150ms;
+    text-decoration: none;
+  }
+  .btn-secondary:hover { border-color: var(--cream-400); color: var(--cream-950); background: var(--cream-50); }
+
+  /* ── Demo nav bar ── */
+  .demo-nav {
+    background: var(--cream-950); color: white;
+    padding: 8px 16px; font-size: 12px;
+  }
+  .demo-nav-inner {
+    max-width: 1080px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .demo-nav-label {
+    font-weight: 700; letter-spacing: 0.08em; font-size: 10px;
+    color: rgba(255,255,255,0.5); margin-right: 4px;
+  }
+  .demo-nav-link {
+    color: rgba(255,255,255,0.65); text-decoration: none;
+    padding: 4px 11px; border-radius: 100px;
+    font-weight: 500; font-size: 12px;
+    transition: all 150ms;
+  }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 920px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .stepper { gap: 4px; }
+    .step-label { font-size: 10px; }
+  }
+  @media (max-width: 720px) {
+    .page { padding: 18px 16px 48px; }
+    .status-mission-title { font-size: 18px; }
+    .qr-frame img { width: 180px; height: 180px; }
+    .stepper .step-label { display: none; }
+    .nav-link:not(.active) { display: none; }
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS RAMENEUR</span>
+    <a href="rm-04-declarer-trajet.html" class="demo-nav-link">1 · Déclarer trajet</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-05-liste-opportunites.html" class="demo-nav-link">2 · Opportunités</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-06-detail-opportunite.html" class="demo-nav-link">3 · Détail mission</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-08-mission-active.html" class="demo-nav-link active">4 · Mission active</a>
+  </div>
+</div>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="header">
+  <a href="rm-04-declarer-trajet.html" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+  <nav class="nav-links">
+    <a href="rm-04-declarer-trajet.html" class="nav-link">Mes trajets</a>
+    <a href="#" class="nav-link active">Missions actives</a>
+    <a href="#" class="nav-link">Revenus</a>
+    <div class="nav-sep"></div>
+    <div class="avatar-btn">🌿</div>
+  </nav>
+</header>
+
+<div class="page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="rm-04-declarer-trajet.html">Mes trajets</a>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    <a href="rm-05-liste-opportunites.html">Trajet du 14 mai</a>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    <span class="current">Mission active · La Ruche du Bessin</span>
+  </div>
+
+  <div class="preview-label">RM-08 · Parcours rameneur</div>
+
+  <!-- ══════════ STATUS HEADER ══════════ -->
+  <div class="status-header">
+    <div class="status-header-top">
+      <div class="status-mission">
+        <div class="status-mission-label">Mission active</div>
+        <div class="status-mission-title">La Ruche du Bessin · Bayeux → Paris</div>
+        <div class="status-mission-meta">
+          <span>🐝 Apiculteur</span>
+          <span class="status-meta-sep">·</span>
+          <span>4 voisins</span>
+          <span class="status-meta-sep">·</span>
+          <span>Gain net <strong style="color:var(--green-700)">+18,00 €</strong></span>
+        </div>
+      </div>
+      <span class="status-badge confirmed" id="status-badge">
+        <span class="status-dot"></span>
+        Confirmée · Pickup en attente
+      </span>
+    </div>
+
+    <!-- Progress stepper -->
+    <div class="stepper">
+      <div class="step done">
+        <div class="step-circle">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <span class="step-label">Réservée</span>
+      </div>
+      <div class="step-bar done"></div>
+      <div class="step done">
+        <div class="step-circle">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <span class="step-label">Confirmée</span>
+      </div>
+      <div class="step-bar"></div>
+      <div class="step current" id="step-pickup">
+        <div class="step-circle">3</div>
+        <span class="step-label">Pickup</span>
+      </div>
+      <div class="step-bar"></div>
+      <div class="step" id="step-delivery">
+        <div class="step-circle">4</div>
+        <span class="step-label">Livraisons</span>
+      </div>
+      <div class="step-bar"></div>
+      <div class="step" id="step-end">
+        <div class="step-circle">5</div>
+        <span class="step-label">Terminée</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo tabs -->
+  <div class="demo-tabs">
+    <button class="demo-tab on" onclick="showPanel('pickup', this)">📦 Avant pickup</button>
+    <button class="demo-tab off" onclick="showPanel('delivery', this)">🚗 Livraison en cours</button>
+    <button class="demo-tab off" onclick="showPanel('done', this)">✅ Mission terminée</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- PANEL : AVANT PICKUP                              -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div id="panel-pickup" class="panel active">
+    <div class="action-info">
+      <div class="action-info-icon">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div class="action-info-content">
+        <div class="action-info-title">Tous les voisins ont confirmé et payé</div>
+        <div class="action-info-desc">La mission est verrouillée et financée. Présentez le QR code au producteur lors de votre passage à Bayeux.</div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+
+      <!-- LEFT — QR Pickup -->
+      <div class="main-col">
+        <div class="qr-card">
+          <div class="qr-header">
+            <div class="qr-header-label">QR code pickup</div>
+            <div class="qr-header-title">À présenter à La Ruche du Bessin</div>
+            <div class="qr-header-sub">Pierre Mahé · Bayeux (14)</div>
+          </div>
+          <div class="qr-body">
+            <div class="qr-frame qr-corners"><span></span>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=DELTA-PICKUP-RUCHE-BESSIN-MIS001&color=14351A&bgcolor=FFFFFF" alt="QR pickup">
+            </div>
+            <p class="qr-instruction">
+              <strong>Pierre scanne ce code</strong> à votre arrivée. La mission passe automatiquement en état <em>« Récupéré »</em> et vous pouvez prendre les produits.
+            </p>
+            <div class="qr-id">DELTA·MIS001·PICKUP</div>
+          </div>
+          <div class="qr-cta-row">
+            <button class="qr-cta-btn">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              Sauvegarder
+            </button>
+            <button class="qr-cta-btn">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+              Partager
+            </button>
+            <button class="qr-cta-btn">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Télécharger
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT — Producer + Voisins + Countdown -->
+      <div class="side-col">
+
+        <div class="card">
+          <div class="card-title">⏰ Pickup prévu</div>
+          <div class="countdown">
+            <div class="countdown-label">Dans</div>
+            <div class="countdown-value">2 jours</div>
+            <div class="countdown-date">Jeudi 14 mai · matinée recommandée</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🐝 Le producteur</div>
+          <div class="producer-compact">
+            <div class="producer-avatar-sm">🐝</div>
+            <div>
+              <div class="producer-name-sm">La Ruche du Bessin</div>
+              <div class="producer-loc-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Bayeux (14)
+              </div>
+            </div>
+          </div>
+          <div class="contact-row">
+            <a href="#" class="contact-btn">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+              Chat
+            </a>
+            <a href="#" class="contact-btn">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+              Appeler
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">👥 Voisins (4 confirmés)</div>
+          <div class="voisins-list">
+            <div class="voisin-row">
+              <div class="voisin-row-avatar">V1</div>
+              <div class="voisin-row-info">
+                <div class="voisin-row-name">Voisin 1</div>
+                <div class="voisin-row-meta">Paris 11<sup>e</sup> · payé</div>
+              </div>
+              <span class="voisin-row-status">✓ confirmé</span>
+            </div>
+            <div class="voisin-row">
+              <div class="voisin-row-avatar">V2</div>
+              <div class="voisin-row-info">
+                <div class="voisin-row-name">Voisin 2</div>
+                <div class="voisin-row-meta">Paris 11<sup>e</sup> · payé</div>
+              </div>
+              <span class="voisin-row-status">✓ confirmé</span>
+            </div>
+            <div class="voisin-row">
+              <div class="voisin-row-avatar">V3</div>
+              <div class="voisin-row-info">
+                <div class="voisin-row-name">Voisin 3</div>
+                <div class="voisin-row-meta">Paris 12<sup>e</sup> · payé</div>
+              </div>
+              <span class="voisin-row-status">✓ confirmé</span>
+            </div>
+            <div class="voisin-row">
+              <div class="voisin-row-avatar">V4</div>
+              <div class="voisin-row-info">
+                <div class="voisin-row-name">Voisin 4</div>
+                <div class="voisin-row-meta">Paris 12<sup>e</sup> · payé</div>
+              </div>
+              <span class="voisin-row-status">✓ confirmé</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- PANEL : LIVRAISON EN COURS                       -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div id="panel-delivery" class="panel">
+    <div class="action-info" style="background: var(--blue-100); border-color: #BFDBFE">
+      <div class="action-info-icon" style="background: var(--blue-500); color: white">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+      </div>
+      <div class="action-info-content">
+        <div class="action-info-title" style="color:var(--blue-500)">Pickup confirmé · 2 livraisons restantes</div>
+        <div class="action-info-desc" style="color:var(--cream-800)">Présentez le QR code au voisin actif lors de la remise. Il scanne, la livraison est validée.</div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div class="main-col">
+        <div class="qr-card">
+          <div class="qr-header" style="background:linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)">
+            <div class="qr-header-label">QR code livraison · 3 sur 4</div>
+            <div class="qr-header-title">À présenter à Voisin 3</div>
+            <div class="qr-header-sub">Paris 12<sup>e</sup> · point de RDV : café Le Baron</div>
+          </div>
+          <div class="qr-body">
+            <div class="qr-frame qr-corners" style="border-color: var(--blue-100)"><span></span>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=DELTA-DELIVERY-V3-MIS001&color=1E40AF&bgcolor=FFFFFF" alt="QR delivery V3">
+            </div>
+            <p class="qr-instruction">
+              <strong>Voisin 3 scanne ce code</strong> au moment de la remise. La livraison passe en état <em>« Livré »</em>, le paiement progresse vers la libération.
+            </p>
+            <div class="qr-id">DELTA·MIS001·DELIVER·V3</div>
+          </div>
+          <div class="qr-cta-row">
+            <button class="qr-cta-btn">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+              Chat avec Voisin 3
+              <span class="badge-num">2</span>
+            </button>
+            <button class="qr-cta-btn">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+              Itinéraire
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-col">
+        <div class="card">
+          <div class="card-title">📍 Progression livraisons</div>
+          <div class="voisins-list">
+            <div class="voisin-row done">
+              <div class="voisin-row-avatar">V1</div>
+              <div class="voisin-row-info">
+                <div class="voisin-row-name">Voisin 1</div>
+                <div class="voisin-row-meta">Paris 11<sup>e</sup> · livré il y a 1h</div>
+              </div>
+              <span class="voisin-row-status">livré</span>
+            </div>
+            <div class="voisin-row done">
+              <div class="voisin-row-avatar">V2</div>
+              <div class="voisin-row-info">
+                <div class="voisin-row-name">Voisin 2</div>
+                <div class="voisin-row-meta">Paris 11<sup>e</sup> · livré il y a 30 min</div>
+              </div>
+              <span class="voisin-row-status">livré</span>
+            </div>
+            <div class="voisin-row active">
+              <div class="voisin-row-avatar">V3</div>
+              <div class="voisin-row-info">
+                <div class="voisin-row-name">Voisin 3</div>
+                <div class="voisin-row-meta">Paris 12<sup>e</sup> · livraison en cours</div>
+              </div>
+              <span class="voisin-row-status">en cours</span>
+            </div>
+            <div class="voisin-row">
+              <div class="voisin-row-avatar">V4</div>
+              <div class="voisin-row-info">
+                <div class="voisin-row-name">Voisin 4</div>
+                <div class="voisin-row-meta">Paris 12<sup>e</sup> · à venir</div>
+              </div>
+              <span class="voisin-row-status">en attente</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💰 Gain en cours d'acquisition</div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <span style="font-size:13px;color:var(--cream-700)">Acquis (2/4 livrés)</span>
+            <span style="font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--green-700)">9,00 €</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <span style="font-size:13px;color:var(--cream-500)">Restant (V3, V4)</span>
+            <span style="font-family:'Lora',serif;font-size:14px;color:var(--cream-500)">+9,00 €</span>
+          </div>
+          <p style="font-size:11px;color:var(--cream-500);margin-top:10px;font-style:italic;line-height:1.5">
+            Le versement final est déclenché à la dernière livraison confirmée.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- PANEL : MISSION TERMINÉE                         -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div id="panel-done" class="panel">
+
+    <div class="success-card">
+      <div class="success-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <h2 class="success-title">Mission accomplie !</h2>
+      <p class="success-sub">
+        Vous avez ramené 22 produits chez 4 voisins. Le producteur a été payé, et votre commission est en route.
+      </p>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-title">📊 Récapitulatif de la mission</div>
+
+      <div class="summary-grid">
+        <div class="summary-stat">
+          <div class="summary-stat-label">Voisins servis</div>
+          <div class="summary-stat-value">4 / 4</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-label">Produits livrés</div>
+          <div class="summary-stat-value">22</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-label">Distance totale</div>
+          <div class="summary-stat-value">≈ 234 km</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-label">Votre gain net</div>
+          <div class="summary-stat-value gain">+18,00 €</div>
+        </div>
+      </div>
+
+      <div class="next-steps">
+        <span class="next-steps-icon">💸</span>
+        <div class="next-steps-text">
+          <strong>Versement Stripe</strong> sous 24-48 h sur votre compte bancaire. Vous recevrez un email de confirmation.
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <a href="#" class="btn-primary">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+          Noter le producteur
+        </a>
+        <a href="rm-04-declarer-trajet.html" class="btn-secondary">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          Nouveau trajet
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function showPanel(name, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelectorAll('.demo-tab').forEach(t => { t.classList.remove('on'); t.classList.add('off'); });
+    btn.classList.remove('off'); btn.classList.add('on');
+
+    // Update stepper
+    const stepPickup = document.getElementById('step-pickup');
+    const stepDelivery = document.getElementById('step-delivery');
+    const stepEnd = document.getElementById('step-end');
+    const badge = document.getElementById('status-badge');
+
+    [stepPickup, stepDelivery, stepEnd].forEach(s => { s.classList.remove('current', 'done'); });
+    document.querySelectorAll('.step-bar').forEach(b => b.classList.remove('done'));
+    // Restore first 2 bars
+    const bars = document.querySelectorAll('.step-bar');
+    bars[0].classList.add('done');
+
+    badge.classList.remove('confirmed', 'delivering', 'completed');
+
+    if (name === 'pickup') {
+      stepPickup.classList.add('current');
+      badge.classList.add('confirmed');
+      badge.innerHTML = '<span class="status-dot"></span> Confirmée · Pickup en attente';
+    } else if (name === 'delivery') {
+      stepPickup.classList.add('done');
+      stepPickup.querySelector('.step-circle').innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+      stepDelivery.classList.add('current');
+      bars[1].classList.add('done');
+      bars[2].classList.add('done');
+      badge.classList.add('delivering');
+      badge.innerHTML = '<span class="status-dot"></span> Livraison · 2 sur 4';
+    } else if (name === 'done') {
+      stepPickup.classList.add('done');
+      stepPickup.querySelector('.step-circle').innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+      stepDelivery.classList.add('done');
+      stepDelivery.querySelector('.step-circle').innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+      stepEnd.classList.add('current');
+      bars[1].classList.add('done');
+      bars[2].classList.add('done');
+      bars[3].classList.add('done');
+      badge.classList.add('completed');
+      badge.innerHTML = '<span class="status-dot"></span> Mission terminée';
+    }
+  }
+</script>
+
+</body>
+</html>

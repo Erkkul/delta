@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM-06 · Détail d'une opportunité — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50: #FAF7F2;
+    --gold: #D4A017;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream-50);
+    color: var(--cream-950);
+    min-height: 100vh;
+  }
+
+  /* ══ HEADER ══ */
+  .header {
+    background: rgba(250,247,242,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 32px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(53,127,67,0.04);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-icon {
+    width: 34px; height: 34px; background: var(--green-800); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    box-shadow: 0 2px 6px rgba(14,53,26,0.25);
+  }
+  .logo-text { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-800); letter-spacing: -0.02em; }
+  .logo-dot { color: var(--earth-500); }
+  .nav-links { display: flex; align-items: center; gap: 4px; }
+  .nav-link {
+    font-size: 14px; font-weight: 500; color: var(--cream-700);
+    text-decoration: none; padding: 6px 12px; border-radius: 8px;
+    transition: color 150ms, background 150ms;
+  }
+  .nav-link:hover { color: var(--green-700); background: var(--green-50); }
+  .nav-link.active { color: var(--green-700); font-weight: 600; }
+  .nav-sep { width: 1px; height: 20px; background: var(--cream-200); margin: 0 4px; }
+  .avatar-btn {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--green-100);
+    border: 2px solid var(--green-200); display: flex; align-items: center;
+    justify-content: center; font-size: 15px;
+  }
+
+  /* ══ PAGE LAYOUT ══ */
+  .page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 24px 32px 100px;
+  }
+
+  .breadcrumb {
+    font-size: 13px; color: var(--cream-500);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  .breadcrumb a { color: var(--cream-600); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--green-700); }
+  .breadcrumb svg { width: 12px; height: 12px; color: var(--cream-400); }
+  .breadcrumb .current { color: var(--cream-800); font-weight: 500; }
+
+  .preview-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--cream-500);
+    margin-bottom: 6px;
+  }
+
+  /* ══ HERO ══ */
+  .hero {
+    margin-bottom: 28px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .hero-info { flex: 1; min-width: 260px; }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--gold);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 100px;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 6px rgba(212,160,23,0.3);
+  }
+  .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.15;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .hero-sub {
+    font-size: 14px;
+    color: var(--cream-700);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .hero-sub svg { width: 13px; height: 13px; color: var(--cream-400); }
+
+  /* ══ MAIN GRID ══ */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 28px;
+    align-items: flex-start;
+  }
+  .main-col { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+  .side-col { position: sticky; top: 88px; }
+
+  /* ══ CARD ══ */
+  .card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--cream-200);
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(53,127,67,0.05);
+  }
+
+  .section-title {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green-800);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .num {
+    width: 22px; height: 22px;
+    background: var(--green-100);
+    color: var(--green-800);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+  }
+
+  /* ── PRODUCER ── */
+  .producer-block {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .producer-avatar {
+    width: 70px; height: 70px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    background: linear-gradient(135deg, var(--earth-200), var(--earth-400));
+    box-shadow: 0 4px 12px rgba(184,112,63,0.2);
+    flex-shrink: 0;
+  }
+  .producer-content { flex: 1; min-width: 0; }
+  .producer-name {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-900);
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .producer-line {
+    font-size: 13px;
+    color: var(--cream-600);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  .producer-line svg { width: 12px; height: 12px; color: var(--cream-400); }
+  .producer-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .producer-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--cream-700);
+  }
+  .producer-stat strong { color: var(--cream-950); font-weight: 600; }
+  .stars { color: var(--earth-500); font-size: 13px; letter-spacing: 1px; }
+  .producer-bio {
+    font-size: 13.5px;
+    color: var(--cream-700);
+    line-height: 1.55;
+    padding-top: 12px;
+    border-top: 1px solid var(--cream-100);
+  }
+
+  /* ── PRODUCTS ── */
+  .product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .product-item {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--cream-200);
+    border-radius: 12px;
+    background: var(--cream-50);
+  }
+  .product-emoji {
+    flex-shrink: 0;
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    background: white;
+    border: 1px solid var(--cream-200);
+  }
+  .product-content { flex: 1; min-width: 0; }
+  .product-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cream-950);
+    margin-bottom: 2px;
+  }
+  .product-desc {
+    font-size: 12px;
+    color: var(--cream-600);
+  }
+  .product-price {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .product-qty {
+    font-size: 12px;
+    color: var(--cream-500);
+    margin-bottom: 2px;
+  }
+  .product-total {
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green-800);
+  }
+  .products-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: 14px;
+    margin-top: 4px;
+    border-top: 1.5px solid var(--cream-200);
+  }
+  .products-total-label { font-size: 13px; color: var(--cream-700); font-weight: 500; }
+  .products-total-value {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-900);
+  }
+
+  /* ── VOISINS ── */
+  .voisins-summary {
+    background: var(--green-50);
+    border: 1px solid var(--green-100);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .voisins-summary-icon {
+    width: 36px; height: 36px;
+    background: var(--green-200);
+    color: var(--green-800);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .voisins-summary-text {
+    font-size: 14px;
+    color: var(--cream-800);
+  }
+  .voisins-summary-text strong {
+    color: var(--green-800);
+    font-weight: 700;
+  }
+  .voisins-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .voisin-tile {
+    background: var(--cream-50);
+    border: 1px solid var(--cream-200);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .voisin-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--cream-200);
+    color: var(--cream-700);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .voisin-info { flex: 1; min-width: 0; }
+  .voisin-id {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cream-900);
+    margin-bottom: 1px;
+  }
+  .voisin-zone {
+    font-size: 11.5px;
+    color: var(--cream-500);
+    display: flex; align-items: center; gap: 3px;
+  }
+  .voisin-zone svg { width: 10px; height: 10px; }
+  .voisins-note {
+    font-size: 12px;
+    color: var(--cream-500);
+    margin-top: 12px;
+    font-style: italic;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .voisins-note svg { width: 13px; height: 13px; color: var(--cream-400); }
+
+  /* ── ITINÉRAIRE ── */
+  .route-viz {
+    background: linear-gradient(180deg, var(--green-50) 0%, var(--cream-50) 100%);
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .route-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .route-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .route-dot.start { background: var(--green-500); border: 3px solid var(--green-200); width: 16px; height: 16px; }
+  .route-dot.pickup { background: var(--earth-500); border: 3px solid var(--earth-200); width: 16px; height: 16px; }
+  .route-dot.end { background: var(--green-700); border: 3px solid var(--green-300); width: 16px; height: 16px; }
+  .route-text { font-size: 14px; color: var(--cream-800); font-weight: 500; flex: 1; }
+  .route-text strong { color: var(--green-900); }
+  .route-text small { color: var(--cream-500); font-weight: 400; font-size: 12px; }
+  .route-segment {
+    margin-left: 7px;
+    border-left: 2px dashed var(--cream-300);
+    padding-left: 19px;
+    font-size: 11.5px;
+    color: var(--cream-500);
+    padding-top: 4px; padding-bottom: 4px;
+  }
+  .route-segment.detour { border-left-color: var(--earth-300); color: var(--earth-700); }
+
+  .logistics-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .info-block {
+    background: var(--cream-50);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .info-block-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cream-500);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .info-block-value {
+    font-size: 14px;
+    color: var(--cream-900);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .dropoff-note {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--earth-50);
+    border: 1px dashed var(--earth-200);
+    border-radius: 10px;
+    font-size: 12.5px;
+    color: var(--earth-800);
+    line-height: 1.5;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .dropoff-note svg { width: 16px; height: 16px; color: var(--earth-500); flex-shrink: 0; margin-top: 1px; }
+
+  /* ── TIMELINE ── */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .timeline-step {
+    display: flex;
+    gap: 14px;
+    position: relative;
+    padding-bottom: 18px;
+  }
+  .timeline-step:last-child { padding-bottom: 0; }
+  .timeline-step::before {
+    content: '';
+    position: absolute;
+    left: 17px; top: 36px;
+    bottom: 0;
+    width: 2px;
+    background: var(--cream-200);
+  }
+  .timeline-step:last-child::before { display: none; }
+  .timeline-num {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--green-200);
+    color: var(--green-700);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 1;
+    position: relative;
+  }
+  .timeline-content { flex: 1; padding-top: 6px; min-width: 0; }
+  .timeline-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cream-950);
+    margin-bottom: 3px;
+  }
+  .timeline-desc {
+    font-size: 13px;
+    color: var(--cream-600);
+    line-height: 1.5;
+  }
+  .timeline-desc strong { color: var(--green-800); font-weight: 600; }
+
+  /* ══ SIDEBAR — CALCUL ══ */
+  .calc-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--cream-200);
+    box-shadow: 0 2px 12px rgba(53,127,67,0.05);
+    overflow: hidden;
+  }
+  .calc-header {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--green-50) 0%, var(--cream-50) 100%);
+    border-bottom: 1px solid var(--cream-200);
+  }
+  .calc-title {
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green-800);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .calc-body { padding: 18px 20px; }
+  .calc-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    font-size: 13px;
+  }
+  .calc-line .label { color: var(--cream-700); }
+  .calc-line .label small { color: var(--cream-500); display: block; font-size: 11px; margin-top: 1px; }
+  .calc-line .value { font-weight: 500; color: var(--cream-900); white-space: nowrap; }
+  .calc-line .value.minus { color: var(--earth-700); }
+  .calc-line.divider { border-top: 1px dashed var(--cream-200); margin-top: 4px; padding-top: 10px; }
+
+  .calc-net {
+    margin-top: 8px;
+    padding: 14px 16px;
+    background: var(--green-50);
+    border: 1.5px solid var(--green-200);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .calc-net-label {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--green-800);
+  }
+  .calc-net-value {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-700);
+    letter-spacing: -0.01em;
+  }
+  .calc-footnote {
+    font-size: 11px;
+    color: var(--cream-500);
+    margin-top: 12px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .cta-box { margin-top: 16px; }
+  .btn-reserver {
+    width: 100%;
+    background: var(--green-600);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    height: 52px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(53,127,67,0.30);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 200ms ease;
+    letter-spacing: 0.02em;
+  }
+  .btn-reserver:hover {
+    background: var(--green-700);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(53,127,67,0.36);
+  }
+  .btn-reserver:active { transform: translateY(0); }
+
+  .btn-back {
+    width: 100%;
+    background: transparent;
+    color: var(--cream-700);
+    border: 1.5px solid var(--cream-200);
+    border-radius: 100px;
+    height: 44px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 150ms;
+  }
+  .btn-back:hover { border-color: var(--cream-400); color: var(--cream-950); background: var(--cream-50); }
+
+  .conditions {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: var(--cream-50);
+    border-radius: 12px;
+    border: 1px solid var(--cream-200);
+  }
+  .conditions-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cream-800);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .conditions ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  .conditions li {
+    font-size: 12.5px;
+    color: var(--cream-700);
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .conditions li svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+  .conditions li.ok svg { color: var(--green-600); }
+  .conditions li.warn svg { color: var(--earth-500); }
+
+  /* ══ MOBILE STICKY CTA ══ */
+  .mobile-cta {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid var(--cream-200);
+    padding: 12px 16px;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.05);
+    z-index: 50;
+  }
+  .mobile-cta-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .mobile-cta-gain {
+    flex-shrink: 0;
+    text-align: left;
+  }
+  .mobile-cta-gain-label { font-size: 11px; color: var(--cream-500); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+  .mobile-cta-gain-value { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--green-700); line-height: 1; }
+  .mobile-cta-btn {
+    flex: 1;
+    background: var(--green-600);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    height: 46px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(53,127,67,0.30);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* ── Demo nav bar ── */
+  .demo-nav {
+    background: var(--cream-950); color: white;
+    padding: 8px 16px; font-size: 12px;
+  }
+  .demo-nav-inner {
+    max-width: 1080px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .demo-nav-label {
+    font-weight: 700; letter-spacing: 0.08em; font-size: 10px;
+    color: rgba(255,255,255,0.5); margin-right: 4px;
+  }
+  .demo-nav-link {
+    color: rgba(255,255,255,0.65); text-decoration: none;
+    padding: 4px 11px; border-radius: 100px;
+    font-weight: 500; font-size: 12px;
+    transition: all 150ms;
+  }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 920px) {
+    .main-grid { grid-template-columns: 1fr; gap: 20px; }
+    .side-col { position: relative; top: 0; display: none; }
+    .mobile-cta { display: block; }
+    .page { padding-bottom: 100px; }
+  }
+
+  @media (max-width: 720px) {
+    .page { padding: 18px 16px 100px; }
+    .hero h1 { font-size: 24px; }
+    .producer-block { flex-direction: column; }
+    .voisins-grid { grid-template-columns: 1fr; }
+    .logistics-info { grid-template-columns: 1fr; }
+    .nav-link:not(.active) { display: none; }
+    .card { padding: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS RAMENEUR</span>
+    <a href="rm-04-declarer-trajet.html" class="demo-nav-link">1 · Déclarer trajet</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-05-liste-opportunites.html" class="demo-nav-link">2 · Opportunités</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-06-detail-opportunite.html" class="demo-nav-link active">3 · Détail mission</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-08-mission-active.html" class="demo-nav-link">4 · Mission active</a>
+  </div>
+</div>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="header">
+  <a href="#" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#" class="nav-link active">Mes trajets</a>
+    <a href="#" class="nav-link">Missions actives</a>
+    <a href="#" class="nav-link">Revenus</a>
+    <div class="nav-sep"></div>
+    <div class="avatar-btn">🌿</div>
+  </nav>
+</header>
+
+<div class="page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="rm-04-declarer-trajet.html">Mes trajets</a>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    <a href="rm-05-liste-opportunites.html">Trajet du 14 mai</a>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    <a href="rm-05-liste-opportunites.html">Opportunités</a>
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    <span class="current">La Ruche du Bessin</span>
+  </div>
+
+  <div class="preview-label">RM-06 · Parcours rameneur</div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-info">
+      <span class="hero-tag">★ Meilleur gain sur ce trajet</span>
+      <h1>Mission proposée par La Ruche du Bessin</h1>
+      <div class="hero-sub">
+        <span>Apiculteur</span>
+        <span>·</span>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+        <span>Bayeux (14)</span>
+        <span>·</span>
+        <span>à 12 km de votre destination Caen</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="main-grid">
+
+    <!-- ════════════════════ COL GAUCHE ════════════════════ -->
+    <div class="main-col">
+
+      <!-- ── PRODUCTEUR ── -->
+      <div class="card">
+        <div class="section-title"><span class="num">1</span>Le producteur</div>
+        <div class="producer-block">
+          <div class="producer-avatar">🐝</div>
+          <div class="producer-content">
+            <div class="producer-name">La Ruche du Bessin</div>
+            <div class="producer-line">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span>Bayeux (14)</span>
+              <span>·</span>
+              <span>Apiculteur depuis 2011</span>
+            </div>
+            <div class="producer-stats">
+              <div class="producer-stat">
+                <span class="stars">★★★★★</span>
+                <strong>4,9</strong>
+                <span style="color:var(--cream-500)">(38 avis)</span>
+              </div>
+              <div class="producer-stat">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <strong>23</strong>
+                <span>missions livrées</span>
+              </div>
+            </div>
+            <p class="producer-bio">
+              Pierre Mahé exploite 22 ruches en lisière de la forêt de Cerisy. Récoltes de printemps (acacia, fleurs sauvages) et d'été (tilleul, châtaignier). Démarche en transition bio depuis 2022.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PRODUITS ── -->
+      <div class="card">
+        <div class="section-title"><span class="num">2</span>Produits à ramener</div>
+        <p style="font-size:13px;color:var(--cream-600);margin-bottom:14px;line-height:1.5">
+          Aggrégat des 4 commandes voisins. Le producteur prépare un seul lot que vous récupérez en une fois.
+        </p>
+
+        <div class="product-list">
+
+          <div class="product-item">
+            <div class="product-emoji">🍯</div>
+            <div class="product-content">
+              <div class="product-name">Miel de printemps</div>
+              <div class="product-desc">Pot 250g · 8,50 €/pot</div>
+            </div>
+            <div class="product-price">
+              <div class="product-qty">12 pots</div>
+              <div class="product-total">102,00 €</div>
+            </div>
+          </div>
+
+          <div class="product-item">
+            <div class="product-emoji">🍯</div>
+            <div class="product-content">
+              <div class="product-name">Miel d'acacia</div>
+              <div class="product-desc">Pot 250g · 11,00 €/pot</div>
+            </div>
+            <div class="product-price">
+              <div class="product-qty">8 pots</div>
+              <div class="product-total">88,00 €</div>
+            </div>
+          </div>
+
+          <div class="product-item">
+            <div class="product-emoji">🐝</div>
+            <div class="product-content">
+              <div class="product-name">Pollen frais</div>
+              <div class="product-desc">Pot 100g · 15,00 €/pot</div>
+            </div>
+            <div class="product-price">
+              <div class="product-qty">2 pots</div>
+              <div class="product-total">30,00 €</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="products-total">
+          <span class="products-total-label">Total ventes (4 voisins)</span>
+          <span class="products-total-value">220,00 €</span>
+        </div>
+      </div>
+
+      <!-- ── VOISINS ── -->
+      <div class="card">
+        <div class="section-title"><span class="num">3</span>Pour qui ?</div>
+
+        <div class="voisins-summary">
+          <div class="voisins-summary-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <div class="voisins-summary-text">
+            <strong>4 voisins intéressés</strong> autour de Paris 11<sup>e</sup> et 12<sup>e</sup>
+          </div>
+        </div>
+
+        <div class="voisins-grid">
+          <div class="voisin-tile">
+            <div class="voisin-avatar">V1</div>
+            <div class="voisin-info">
+              <div class="voisin-id">Voisin 1</div>
+              <div class="voisin-zone">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Paris 11<sup>e</sup>
+              </div>
+            </div>
+          </div>
+          <div class="voisin-tile">
+            <div class="voisin-avatar">V2</div>
+            <div class="voisin-info">
+              <div class="voisin-id">Voisin 2</div>
+              <div class="voisin-zone">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Paris 11<sup>e</sup>
+              </div>
+            </div>
+          </div>
+          <div class="voisin-tile">
+            <div class="voisin-avatar">V3</div>
+            <div class="voisin-info">
+              <div class="voisin-id">Voisin 3</div>
+              <div class="voisin-zone">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Paris 12<sup>e</sup>
+              </div>
+            </div>
+          </div>
+          <div class="voisin-tile">
+            <div class="voisin-avatar">V4</div>
+            <div class="voisin-info">
+              <div class="voisin-id">Voisin 4</div>
+              <div class="voisin-zone">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Paris 12<sup>e</sup>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="voisins-note">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Identités et adresses précises communiquées après que vous ayez réservé la mission.</span>
+        </div>
+      </div>
+
+      <!-- ── ITINÉRAIRE ── -->
+      <div class="card">
+        <div class="section-title"><span class="num">4</span>Itinéraire et logistique</div>
+
+        <div class="route-viz">
+          <div class="route-line">
+            <div class="route-dot start"></div>
+            <div class="route-text"><strong>Paris 11<sup>e</sup></strong> <small>· votre départ</small></div>
+          </div>
+          <div class="route-segment">≈ 222 km · 2h25</div>
+          <div class="route-line">
+            <div class="route-dot pickup"></div>
+            <div class="route-text"><strong>Bayeux (14)</strong> <small>· pickup chez le producteur</small></div>
+          </div>
+          <div class="route-segment detour">≈ 12 km · 8 min de détour depuis votre route directe</div>
+          <div class="route-line">
+            <div class="route-dot end"></div>
+            <div class="route-text"><strong>Caen</strong> <small>· votre destination finale</small></div>
+          </div>
+        </div>
+
+        <div class="logistics-info">
+          <div class="info-block">
+            <div class="info-block-title">Pickup</div>
+            <div class="info-block-value">Jeudi 14 mai dans la journée. Le producteur sera prévenu de votre passage.</div>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title">Livraison voisins</div>
+            <div class="info-block-value">Au retour, à votre rythme entre Paris 11<sup>e</sup> et 12<sup>e</sup>.</div>
+          </div>
+        </div>
+
+        <div class="dropoff-note">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span>Le lieu de remise (domicile, point de RDV, café…) est négocié directement avec chaque voisin via le chat de mission. Vous gardez la flexibilité.</span>
+        </div>
+      </div>
+
+      <!-- ── COMMENT ÇA SE PASSE ── -->
+      <div class="card">
+        <div class="section-title"><span class="num">5</span>Comment ça se passe</div>
+
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="timeline-num">1</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Vous réservez la mission</div>
+              <div class="timeline-desc">La mission est <strong>verrouillée pour vous</strong>, plus accessible aux autres rameneurs. Notification envoyée aux 4 voisins.</div>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-num">2</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Les voisins ont 24 h pour confirmer</div>
+              <div class="timeline-desc">Chaque voisin valide sa commande et paie via Stripe. Si <strong>au moins un</strong> voisin confirme, la mission est validée.</div>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-num">3</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Vous récupérez chez le producteur</div>
+              <div class="timeline-desc">Jeudi 14, à votre passage à Bayeux. Vous présentez le <strong>QR code de pickup</strong> au producteur, il vous remet le lot.</div>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-num">4</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Vous livrez chaque voisin</div>
+              <div class="timeline-desc">À votre retour à Paris. Chaque voisin scanne votre <strong>QR code de livraison</strong> à la remise.</div>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-num">5</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Vous êtes payé automatiquement</div>
+              <div class="timeline-desc">Dès la dernière livraison confirmée, votre commission est versée sur votre compte Stripe sous <strong>24-48h</strong>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════ COL DROITE — STICKY ════════════════════ -->
+    <aside class="side-col">
+
+      <div class="calc-card">
+        <div class="calc-header">
+          <div class="calc-title">📊 Calcul détaillé du gain</div>
+        </div>
+
+        <div class="calc-body">
+          <div class="calc-line">
+            <span class="label">
+              Total ventes
+              <small>4 voisins · 220,00 €</small>
+            </span>
+            <span class="value">220,00 €</span>
+          </div>
+
+          <div class="calc-line">
+            <span class="label">
+              Versement producteur
+              <small>85 %</small>
+            </span>
+            <span class="value minus">−187,00 €</span>
+          </div>
+
+          <div class="calc-line">
+            <span class="label">
+              Commission plateforme
+              <small>5 %</small>
+            </span>
+            <span class="value minus">−11,00 €</span>
+          </div>
+
+          <div class="calc-line divider">
+            <span class="label" style="color:var(--cream-900);font-weight:600">
+              Votre commission
+              <small>10 % du total</small>
+            </span>
+            <span class="value" style="color:var(--green-700);font-weight:700">+22,00 €</span>
+          </div>
+
+          <div class="calc-line">
+            <span class="label">
+              Frais carburant
+              <small>12 km × 0,33 €/km</small>
+            </span>
+            <span class="value minus">−4,00 €</span>
+          </div>
+
+          <div class="calc-net">
+            <span class="calc-net-label">Gain net</span>
+            <span class="calc-net-value">+18,00 €</span>
+          </div>
+
+          <p class="calc-footnote">
+            Frais carburant calculés sur la base d'un véhicule essence moyen, ajustables dans vos préférences. Vos gains cumulés du mois seront versés en un seul virement.
+          </p>
+        </div>
+      </div>
+
+      <div class="cta-box">
+        <button class="btn-reserver" onclick="location.href='rm-08-mission-active.html'">
+          Réserver cette mission
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        </button>
+        <button class="btn-back" onclick="location.href='rm-05-liste-opportunites.html'">← Retour aux opportunités</button>
+      </div>
+
+      <div class="conditions">
+        <div class="conditions-title">Conditions</div>
+        <ul>
+          <li class="ok">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Verrouillage exclusif : aucun autre rameneur ne peut prendre cette mission.</span>
+          </li>
+          <li class="ok">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Annulable sans frais avant le pickup chez le producteur.</span>
+          </li>
+          <li class="ok">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Mission confirmée si au moins 1 voisin valide sous 24 h.</span>
+          </li>
+          <li class="warn">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <span>Si aucun voisin ne confirme dans le délai, la mission est annulée automatiquement.</span>
+          </li>
+        </ul>
+      </div>
+
+    </aside>
+
+  </div>
+
+</div>
+
+<!-- ══ MOBILE STICKY CTA ══ -->
+<div class="mobile-cta">
+  <div class="mobile-cta-row">
+    <div class="mobile-cta-gain">
+      <div class="mobile-cta-gain-label">Gain net</div>
+      <div class="mobile-cta-gain-value">+18,00 €</div>
+    </div>
+    <button class="mobile-cta-btn" onclick="location.href='rm-08-mission-active.html'">
+      Réserver
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+</body>
+</html>

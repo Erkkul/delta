@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (pour le code à venir)
+node_modules/
+.env
+.env.local
+.env.*.local
+
+# Python (pour le backend à venir)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Build
+dist/
+build/
+*.log
+
+# Claude interne (ne pas versionner les sessions)
+.claude/settings.local.json

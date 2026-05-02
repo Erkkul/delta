@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PR-04 · Catalogue produits — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50: #FAF7F2;
+    --gold: #D4A017;
+    --red-500: #DC2626;
+    --red-100: #FEE2E2;
+    --orange-500: #EA580C;
+    --orange-100: #FFEDD5;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream-50);
+    color: var(--cream-950);
+    min-height: 100vh;
+  }
+
+  /* ── Demo nav bar ── */
+  .demo-nav {
+    background: var(--cream-950); color: white;
+    padding: 8px 16px; font-size: 12px;
+  }
+  .demo-nav-inner {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .demo-nav-label {
+    font-weight: 700; letter-spacing: 0.08em; font-size: 10px;
+    color: rgba(255,255,255,0.5); margin-right: 4px;
+  }
+  .demo-nav-link {
+    color: rgba(255,255,255,0.65); text-decoration: none;
+    padding: 4px 11px; border-radius: 100px;
+    font-weight: 500; font-size: 12px;
+    transition: all 150ms;
+  }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ══════════ APP LAYOUT ══════════ */
+  .app-layout {
+    display: flex;
+    min-height: calc(100vh - 36px);
+  }
+
+  /* ══════════ SIDEBAR ══════════ */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: white;
+    border-right: 1px solid var(--cream-200);
+    padding: 18px 14px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: calc(100vh - 36px);
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    padding: 6px 10px 18px;
+    border-bottom: 1px solid var(--cream-100);
+    margin-bottom: 14px;
+  }
+  .sidebar-logo-icon {
+    width: 36px; height: 36px;
+    background: var(--green-800);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 2px 6px rgba(14,53,26,0.25);
+    flex-shrink: 0;
+  }
+  .sidebar-logo-text {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green-800);
+    letter-spacing: -0.02em;
+  }
+  .sidebar-logo-dot { color: var(--earth-500); }
+  .sidebar-logo-role {
+    font-size: 10px;
+    color: var(--cream-500);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-top: 1px;
+  }
+
+  .sidebar-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--cream-500);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0 12px;
+    margin: 12px 0 6px;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--cream-700);
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all 150ms;
+    position: relative;
+  }
+  .sidebar-link:hover {
+    background: var(--green-50);
+    color: var(--green-800);
+  }
+  .sidebar-link.active {
+    background: var(--green-100);
+    color: var(--green-800);
+    font-weight: 600;
+  }
+  .sidebar-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px; bottom: 8px;
+    width: 3px;
+    background: var(--green-600);
+    border-radius: 0 100px 100px 0;
+  }
+  .sidebar-link svg {
+    width: 16px; height: 16px;
+    color: currentColor;
+    flex-shrink: 0;
+  }
+  .sidebar-link-text { flex: 1; }
+  .sidebar-link-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 100px;
+    background: var(--earth-500);
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .sidebar-divider {
+    height: 1px;
+    background: var(--cream-100);
+    margin: 14px 0 10px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--cream-100);
+  }
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 150ms;
+  }
+  .sidebar-user:hover { background: var(--cream-50); }
+  .sidebar-user-avatar {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--earth-200), var(--earth-400));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .sidebar-user-info { flex: 1; min-width: 0; }
+  .sidebar-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cream-950);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sidebar-user-role {
+    font-size: 11px;
+    color: var(--cream-500);
+  }
+
+  /* ══════════ MAIN AREA ══════════ */
+  .main-area {
+    flex: 1;
+    min-width: 0;
+    background: var(--cream-50);
+  }
+  .main-page {
+    max-width: 1200px;
+    padding: 26px 32px 64px;
+  }
+
+  /* ── Top bar mobile ── */
+  .mobile-topbar { display: none; }
+
+  /* ── Page header ── */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .page-header-content { flex: 1; min-width: 280px; }
+  .preview-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--cream-500);
+    margin-bottom: 6px;
+  }
+  .page-title {
+    font-family: 'Lora', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 14px;
+    color: var(--cream-600);
+  }
+
+  .btn-primary {
+    background: var(--green-600);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    padding: 0 22px;
+    height: 44px;
+    font-family: 'DM Sans';
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(53,127,67,0.26);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 200ms;
+    text-decoration: none;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .btn-primary:hover {
+    background: var(--green-700);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(53,127,67,0.32);
+  }
+
+  /* ══════════ STATS BANNER ══════════ */
+  .stats-banner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .stat-card-label {
+    font-size: 11px;
+    color: var(--cream-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .stat-card-value {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.1;
+  }
+  .stat-card-trend {
+    font-size: 11.5px;
+    color: var(--green-700);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+  .stat-card-trend.flat { color: var(--cream-500); }
+
+  /* ══════════ FILTERS ══════════ */
+  .filters-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    background: white;
+    border: 1.5px solid var(--cream-200);
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cream-700);
+    cursor: pointer;
+    transition: all 150ms;
+    white-space: nowrap;
+  }
+  .filter-pill:hover { border-color: var(--green-300); color: var(--green-700); background: var(--green-50); }
+  .filter-pill.active {
+    background: var(--green-700);
+    border-color: var(--green-700);
+    color: white;
+  }
+  .filter-pill .count {
+    font-size: 11px;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+  .filter-pill.active .count { opacity: 0.85; }
+
+  .filter-spacer { flex: 1; }
+  .search-input-wrapper {
+    position: relative;
+    width: 240px;
+  }
+  .search-input {
+    width: 100%;
+    height: 36px;
+    background: white;
+    border: 1.5px solid var(--cream-200);
+    border-radius: 100px;
+    padding: 0 14px 0 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--cream-950);
+    outline: none;
+    transition: border-color 200ms;
+  }
+  .search-input:focus { border-color: var(--green-400); box-shadow: 0 0 0 3px rgba(53,127,67,0.10); }
+  .search-input::placeholder { color: var(--cream-400); }
+  .search-icon {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    width: 14px; height: 14px;
+    color: var(--cream-400);
+    pointer-events: none;
+  }
+
+  /* ══════════ PRODUCTS GRID ══════════ */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+  }
+
+  .product-card {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid var(--cream-200);
+    overflow: hidden;
+    transition: all 200ms;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-card:hover {
+    border-color: var(--green-300);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(53,127,67,0.10);
+  }
+  .product-card.draft { opacity: 0.85; }
+  .product-card.disabled { opacity: 0.65; }
+
+  .product-img {
+    height: 150px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .product-img-emoji {
+    font-size: 56px;
+    opacity: 0.7;
+  }
+  .grad-miel-printemps { background: linear-gradient(135deg, var(--earth-100), var(--earth-200)); }
+  .grad-miel-acacia { background: linear-gradient(135deg, var(--earth-200), var(--earth-400)); }
+  .grad-miel-ete { background: linear-gradient(135deg, var(--earth-400), var(--earth-200)); }
+  .grad-pollen { background: linear-gradient(135deg, var(--cream-200), var(--earth-100)); }
+  .grad-cire { background: linear-gradient(135deg, var(--cream-200), var(--cream-300)); }
+  .grad-hydromel { background: linear-gradient(135deg, var(--earth-200), var(--cream-200)); }
+
+  /* Status badge */
+  .status-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 100px;
+    backdrop-filter: blur(4px);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .status-badge.actif {
+    background: rgba(228,244,231,0.92);
+    color: var(--green-800);
+    border: 1px solid rgba(192,228,199,0.7);
+  }
+  .status-badge.brouillon {
+    background: rgba(245,245,244,0.92);
+    color: var(--cream-700);
+    border: 1px solid var(--cream-300);
+  }
+  .status-badge.epuise {
+    background: rgba(255,237,213,0.94);
+    color: var(--orange-500);
+    border: 1px solid #FED7AA;
+  }
+  .status-badge.desactive {
+    background: rgba(245,245,244,0.92);
+    color: var(--cream-600);
+    border: 1px solid var(--cream-300);
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+  .status-badge.actif .status-dot { background: var(--green-600); }
+  .status-badge.brouillon .status-dot { background: var(--cream-500); }
+  .status-badge.epuise .status-dot { background: var(--orange-500); }
+  .status-badge.desactive .status-dot { background: var(--cream-500); }
+
+  /* Quick action menu */
+  .product-menu-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(4px);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cream-700);
+    transition: all 150ms;
+  }
+  .product-menu-btn:hover { background: white; color: var(--green-700); }
+
+  /* Card body */
+  .product-body {
+    padding: 14px 16px 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-name {
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cream-950);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .product-category {
+    font-size: 11.5px;
+    color: var(--cream-500);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .product-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: var(--cream-50);
+    border-radius: 10px;
+  }
+  .product-price {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green-700);
+  }
+  .product-price-unit {
+    font-size: 11px;
+    color: var(--cream-500);
+    font-weight: 400;
+    margin-left: 1px;
+  }
+  .product-stock {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cream-700);
+  }
+  .product-stock.low { color: var(--orange-500); }
+  .product-stock.empty { color: var(--cream-500); text-decoration: line-through; }
+
+  .product-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 11.5px;
+    color: var(--cream-500);
+    margin-bottom: 12px;
+  }
+  .product-meta-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .product-meta-line svg { width: 12px; height: 12px; flex-shrink: 0; color: var(--cream-400); }
+
+  .product-stats {
+    display: flex;
+    gap: 12px;
+    padding-top: 10px;
+    margin-top: auto;
+    border-top: 1px dashed var(--cream-200);
+  }
+  .product-stat {
+    flex: 1;
+    text-align: center;
+  }
+  .product-stat-value {
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--green-800);
+  }
+  .product-stat-value.envies { color: var(--earth-600); }
+  .product-stat-label {
+    font-size: 10px;
+    color: var(--cream-500);
+    font-weight: 500;
+    margin-top: 1px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ══════════ EMPTY STATE ══════════ */
+  .empty-state {
+    background: white;
+    border: 2px dashed var(--cream-200);
+    border-radius: 16px;
+    padding: 64px 32px;
+    text-align: center;
+  }
+  .empty-icon { font-size: 56px; opacity: 0.5; margin-bottom: 14px; }
+  .empty-title {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-900);
+    margin-bottom: 8px;
+  }
+  .empty-desc {
+    font-size: 14px;
+    color: var(--cream-600);
+    line-height: 1.55;
+    max-width: 420px;
+    margin: 0 auto 20px;
+  }
+
+  /* ══════════ DEMO TABS (states) ══════════ */
+  .demo-tabs {
+    display: flex; gap: 8px; padding: 6px;
+    margin-bottom: 16px;
+    background: var(--cream-100);
+    border-radius: 10px;
+    border: 1px solid var(--cream-200);
+    width: fit-content;
+  }
+  .demo-tab {
+    padding: 6px 14px; border-radius: 6px; border: none;
+    font-family: 'DM Sans'; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 150ms; white-space: nowrap;
+  }
+  .demo-tab.on  { background: white; color: var(--green-800); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .demo-tab.off { background: transparent; color: var(--cream-600); }
+  .demo-tab.off:hover { color: var(--green-700); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Responsive ── */
+  @media (max-width: 920px) {
+    .sidebar {
+      position: fixed;
+      left: -240px;
+      transition: left 250ms;
+      z-index: 200;
+      box-shadow: 4px 0 16px rgba(0,0,0,0.08);
+    }
+    .sidebar.open { left: 0; }
+    .mobile-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid var(--cream-200);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .mobile-burger {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--cream-800);
+    }
+    .mobile-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stats-banner {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .main-page {
+      padding: 18px 16px 48px;
+    }
+    .page-title { font-size: 22px; }
+  }
+  @media (max-width: 540px) {
+    .stats-banner { grid-template-columns: 1fr 1fr; }
+    .filters-row { gap: 6px; }
+    .search-input-wrapper { width: 100%; order: -1; margin-bottom: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS PRODUCTEUR</span>
+    <a href="pr-04-catalogue.html" class="demo-nav-link active">1 · Catalogue</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="pr-05-edition-produit.html" class="demo-nav-link">2 · Édition produit</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="pr-06-recuperation.html" class="demo-nav-link">3 · Récupération QR</a>
+  </div>
+</div>
+
+<div class="app-layout">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <a href="pr-04-catalogue.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">🐜</div>
+      <div>
+        <div class="sidebar-logo-text">Delta<span class="sidebar-logo-dot">.</span></div>
+        <span class="sidebar-logo-role">Espace producteur</span>
+      </div>
+    </a>
+
+    <div class="sidebar-section-label">Activité</div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <span class="sidebar-link-text">Tableau de bord</span>
+      </a>
+      <a href="pr-04-catalogue.html" class="sidebar-link active">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        <span class="sidebar-link-text">Catalogue</span>
+      </a>
+      <a href="pr-06-recuperation.html" class="sidebar-link">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+        <span class="sidebar-link-text">Récupérations</span>
+        <span class="sidebar-link-badge">2</span>
+      </a>
+      <a href="#" class="sidebar-link">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="sidebar-link-text">Ventes & revenus</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section-label">Compte</div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        <span class="sidebar-link-text">Mon profil public</span>
+      </a>
+      <a href="#" class="sidebar-link">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span class="sidebar-link-text">Paramètres</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar">🐝</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">La Ruche du Bessin</div>
+          <div class="sidebar-user-role">Pierre Mahé</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════ MAIN AREA ══════════ -->
+  <main class="main-area">
+
+    <!-- Mobile topbar -->
+    <div class="mobile-topbar">
+      <button class="mobile-burger" onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <a href="pr-04-catalogue.html" class="mobile-logo">
+        <div style="width:30px;height:30px;background:var(--green-800);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">🐜</div>
+        <span style="font-family:Lora,serif;font-size:17px;font-weight:700;color:var(--green-800)">Delta<span style="color:var(--earth-500)">.</span></span>
+      </a>
+      <div style="width:40px"></div>
+    </div>
+
+    <div class="main-page">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <div class="page-header-content">
+          <div class="preview-label">PR-04 · Espace producteur</div>
+          <h1 class="page-title">Mon catalogue</h1>
+          <p class="page-sub">Gérez vos produits, leurs prix, leurs stocks et leur disponibilité.</p>
+        </div>
+        <a href="pr-05-edition-produit.html" class="btn-primary">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nouveau produit
+        </a>
+      </div>
+
+      <!-- Stats banner -->
+      <div class="stats-banner">
+        <div class="stat-card">
+          <div class="stat-card-label">Produits actifs</div>
+          <div class="stat-card-value">4</div>
+          <div class="stat-card-trend">3 vendus cette semaine</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Envies de voisins</div>
+          <div class="stat-card-value">11</div>
+          <div class="stat-card-trend">+3 cette semaine</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Récupérations à venir</div>
+          <div class="stat-card-value">2</div>
+          <div class="stat-card-trend">Prochaine jeu. 14 mai</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Revenus du mois</div>
+          <div class="stat-card-value">428 €</div>
+          <div class="stat-card-trend flat">≈ même qu'avril</div>
+        </div>
+      </div>
+
+      <!-- Demo tabs -->
+      <div class="demo-tabs">
+        <button class="demo-tab on" onclick="showPanel('normal', this)">📦 Avec produits (6)</button>
+        <button class="demo-tab off" onclick="showPanel('empty', this)">🌱 Catalogue vide</button>
+      </div>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- PANEL : NORMAL (avec produits)                    -->
+      <!-- ════════════════════════════════════════════════ -->
+      <div id="panel-normal" class="panel active">
+
+        <!-- Filters -->
+        <div class="filters-row">
+          <button class="filter-pill active">Tous <span class="count">(6)</span></button>
+          <button class="filter-pill">Actifs <span class="count">(4)</span></button>
+          <button class="filter-pill">Brouillons <span class="count">(1)</span></button>
+          <button class="filter-pill">Désactivés <span class="count">(1)</span></button>
+          <div class="filter-spacer"></div>
+          <div class="search-input-wrapper">
+            <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+            </svg>
+            <input class="search-input" type="text" placeholder="Rechercher un produit…">
+          </div>
+        </div>
+
+        <!-- Products grid -->
+        <div class="products-grid">
+
+          <!-- Miel printemps - actif -->
+          <div class="product-card" onclick="location.href='pr-05-edition-produit.html'">
+            <div class="product-img grad-miel-printemps">
+              <span class="product-img-emoji">🍯</span>
+              <span class="status-badge actif"><span class="status-dot"></span>Actif</span>
+              <button class="product-menu-btn" onclick="event.stopPropagation()">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+              </button>
+            </div>
+            <div class="product-body">
+              <div class="product-name">Miel de printemps</div>
+              <div class="product-category">🐝 Miel · pot 250g</div>
+
+              <div class="product-price-row">
+                <span class="product-price">8,50 €<span class="product-price-unit">/pot</span></span>
+                <span class="product-stock">24 en stock</span>
+              </div>
+
+              <div class="product-meta">
+                <div class="product-meta-line">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Disponible jusqu'au 30 juin</span>
+                </div>
+              </div>
+
+              <div class="product-stats">
+                <div class="product-stat">
+                  <div class="product-stat-value envies">4</div>
+                  <div class="product-stat-label">Envies</div>
+                </div>
+                <div class="product-stat">
+                  <div class="product-stat-value">12</div>
+                  <div class="product-stat-label">Vendus</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Miel acacia - actif -->
+          <div class="product-card" onclick="location.href='pr-05-edition-produit.html'">
+            <div class="product-img grad-miel-acacia">
+              <span class="product-img-emoji">🍯</span>
+              <span class="status-badge actif"><span class="status-dot"></span>Actif</span>
+              <button class="product-menu-btn" onclick="event.stopPropagation()">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+              </button>
+            </div>
+            <div class="product-body">
+              <div class="product-name">Miel d'acacia</div>
+              <div class="product-category">🐝 Miel · pot 250g</div>
+
+              <div class="product-price-row">
+                <span class="product-price">11,00 €<span class="product-price-unit">/pot</span></span>
+                <span class="product-stock">18 en stock</span>
+              </div>
+
+              <div class="product-meta">
+                <div class="product-meta-line">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Disponible toute l'année</span>
+                </div>
+              </div>
+
+              <div class="product-stats">
+                <div class="product-stat">
+                  <div class="product-stat-value envies">3</div>
+                  <div class="product-stat-label">Envies</div>
+                </div>
+                <div class="product-stat">
+                  <div class="product-stat-value">8</div>
+                  <div class="product-stat-label">Vendus</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pollen frais - actif, stock bas -->
+          <div class="product-card" onclick="location.href='pr-05-edition-produit.html'">
+            <div class="product-img grad-pollen">
+              <span class="product-img-emoji">🐝</span>
+              <span class="status-badge actif"><span class="status-dot"></span>Actif</span>
+              <button class="product-menu-btn" onclick="event.stopPropagation()">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+              </button>
+            </div>
+            <div class="product-body">
+              <div class="product-name">Pollen frais</div>
+              <div class="product-category">🐝 Pollen · pot 100g</div>
+
+              <div class="product-price-row">
+                <span class="product-price">15,00 €<span class="product-price-unit">/pot</span></span>
+                <span class="product-stock low">⚠ 3 en stock</span>
+              </div>
+
+              <div class="product-meta">
+                <div class="product-meta-line">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Saison printemps · jusqu'au 31 mai</span>
+                </div>
+              </div>
+
+              <div class="product-stats">
+                <div class="product-stat">
+                  <div class="product-stat-value envies">2</div>
+                  <div class="product-stat-label">Envies</div>
+                </div>
+                <div class="product-stat">
+                  <div class="product-stat-value">5</div>
+                  <div class="product-stat-label">Vendus</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cire d'abeille - actif -->
+          <div class="product-card" onclick="location.href='pr-05-edition-produit.html'">
+            <div class="product-img grad-cire">
+              <span class="product-img-emoji">🕯️</span>
+              <span class="status-badge actif"><span class="status-dot"></span>Actif</span>
+              <button class="product-menu-btn" onclick="event.stopPropagation()">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+              </button>
+            </div>
+            <div class="product-body">
+              <div class="product-name">Cire d'abeille brute</div>
+              <div class="product-category">🐝 Cire · pain 50g</div>
+
+              <div class="product-price-row">
+                <span class="product-price">6,00 €<span class="product-price-unit">/pain</span></span>
+                <span class="product-stock">12 en stock</span>
+              </div>
+
+              <div class="product-meta">
+                <div class="product-meta-line">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Disponible toute l'année</span>
+                </div>
+              </div>
+
+              <div class="product-stats">
+                <div class="product-stat">
+                  <div class="product-stat-value envies">1</div>
+                  <div class="product-stat-label">Envies</div>
+                </div>
+                <div class="product-stat">
+                  <div class="product-stat-value">2</div>
+                  <div class="product-stat-label">Vendus</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Miel d'été - brouillon -->
+          <div class="product-card draft" onclick="location.href='pr-05-edition-produit.html'">
+            <div class="product-img grad-miel-ete">
+              <span class="product-img-emoji">🍯</span>
+              <span class="status-badge brouillon"><span class="status-dot"></span>Brouillon</span>
+              <button class="product-menu-btn" onclick="event.stopPropagation()">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+              </button>
+            </div>
+            <div class="product-body">
+              <div class="product-name">Miel d'été (tilleul, châtaignier)</div>
+              <div class="product-category">🐝 Miel · pot 250g</div>
+
+              <div class="product-price-row">
+                <span class="product-price">10,50 €<span class="product-price-unit">/pot</span></span>
+                <span class="product-stock">— stock à renseigner</span>
+              </div>
+
+              <div class="product-meta">
+                <div class="product-meta-line">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>Pas encore publié — fiche incomplète</span>
+                </div>
+              </div>
+
+              <div class="product-stats">
+                <div class="product-stat">
+                  <div class="product-stat-value envies">—</div>
+                  <div class="product-stat-label">Envies</div>
+                </div>
+                <div class="product-stat">
+                  <div class="product-stat-value">—</div>
+                  <div class="product-stat-label">Vendus</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hydromel - désactivé -->
+          <div class="product-card disabled" onclick="location.href='pr-05-edition-produit.html'">
+            <div class="product-img grad-hydromel">
+              <span class="product-img-emoji">🍶</span>
+              <span class="status-badge desactive"><span class="status-dot"></span>Désactivé</span>
+              <button class="product-menu-btn" onclick="event.stopPropagation()">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+              </button>
+            </div>
+            <div class="product-body">
+              <div class="product-name">Hydromel artisanal</div>
+              <div class="product-category">🐝 Boisson · bouteille 50cl</div>
+
+              <div class="product-price-row">
+                <span class="product-price">14,00 €<span class="product-price-unit">/btl</span></span>
+                <span class="product-stock empty">Inactif</span>
+              </div>
+
+              <div class="product-meta">
+                <div class="product-meta-line">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                  <span>Hors scope MVP (alcool)</span>
+                </div>
+              </div>
+
+              <div class="product-stats">
+                <div class="product-stat">
+                  <div class="product-stat-value envies">—</div>
+                  <div class="product-stat-label">Envies</div>
+                </div>
+                <div class="product-stat">
+                  <div class="product-stat-value">—</div>
+                  <div class="product-stat-label">Vendus</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════ -->
+      <!-- PANEL : EMPTY                                     -->
+      <!-- ════════════════════════════════════════════════ -->
+      <div id="panel-empty" class="panel">
+        <div class="empty-state">
+          <div class="empty-icon">🌱</div>
+          <div class="empty-title">Votre catalogue est vide</div>
+          <p class="empty-desc">
+            Ajoutez votre premier produit pour commencer à apparaître dans les envies des voisins. Ça prend 2 minutes : un nom, une photo, un prix.
+          </p>
+          <a href="pr-05-edition-produit.html" class="btn-primary" style="margin: 0 auto;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Ajouter mon premier produit
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  function showPanel(name, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelectorAll('.demo-tab').forEach(t => { t.classList.remove('on'); t.classList.add('off'); });
+    btn.classList.remove('off'); btn.classList.add('on');
+  }
+</script>
+
+</body>
+</html>
