@@ -13,7 +13,7 @@ Charge ce fichier à l'ouverture du projet pour comprendre rapidement où on en 
 ## Statut
 
 - **Phase** : conception produit, pré-développement
-- **Maquettes** : parcours rameneur (RM-04, RM-05, RM-06, RM-08) et parcours producteur (PR-04, PR-05, PR-06) posés. Reste à faire le parcours acheteur.
+- **Maquettes** : 11 écrans prioritaires posés (rameneur, producteur, acheteur). Avancement détaillé sur Jira (projet KAN).
 - **Décisions structurantes** : prises (voir ci-dessous)
 - **Backlog** : structuré sur Jira (erkulaws.atlassian.net, projet KAN) — épics, features et subtasks créés pour l'ensemble du MVP
 - **Code** : pas commencé
@@ -26,16 +26,21 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 
 | Question | Document |
 |----------|----------|
-| Vision, marché, positionnement, contexte | `vision/PRD.md` |
-| Étude de marché chiffrée | `vision/etude_marche.md` |
-| Cahier des charges initial (historique) | `vision/cahier_des_charges.pdf` |
-| Carte des écrans MVP | `produit/sitemap.md` |
-| Cycle de vie d'une mission, machine à états, paiement, QR codes | `produit/flow_mission.md` |
+| Vision, marché, positionnement, personas, user stories, sitemap, flow mission | `PRD.md` *(local uniquement, non versionné)* |
+| Carte des écrans MVP avec IDs | `PRD.md` — section 10 |
+| Cycle de vie d'une mission, machine à états, paiement, QR codes | `PRD.md` — section 11 |
+| Parcours acheteur détaillé (logique écran par écran) | `PRD.md` — section 12 |
 | Backlog MVP (épics, features, subtasks) | Jira KAN — erkulaws.atlassian.net |
-| User stories archivées (référence, non maintenu) | `produit/archives/user_stories_v2_2026-05-02.md` |
-| Roadmap dev par phase et sprint | `produit/roadmap.md` |
+| Mapping ticket Jira ↔ écran ↔ maquette | `produit/jira_mapping.md` |
 | Journal des arbitrages produit (avec dates) | `produit/decisions/decisions_produit.md` |
 | Maquettes HTML cliquables | `design/maquettes/rameneur/` |
+| Stack technique, structure du monorepo, conventions de code | `ARCHITECTURE.md` — sections 2 à 4 |
+| Modélisation DB, RLS, migrations | `ARCHITECTURE.md` — section 5 |
+| Implémentation machine à états mission, pipeline matching, flow Stripe | `ARCHITECTURE.md` — sections 6 à 8 |
+| Sécurité, tests, observabilité, CI/CD | `ARCHITECTURE.md` — sections 9 à 12 |
+| Stratégie free-tier (services, triggers d'upgrade, workarounds) | `ARCHITECTURE.md` — section 13 |
+| Playbook pour ajouter une feature (où placer le code, checklist) | `ARCHITECTURE.md` — section 14 |
+| Journal des décisions techniques (avec dates) | `ARCHITECTURE.md` — section 18 |
 
 ## Décisions clés (résumé — détails dans `produit/decisions/`)
 
@@ -50,14 +55,42 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 - **Autocomplétion adresses** : API Adresse Gouv.fr
 - **Produits MVP** : secs et agricoles non sensibles uniquement (pas de frais, pas d'alcool, pas de transformés sensibles)
 - **Statut juridique plateforme** : mise en relation, responsabilités limitées (rôle marketplace pur)
+- **Modèle de compte** : multi-rôles progressif — le compte rameneur inclut la capacité d'achat ; un acheteur peut devenir rameneur en complétant son profil ; les producteurs partagent le même système de compte avec accès à leur espace via onglet dédié
+- **Vérification SIRET** : asynchrone — le producteur peut configurer profil et catalogue mais les produits restent non visibles jusqu'à validation
+- **Social login** : Google et Apple disponibles dès le MVP
+
+## Décisions techniques clés (résumé — détails dans `ARCHITECTURE.md`)
+
+- **Monorepo** : Turborepo + pnpm, TypeScript end-to-end, séparation stricte domain (`packages/core`) / adapter (Next handlers, jobs, UI)
+- **Web** : Next.js 15 App Router + Tailwind + shadcn/ui sur Vercel
+- **Mobile** : Expo SDK 53 + NativeWind 4, builds via EAS
+- **API** : Next.js Route Handlers + Zod (`packages/contracts`), versionnée `/api/v1/`
+- **DB** : Supabase Postgres + PostGIS, **RLS on par défaut**, migrations versionnées
+- **Auth** : Supabase Auth + Google + Apple, JWT user-side, service role réservé aux jobs/webhooks
+- **Jobs asynchrones** : Inngest (matching, notifs, timers, expirations)
+- **Realtime** : Supabase Realtime pour chat mission et statuts live
+- **Recherche** : Postgres FTS au MVP (pas d'Algolia/Meilisearch)
+- **Paiement** : Stripe Connect Express, escrow plateforme, webhook signé + table d'idempotence
+- **State machine mission** : discriminated union TS + audit trail immutable (`mission_events`)
+- **Matching** : table matérialisée `opportunities` rafraîchie par events Inngest, buffer géo 10 km
+- **Tests** : Vitest (unit `packages/core`) + Playwright (E2E web) + Maestro (E2E mobile)
+- **Observabilité** : Sentry + pino JSON logs + Vercel Analytics + dashboard Inngest
+- **Stratégie coût** : free-tier first pendant le dev, bascule payant événement par événement (cf. `ARCHITECTURE.md` §13)
 
 ## Hors scope MVP (pour ne pas réintroduire)
 
+**Produit :**
 - Produits frais / chaîne du froid
 - Multi-producteurs par mission
 - Wishlist publique / carte de la demande
 - Wallet interne / cashback
 - Matching algorithmique automatique commande → rameneur
+
+**Technique :**
+- Microservices, GraphQL, tRPC, NestJS au MVP
+- Algolia / Meilisearch (Postgres FTS suffit)
+- Kubernetes / Docker en prod (Vercel + Supabase suffisent)
+- i18n active (français seul, next-intl scaffoldé pour v2)
 
 ## Conventions
 
@@ -82,17 +115,38 @@ Règles à respecter sans qu'elles soient rappelées à chaque demande.
 - Ajouter une entrée datée dans `produit/decisions/decisions_produit.md` (format : `YYYY-MM-DD — décision — contexte court`)
 - Si la décision invalide une ancienne : marquer l'ancienne `[SUPERSEDED YYYY-MM-DD — voir <nouvelle entrée>]` au lieu de la supprimer
 - Mettre à jour le résumé "Décisions clés" du `CLAUDE.md` si la décision est structurante
-- Mettre à jour le PRD (`vision/PRD.md`) si la décision contredit son contenu
+- Mettre à jour le PRD (`PRD.md`) si la décision contredit son contenu
+
+### Après toute création, modification ou suppression de ticket Jira — règle impérative
+Le mapping Jira ↔ repo doit rester en permanence synchronisé avec le projet KAN sur `erkulaws.atlassian.net`. Toute opération sur un ticket entraîne **systématiquement** la mise à jour des fichiers ci-dessous, dans le même commit :
+
+1. **`produit/jira_mapping.md`** (source de vérité) :
+   - Ajouter / éditer / retirer la ligne du ticket dans la section "Catalogue Jira complet" (table de l'épic concerné)
+   - Si le ticket touche un écran existant, mettre à jour la table "Mapping écran ↔ ticket(s) Jira" du parcours correspondant (Producteur / Acheteur / Rameneur / Transverse)
+   - Mettre à jour le compteur de la section "Vue d'ensemble" (nombre d'épics / features / subtasks) et la date d'état
+2. **PRD §10 (sitemap)** : si l'écran est listé dans 10.2 / 10.3 / 10.4 / 10.5, mettre à jour sa colonne "Ticket(s) Jira"
+3. **Maquettes HTML** : si une maquette existe pour cet écran (`design/maquettes/[persona]/[id]-[slug].html`), mettre à jour le commentaire `<!-- Ticket(s) Jira : ... -->` en tête de fichier
+4. **Aucune référence orpheline** : en cas de suppression ou fusion de ticket, retirer ou rediriger toutes les mentions de l'ancien ID dans les trois emplacements ci-dessus
+5. **Commit dédié** au mapping, message type : `Mapping Jira : ajout KAN-XX (résumé court)` ou `Mapping Jira : suppression KAN-XX (raison)`. Ne pas mélanger avec d'autres modifications produit.
 
 ### Avant de créer une maquette
 - Vérifier la nomenclature `[persona-id]-[slug].html` (rm / ac / pr)
-- Confirmer que l'écran est listé dans `produit/sitemap.md` ; sinon, mettre à jour le sitemap d'abord
+- Confirmer que l'écran est listé dans le sitemap PRD §10 ; sinon, l'ajouter d'abord
 - Ranger dans `design/maquettes/[persona]/`
 
 ### Avant de créer un nouveau fichier de doc
 - Demander confirmation si le fichier crée un nouveau dossier de premier niveau
 - Privilégier l'ajout dans un fichier existant plutôt que la fragmentation
 - Pas de suffixe `_v1`, `_final`, etc. sur les fichiers vivants
+
+### Modifications de `PRD.md` — règle impérative
+Le PRD est la source de vérité fonctionnelle du produit. Toute modification, quelle qu'elle soit (ajout, suppression, refonte, correction), doit être consignée dans la table changelog **§16.4** du PRD dans le même commit.
+
+- Ajouter une ligne au changelog avec : version (incrément mineur en `X.Y` sauf refonte structurelle qui passe à `X+1.0`), date ISO `YYYY-MM-DD`, résumé concis listant les sections touchées et la nature du changement
+- Format : `| X.Y | YYYY-MM-DD | <résumé> |`
+- Grouper les corrections mineures (typos, liens, reformulations) du même jour sous une seule entrée plutôt que multiplier les lignes
+- Si la modification est déclenchée par une décision produit, citer la date de la décision dans le résumé et garder cohérent avec `produit/decisions/decisions_produit.md`
+- Ne jamais éditer le PRD sans mettre à jour le changelog dans le même commit
 
 ### Modifications de `DESIGN.md` — règle impérative
 `DESIGN.md` est la source de vérité du design system et doit toujours être synchronisé avec le dépôt distant.
@@ -104,11 +158,33 @@ Règles à respecter sans qu'elles soient rappelées à chaque demande.
 - Faire un `git add DESIGN.md && git commit -m "design: <description courte>" && git push origin main` immédiatement.
 - Ne jamais laisser une modification de `DESIGN.md` non commitée ou non poussée.
 
+### Modifications de `ARCHITECTURE.md` — règle impérative
+`ARCHITECTURE.md` est la source de vérité technique du projet. Toute évolution structurante (changement de stack, nouvelle convention, ajout d'une couche) doit être consignée dans la table journal **§18** du fichier dans le même commit.
+
+- Ajouter une ligne au journal §18 : version (incrément mineur en `X.Y`, ou `X+1.0` si refonte), date ISO `YYYY-MM-DD`, résumé concis listant les sections touchées et la nature du changement
+- Format : `| X.Y | YYYY-MM-DD | <résumé> |`
+- Grouper les corrections mineures (typos, reformulations) du même jour sous une seule entrée
+- Distinguer décisions techniques (journal §18 d'`ARCHITECTURE.md`) et décisions produit (`produit/decisions/decisions_produit.md`) — ne jamais mélanger
+- Ne jamais éditer `ARCHITECTURE.md` sans mettre à jour le journal §18 dans le même commit
+
+### Cadrage technique d'une feature Jira — skill `propose-spec`
+Pour préparer techniquement une feature Jira KAN avant de coder, utiliser le skill `propose-spec` (slash command `/propose KAN-XXX`). Il génère trois fichiers Markdown courts dans `specs/KAN-XXX/` (proposal, design, tasks), met à jour le ticket Jira (commentaire + lien + transition To Do) et synchronise `produit/jira_mapping.md`.
+
+- Source unique de vérité : le contenu des specs vit dans `specs/KAN-XXX/`. Jira et le mapping ne contiennent que des **liens** vers ces fichiers — jamais de copie du contenu.
+- Option A retenue : Jira reste maître des tâches livrables (subtasks). `tasks.md` ne contient que des tâches techniques internes (setup, refacto, migrations, helpers) qui n'ont pas vocation à être trackées comme livrables produit.
+- Pas de slug dans le nom du dossier : `specs/KAN-XXX/`, pas `specs/KAN-XXX-slug/`.
+- Définition complète et workflow : `.claude/skills/propose-spec/SKILL.md`.
+
 ### Hiérarchie en cas de conflit entre sources
+**Sur sujets produit / fonctionnels :**
 1. `produit/decisions/decisions_produit.md` (dernière entrée datée)
 2. Logique "rameneur initiateur" (flip vs PRD)
-3. PRD (`vision/PRD.md`)
+3. PRD (`PRD.md`)
 4. Cahier des charges initial (historique seulement, ne pas s'y appuyer pour trancher)
+
+**Sur sujets techniques (stack, structure code, conventions, infra) :**
+1. `ARCHITECTURE.md` — journal §18 (dernière entrée datée) puis sections normatives
+2. `DESIGN.md` pour tout ce qui touche au design system et aux tokens visuels
 
 ## Garde-fous produit
 

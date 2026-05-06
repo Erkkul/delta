@@ -33,3 +33,10 @@ build/
 
 # Claude Code (config locale, non versionné)
 .claude/
+
+# Documentation produit — conservée en local, non versionnée
+# Ces fichiers sont accessibles à Claude en local mais n'ont pas leur place dans le repo technique.
+# À archiver sur Google Drive si partage externe nécessaire.
+PRD.md
+vision/etude_marche.md
+produit/archives/

@@ -12,6 +12,13 @@ Ce document trace les arbitrages produit pris au fur et à mesure des itération
 
 - **2026-05-01** — Le nom de code du projet reste *Delta*. Le naming définitif (« Les Fourmis » envisagé dans une maquette précédente) sera tranché plus tard.
 
+### Authentification et comptes
+
+- **2026-05-03** — **Modèle de compte multi-rôles progressif**. Le compte rameneur inclut d'office la capacité d'achat (le rameneur, ayant fourni plus d'informations, est de fait aussi acheteur). Un acheteur peut devenir rameneur en complétant un formulaire supplémentaire (type de véhicule, trajets habituels). Il n'y a pas de compte "acheteur seul" limité — c'est le niveau de complétion du profil qui détermine les droits.
+- **2026-05-03** — **Compte hybride pour les producteurs**. Un producteur utilise le même système de compte que les autres personas. Il peut aussi être rameneur et/ou acheteur. L'accès à l'espace producteur se fait via un lien ou onglet dédié dans l'interface principale (pas un compte séparé). Conséquence acceptée : un producteur qui veut uniquement acheter sans activer son espace producteur peut ne pas avoir à le faire.
+- **2026-05-03** — **Vérification SIRET asynchrone**. Pendant la période de vérification, le producteur peut configurer son profil et son catalogue. Ses produits restent non visibles publiquement tant que la vérification n'est pas complète. Aucune mission ne peut être générée depuis un catalogue non vérifié.
+- **2026-05-03** — **Social login inclus dès le MVP**. Connexion via Google et Apple disponible au lancement, en complément de l'email/mot de passe classique. Justification : réduction de friction critique pour les rameneurs (persona limitant), inscription rapide depuis mobile.
+
 ### Modèle d'expérience
 
 - **2026-05-01** — Inversion du modèle vs. PRD initial. Le **rameneur est proactif** : il déclare son trajet, voit les opportunités combinées (producteurs + voisins demandeurs), et déclenche la mission. Le système ne pousse plus de matching automatique commande → rameneur.
