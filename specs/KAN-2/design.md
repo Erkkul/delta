@@ -56,9 +56,11 @@ Aucun. Le user sera consommateur ou émetteur de missions ultérieurement, mais 
 
 ## Dépendances
 
-Services externes, jobs internes. Référence : ARCHITECTURE.md §2.
+Services externes, jobs internes. Référence : ARCHITECTURE.md §2. État du provisionnement : `tech/setup.md`.
 
-- Supabase Auth (email/password, Google, Apple)
+- Supabase (Postgres + Auth) — voir `tech/setup.md` § Backend / Données et § Auth / Identité
+- Google Cloud Console (OAuth Google côté Supabase Auth) — voir `tech/setup.md` § Auth / Identité
+- Apple Developer (Sign in with Apple côté Supabase Auth) — voir `tech/setup.md` § Auth / Identité
 - Aucun job Inngest au MVP
 
 ## État UI
