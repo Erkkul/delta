@@ -38,7 +38,7 @@ Sept principes qui tranchent quand deux options techniques s'opposent. Ils compl
 | Validation | Zod (`packages/contracts`) | Aux frontières uniquement |
 | Base de données | Supabase Postgres 15 + PostGIS + pgcrypto | Index GIST sur géo |
 | Auth | Supabase Auth + Google + Apple | Décision produit 2026-05-03 |
-| Sécurité données | RLS systématique, JWT user-side | Service role isolé |
+| Sécurité données | RLS systématique, clé publishable côté client | Clés secrètes (`sb_secret_...`) isolées par service backend |
 | Cache & rate-limit | Upstash Redis | Rate-limit auth + endpoints sensibles |
 | Jobs asynchrones | Inngest | Matching, notifs, timers, expirations |
 | Realtime | Supabase Realtime | Chat mission + statut live |
@@ -223,7 +223,7 @@ Toutes les tables user-data ont la RLS activée à la création. Au minimum :
 - Des policies `insert/update/delete` filtrées par rôle et possession
 - Pas de policy permissive `using (true)` sauf justification documentée
 
-Service role (jobs Inngest, webhook Stripe) bypasse la RLS — utilisé uniquement dans `packages/jobs` et `apps/web/app/api/stripe/webhook/route.ts`.
+Les clés secrètes Supabase (`sb_secret_...`, rôle Postgres `service_role`) bypassent la RLS — utilisées uniquement dans `packages/jobs` et `apps/web/app/api/stripe/webhook/route.ts`. Une clé secrète distincte par service backend (jobs Inngest, webhook Stripe), révocable indépendamment via le dashboard Supabase. Cf. discussion supabase/supabase #29260 et entrée 1.3 du journal §18.
 
 ### 5.3 Schéma cible (vue haute, MVP)
 
@@ -390,7 +390,7 @@ Une seule route : `apps/web/app/api/stripe/webhook/route.ts`.
 6. Réponse 200 (Stripe arrête de retry)
 ```
 
-Service role uniquement pour cette route. Tous les autres handlers sont en JWT user.
+Clé secrète Supabase dédiée à cette route. Tous les autres handlers utilisent la clé publishable + JWT user.
 
 ### 8.3 Events critiques à traiter
 
@@ -578,7 +578,7 @@ Aucune dépense récurrente avant pré-lancement. Tous les services choisis ont 
 
 | Service | Free tier | OK pour dev | Trigger d'upgrade |
 |---|---|---|---|
-| Supabase | 500 MB DB, 1 GB storage, 50k MAU auth, 5 GB egress | ✅ | Pré-lancement public (PITR + plus de pause) — Pro 25 $/mois |
+| Supabase | 500 MB DB, 1 GB storage, 50k MAU auth, 5 GB egress | ✅ | Pré-lancement public — Pro 25 $/mois (déverrouille HIBP leaked password protection, time-box sessions, inactivity timeout, PITR, suppression de la pause auto après 7 j d'inactivité) |
 | Vercel Hobby | 100 GB bandwidth, preview deploys | ⚠️ usage non-commercial selon TOS | Au lancement public — Pro 20 $/mois |
 | Inngest | 50k step-runs/mois, 1 concurrent | ✅ très large | Quand le matching tournera en continu |
 | Upstash Redis | 10k commandes/jour, 256 MB | ✅ | Trafic réel |
@@ -718,3 +718,5 @@ Le seul vrai engagement structurant est **Postgres**. Tout le reste est swappabl
 |---|---|---|
 | 1.0 | 2026-05-06 | Création. Stack adoptée : monorepo Turborepo + pnpm, TS end-to-end, Next.js 15 (App Router) + Tailwind + shadcn pour le web, Expo + NativeWind pour le mobile, Next Route Handlers pour l'API (extractibles via discipline `packages/core`), Supabase Postgres + PostGIS + RLS-on-par-défaut, Supabase Auth (Google + Apple), Inngest pour les jobs, Stripe Connect Express en escrow avec split 85/10/5, Resend pour mail, Expo Push, Maestro pour E2E mobile, Playwright pour E2E web, Vitest pour l'unit, free-tier first. Décisions structurantes : option B (discriminated union TS) pour la state machine mission, table matérialisée `opportunities` pour le matching, RLS systématique, séparation stricte domain/adapter (A2). |
 | 1.1 | 2026-05-06 | Adoption d'une convention de cadrage technique inspirée d'OpenSpec. Nouveau dossier `specs/KAN-XXX/` (trois fichiers : `proposal.md`, `design.md`, `tasks.md`) intercalé entre Jira et le code. Skill `.claude/skills/propose-spec/` + slash command `/propose KAN-XXX` pour générer le cadrage à partir du ticket. Option A retenue : Jira reste maître des tâches livrables (subtasks). `tasks.md` ne contient que des tâches techniques internes (setup, refacto, migrations, helpers). Sources de vérité disjointes : fond des specs dans le repo, Jira ne stocke que des liens. CLAUDE.md mis à jour (nouvelle section "Cadrage technique d'une feature Jira"). |
+| 1.2 | 2026-05-08 | Scaffold initial du monorepo. Suppression du dossier obsolète `code/`. Création à la racine de `package.json` (workspaces pnpm 9, engines Node 20), `pnpm-workspace.yaml` (`apps/*`, `packages/*`), `turbo.json` (pipeline build/lint/typecheck/test/dev/clean). `.gitignore` étendu (Turborepo, Next, Expo, Supabase, Sentry, coverage). CLAUDE.md complété d'une règle « Synchronisation transverse des fichiers Markdown » imposant la propagation des modifs structurantes à tous les `.md` concernés dans le même commit. |
+| 1.3 | 2026-05-08 | Adoption du nouveau système de clés API Supabase (`sb_publishable_...` / `sb_secret_...`) remplaçant les clés JWT legacy `anon` / `service_role`. Variables d'environnement renommées : `SUPABASE_PUBLISHABLE_KEY` (côté client, exposable) et `SUPABASE_SECRET_KEY` (côté serveur, bypass RLS). Plusieurs clés secrètes possibles : une par service backend (jobs Inngest, webhook Stripe), révocables indépendamment via dashboard Supabase. Avantages : interdiction matérielle d'usage côté browser (HTTP 401), audit log par clé, rotation zéro-downtime. Sections impactées : §2.1 ligne sécurité, §5.2 RLS, §8.2 webhook Stripe, §13.2 trigger d'upgrade Supabase Pro (HIBP, time-box sessions, inactivity timeout confirmés Pro-only lors du provisionnement). Source : discussion supabase/supabase #29260 (depuis nov. 2025, les nouveaux projets n'ont plus accès aux clés legacy). Provisionnement : projet `delta-dev` créé le 2026-05-08 en région `eu-west-3` avec PostGIS 3.3.7 + pgcrypto activés ; trace dans `tech/setup.md`. |

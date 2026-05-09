@@ -10,28 +10,47 @@
 *.swp
 *.swo
 
-# Node (pour le code à venir)
+# Node / pnpm
 node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+*.log
+
+# Variables d'environnement
 .env
 .env.local
 .env.*.local
 
-# Python (pour le backend à venir)
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-venv/
+# Turborepo
+.turbo/
 
-# Build
+# Next.js
+.next/
+next-env.d.ts
+out/
+
+# Expo / EAS
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+*.orig.*
+
+# Builds & artefacts
 dist/
 build/
-*.log
+coverage/
+*.tsbuildinfo
 
-# Claude interne (ne pas versionner les sessions)
-.claude/settings.local.json
+# Supabase CLI (artefacts locaux)
+.supabase/
 
-# Claude Code (config locale, non versionné)
+# Sentry source maps tmp
+.sentryclirc
+
+# Claude (config locale, non versionné)
 .claude/
 
 # Documentation produit — conservée en local, non versionnée

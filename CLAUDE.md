@@ -66,7 +66,7 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 - **Mobile** : Expo SDK 53 + NativeWind 4, builds via EAS
 - **API** : Next.js Route Handlers + Zod (`packages/contracts`), versionnée `/api/v1/`
 - **DB** : Supabase Postgres + PostGIS, **RLS on par défaut**, migrations versionnées
-- **Auth** : Supabase Auth + Google + Apple, JWT user-side, service role réservé aux jobs/webhooks
+- **Auth** : Supabase Auth + Google + Apple, clé publishable (`sb_publishable_...`) côté client, clés secrètes (`sb_secret_...`) isolées par service backend (jobs Inngest, webhook Stripe)
 - **Jobs asynchrones** : Inngest (matching, notifs, timers, expirations)
 - **Realtime** : Supabase Realtime pour chat mission et statuts live
 - **Recherche** : Postgres FTS au MVP (pas d'Algolia/Meilisearch)
@@ -166,6 +166,22 @@ Le PRD est la source de vérité fonctionnelle du produit. Toute modification, q
 - Grouper les corrections mineures (typos, reformulations) du même jour sous une seule entrée
 - Distinguer décisions techniques (journal §18 d'`ARCHITECTURE.md`) et décisions produit (`produit/decisions/decisions_produit.md`) — ne jamais mélanger
 - Ne jamais éditer `ARCHITECTURE.md` sans mettre à jour le journal §18 dans le même commit
+
+### Synchronisation transverse des fichiers Markdown — règle impérative
+Toute modification structurante du repo (scaffold, ajout/suppression de package, changement de stack, nouvelle convention, refonte d'un dossier, changement de workflow) doit être propagée à **tous** les fichiers `.md` concernés dans le même commit. Avant de commiter, passer en revue cette checklist :
+
+- `ARCHITECTURE.md` — si stack, structure monorepo, ou conventions techniques touchées : éditer la section concernée + ajouter ligne au journal §18.
+- `CLAUDE.md` — si décision produit structurante, hors scope, conventions de fichiers, ou workflow modifiés : mettre à jour les sections « Décisions clés », « Décisions techniques clés », « Hors scope MVP », « Conventions », ou « Workflow obligatoire ».
+- `PRD.md` — si la modification contredit ou complète une règle métier : éditer + ligne au changelog §16.4.
+- `DESIGN.md` — si tokens, breakpoints, ou règles design touchés : éditer (sous validation explicite, cf. règle dédiée).
+- `README.md` — si arborescence du repo modifiée, ou nouvelle commande npm/pnpm exposée à la racine.
+- `tech/setup.md` — si un service externe est ajouté, retiré, ou son statut change.
+- `produit/jira_mapping.md` — si écran ou ticket Jira impacté.
+- `produit/decisions/decisions_produit.md` — si décision produit prise (datée).
+
+Les autres `.md` (specs/KAN-XXX/, archives, etc.) sont propres à un ticket et n'entrent pas dans cette synchro transverse.
+
+**Comportement attendu de Claude** : à chaque modification, lister les `.md` à mettre à jour avant d'écrire, faire les modifs, et signaler explicitement « .md synchronisés : X, Y, Z » dans la conclusion. Si un .md aurait dû être touché et ne l'est pas, le justifier.
 
 ### Cadrage technique d'une feature Jira — skill `propose-spec`
 Pour préparer techniquement une feature Jira KAN avant de coder, utiliser le skill `propose-spec` (slash command `/propose KAN-XXX`). Il génère trois fichiers Markdown courts dans `specs/KAN-XXX/` (proposal, design, tasks), met à jour le ticket Jira (commentaire + lien + transition To Do) et synchronise `produit/jira_mapping.md`.

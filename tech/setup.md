@@ -12,11 +12,31 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## Backend / Données
 
 ### Supabase (Postgres + Auth + Storage + Realtime)
-- **Statut** : À faire
+- **Statut** : Partiel — provisionnement initial fait le 2026-05-08. Reste CLI + première migration + providers OAuth + cron anti-pause.
 - **Dashboard** : https://supabase.com/dashboard
-- **Plan** : Free (puis Pro à partir de ~50k MAU)
-- **Env vars produites** : `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-- **Notes** : créer projet + activer PostGIS + pgcrypto. RLS-on par défaut. Voir ARCHITECTURE.md §5.
+- **Plan** : Free (bascule Pro au pré-lancement, voir trigger d'upgrade dans ARCHITECTURE.md §13.2)
+- **Project ref** : `knyfrnxkqyyirnsyijfk` (région `eu-west-3` / Paris)
+- **Env vars produites** : `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `SUPABASE_DB_URL` (direct, port 5432), `SUPABASE_DB_URL_POOLED` (transaction pooler, port 6543)
+- **Fait le 2026-05-08** :
+  - Projet `delta-dev` créé en région `eu-west-3`, plan Free, branche DB par défaut `main`
+  - Extensions activées dans le schéma `extensions` : PostGIS 3.3.7, pgcrypto 1.3 (vérifiées via `pg_extension`)
+  - Trois options cochées à la création : Enable Data API, Automatically expose new tables, Enable automatic RLS (cf. principe A4)
+  - Trois clés API récupérées (publishable + secret, nouveau système — voir « Notes clés API » ci-dessous)
+  - Buckets Storage créés : `product-photos` (public, 5 MB max, MIME `image/jpeg`, `image/png`, `image/webp`) et `kyc-documents` (privé strict, 10 MB max, MIME `application/pdf`, `image/jpeg`, `image/png`). Policies RLS Storage à versionner via migrations dans `supabase/policies/storage.sql` (principe A7, pas de policy via UI).
+  - Auth email/password configuré : confirm email ON, min password length 10, requirements `lower + upper + digits`, secure email change ON, secure password change ON, rotation refresh tokens ON, reuse interval 10 s
+  - URL Configuration : Site URL `http://localhost:3000`, Redirect URLs `http://localhost:3000/**` (à élargir au fil des déploiements preview Vercel + prod + deep links mobile)
+  - Connection strings copiées (direct + transaction pooler). Note : la connexion directe est IPv6-only — pour tout runtime IPv4-only (Vercel serverless, certains GitHub Actions runners), utiliser le transaction pooler 6543 ; en local depuis un ISP FR moderne, la directe fonctionne.
+- **À faire** :
+  - Installer la Supabase CLI et lier le projet : `supabase link --project-ref knyfrnxkqyyirnsyijfk`
+  - Créer le squelette `supabase/` (`migrations/`, `seeds/`, `policies/`) si pas déjà présent
+  - Première migration `001_init.sql` pour valider le workflow versionné (cf. ARCHITECTURE.md §5.5)
+  - Cron GitHub Actions de ping toutes les 6 nuits pour éviter la pause Free 7j (cf. ARCHITECTURE.md §13.3)
+  - Installer Agent Skills Supabase (`npx skills add supabase/agent-skills`) en session terminal
+  - Configurer MCP Supabase pour Claude (onglet MCP de la modale Connect)
+  - Brancher providers OAuth Google + Apple une fois GCP / Apple Developer provisionnés
+  - Bascule Pro au pré-lancement : déverrouille HIBP leaked password protection, time-box sessions, inactivity timeout, PITR, et supprime la pause auto après 7 j
+- **Notes clés API** : nouveau système Supabase (`sb_publishable_...` / `sb_secret_...`) remplaçant les clés JWT legacy `anon` / `service_role`. Cf. discussion supabase/supabase #29260 (depuis nov. 2025, les nouveaux projets n'ont plus accès aux clés legacy). La clé publishable est exposable côté client (web + mobile) ; les clés secrètes bypass RLS, restent côté serveur, et on en crée une par service backend (jobs Inngest, webhook Stripe) pour permettre la révocation indépendante.
+- **Notes** : RLS-on par défaut activée à la création du projet. Voir ARCHITECTURE.md §5 (modélisation), §9 (sécurité), §13 (stratégie free-tier).
 
 ### Upstash Redis (rate-limit + cache)
 - **Statut** : À faire
