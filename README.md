@@ -21,12 +21,18 @@ Delta/
 ├── vision/              Stratégie, marché, positionnement
 ├── produit/             Spécifications produit (sitemap, flows, user stories, décisions)
 ├── design/              Identité visuelle, maquettes HTML
-├── tech/                Documentation technique complémentaire (à venir)
+├── tech/                Documentation technique complémentaire (provisionnement, runbooks)
+├── specs/               Cadrages techniques par ticket Jira (proposal/design/tasks)
 ├── legal/               CGU, CGV, RGPD (à venir)
 ├── business/            Modèle économique, pricing, ops (à venir)
-└── code/                Code source (à venir)
-    ├── apps/            web (Next.js), mobile (Expo)
-    └── packages/        core, contracts, db, ui-web, ui-mobile, jobs, ...
+│
+├── apps/                web (Next.js), mobile (Expo) — à venir
+├── packages/            core, contracts, db, ui-web, ui-mobile, jobs, ...
+└── supabase/            Config CLI, migrations versionnées, seeds, policies SQL
+    ├── config.toml      Config locale Supabase CLI
+    ├── migrations/      Migrations SQL horodatées (YYYYMMDDHHMMSS_*.sql)
+    ├── seeds/           Données de seed pour environnements de dev
+    └── policies/        Policies RLS Storage et SQL transverses
 ```
 
 ## Ordre de lecture recommandé

@@ -1,0 +1,4 @@
+# Artefacts locaux de la Supabase CLI (versions, état du link, branches locales).
+# Peuvent contenir des infos sensibles (pooler URL avec credentials, project ref).
+.branches
+.temp

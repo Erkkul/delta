@@ -12,7 +12,7 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## Backend / Données
 
 ### Supabase (Postgres + Auth + Storage + Realtime)
-- **Statut** : Partiel — provisionnement initial fait le 2026-05-08. Reste CLI + première migration + providers OAuth + cron anti-pause.
+- **Statut** : Partiel — CLI installée et première migration jouée le 2026-05-10. Reste providers OAuth, cron anti-pause, Agent Skills, MCP Claude, bascule Pro au pré-lancement.
 - **Dashboard** : https://supabase.com/dashboard
 - **Plan** : Free (bascule Pro au pré-lancement, voir trigger d'upgrade dans ARCHITECTURE.md §13.2)
 - **Project ref** : `knyfrnxkqyyirnsyijfk` (région `eu-west-3` / Paris)
@@ -26,10 +26,13 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
   - Auth email/password configuré : confirm email ON, min password length 10, requirements `lower + upper + digits`, secure email change ON, secure password change ON, rotation refresh tokens ON, reuse interval 10 s
   - URL Configuration : Site URL `http://localhost:3000`, Redirect URLs `http://localhost:3000/**` (à élargir au fil des déploiements preview Vercel + prod + deep links mobile)
   - Connection strings copiées (direct + transaction pooler). Note : la connexion directe est IPv6-only — pour tout runtime IPv4-only (Vercel serverless, certains GitHub Actions runners), utiliser le transaction pooler 6543 ; en local depuis un ISP FR moderne, la directe fonctionne.
+- **Fait le 2026-05-10** :
+  - Supabase CLI installée via Homebrew (`brew install supabase/tap/supabase`)
+  - `supabase init` exécuté à la racine du repo : squelette `supabase/` créé (`config.toml`, `migrations/`, `seeds/`, `policies/`)
+  - `supabase login` + `supabase link --project-ref knyfrnxkqyyirnsyijfk` OK
+  - Première migration `20260510120000_init.sql` créée et poussée via `supabase db push` (workflow versionné validé bout-en-bout, cf. ARCHITECTURE.md §5.5). Contenu : vérification idempotente des extensions postgis + pgcrypto, installation du helper `public.set_updated_at()` à attacher en BEFORE UPDATE sur toutes les futures tables user-data (cf. ARCHITECTURE.md §5.1). Présence confirmée côté remote dans `supabase_migrations.schema_migrations`.
+  - Convention de nommage des migrations confirmée : `YYYYMMDDHHMMSS_description.sql` (cf. ARCHITECTURE.md §5.5) prévaut sur la mention historique `001_init.sql` de cette checklist.
 - **À faire** :
-  - Installer la Supabase CLI et lier le projet : `supabase link --project-ref knyfrnxkqyyirnsyijfk`
-  - Créer le squelette `supabase/` (`migrations/`, `seeds/`, `policies/`) si pas déjà présent
-  - Première migration `001_init.sql` pour valider le workflow versionné (cf. ARCHITECTURE.md §5.5)
   - Cron GitHub Actions de ping toutes les 6 nuits pour éviter la pause Free 7j (cf. ARCHITECTURE.md §13.3)
   - Installer Agent Skills Supabase (`npx skills add supabase/agent-skills`) en session terminal
   - Configurer MCP Supabase pour Claude (onglet MCP de la modale Connect)
