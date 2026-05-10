@@ -12,7 +12,7 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## Backend / Données
 
 ### Supabase (Postgres + Auth + Storage + Realtime)
-- **Statut** : Partiel — CLI installée et première migration jouée le 2026-05-10. Reste providers OAuth, cron anti-pause, Agent Skills, MCP Claude, bascule Pro au pré-lancement.
+- **Statut** : Partiel — CLI + migrations OK (2026-05-10), Agent Skills + MCP read-only branchés (2026-05-10). Reste providers OAuth, cron anti-pause, bascule Pro au pré-lancement.
 - **Dashboard** : https://supabase.com/dashboard
 - **Plan** : Free (bascule Pro au pré-lancement, voir trigger d'upgrade dans ARCHITECTURE.md §13.2)
 - **Project ref** : `knyfrnxkqyyirnsyijfk` (région `eu-west-3` / Paris)
@@ -32,10 +32,13 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
   - `supabase login` + `supabase link --project-ref knyfrnxkqyyirnsyijfk` OK
   - Première migration `20260510120000_init.sql` créée et poussée via `supabase db push` (workflow versionné validé bout-en-bout, cf. ARCHITECTURE.md §5.5). Contenu : vérification idempotente des extensions postgis + pgcrypto, installation du helper `public.set_updated_at()` à attacher en BEFORE UPDATE sur toutes les futures tables user-data (cf. ARCHITECTURE.md §5.1). Présence confirmée côté remote dans `supabase_migrations.schema_migrations`.
   - Convention de nommage des migrations confirmée : `YYYYMMDDHHMMSS_description.sql` (cf. ARCHITECTURE.md §5.5) prévaut sur la mention historique `001_init.sql` de cette checklist.
+  - Pack **Agent Skills Supabase** installé dans `.claude/skills/` (project-scope, versionné) : `supabase` (client libs Next/Expo, auth, RLS, migrations, extensions) et `supabase-postgres-best-practices` (8 catégories de réf, dont security/RLS et schema design en Critical/High). Aucune divergence détectée avec nos conventions normatives (§5.1 lowercase snake_case, §5.2 RLS-on, §5.5 migrations versionnées). Hiérarchie en cas de conflit : ARCHITECTURE.md prime sur le skill (cf. CLAUDE.md « Hiérarchie en cas de conflit »).
+  - **MCP Supabase** branché en mode **read-only** sur `delta-dev` :
+    - Personal Access Token créé sur https://supabase.com/dashboard/account/tokens (nom : `delta-mcp-claude-readonly`), exposé via `SUPABASE_ACCESS_TOKEN` dans le shell (jamais dans le repo).
+    - Config MCP : `npx -y @supabase/mcp-server-supabase@latest --read-only --project-ref=knyfrnxkqyyirnsyijfk`
+    - Mode read-only par décision : verrou A7 (interdiction d'`apply_migration` via MCP, toute évolution DB passe par fichier dans `supabase/migrations/`). La CLI Supabase couvre tous les besoins RW légitimes. Escalade RW ad-hoc possible via second profil temporaire si justifié.
 - **À faire** :
   - Cron GitHub Actions de ping toutes les 6 nuits pour éviter la pause Free 7j (cf. ARCHITECTURE.md §13.3)
-  - Installer Agent Skills Supabase (`npx skills add supabase/agent-skills`) en session terminal
-  - Configurer MCP Supabase pour Claude (onglet MCP de la modale Connect)
   - Brancher providers OAuth Google + Apple une fois GCP / Apple Developer provisionnés
   - Bascule Pro au pré-lancement : déverrouille HIBP leaked password protection, time-box sessions, inactivity timeout, PITR, et supprime la pause auto après 7 j
 - **Notes clés API** : nouveau système Supabase (`sb_publishable_...` / `sb_secret_...`) remplaçant les clés JWT legacy `anon` / `service_role`. Cf. discussion supabase/supabase #29260 (depuis nov. 2025, les nouveaux projets n'ont plus accès aux clés legacy). La clé publishable est exposable côté client (web + mobile) ; les clés secrètes bypass RLS, restent côté serveur, et on en crée une par service backend (jobs Inngest, webhook Stripe) pour permettre la révocation indépendante.

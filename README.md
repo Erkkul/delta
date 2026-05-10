@@ -16,7 +16,8 @@ Delta/
 ├── PRD.md               Spécification produit (source de vérité fonctionnelle)
 ├── ARCHITECTURE.md      Architecture technique (source de vérité technique)
 ├── DESIGN.md            Design system (tokens, composants, règles visuelles)
-├── .claude/             Skills, agents, settings Claude (partagés)
+├── .claude/             Skills + commands + prompts Claude (versionnés). settings.local.json reste local.
+├── .mcp.json            Config MCP project-scope (Supabase read-only, secret hors fichier via $SUPABASE_ACCESS_TOKEN)
 │
 ├── vision/              Stratégie, marché, positionnement
 ├── produit/             Spécifications produit (sitemap, flows, user stories, décisions)

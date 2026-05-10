@@ -101,6 +101,7 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 - **Versions** : pas de suffixe `_v1` sur les fichiers vivants. Si un document est figé (ex: PRD à un instant T), créer un dossier `archives/` plutôt que renommer.
 - **Messages de commit** : phrase courte en français, forme "Verbe + objet" sans préfixe conventionnel (`feat:`, `chore:`, etc.). Exemples : `Ajout du fichier DESIGN.md`, `Mise à jour de CLAUDE.md`, `Archivage des user stories`.
 - **Responsive obligatoire** : toute maquette ou écran doit être conçu pour desktop ET mobile. Pas de mobile-first ni de desktop-first — les deux déclinaisons sont livrées systématiquement. Les breakpoints de référence sont définis dans `DESIGN.md`.
+- **Configuration Claude versionnée** : `.claude/skills/`, `.claude/commands/`, `.claude/prompts/` et `.mcp.json` sont versionnés (conventions partagées entre devs et agents). Restent locaux : `.claude/settings.local.json` (préférences perso, permissions ad-hoc) et `.claude/worktrees/` (artefacts éphémères). Les secrets référencés par `.mcp.json` (ex : `SUPABASE_ACCESS_TOKEN`) ne vivent jamais dans le fichier — uniquement dans le shell utilisateur.
 
 ## Workflow obligatoire
 

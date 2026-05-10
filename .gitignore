@@ -50,8 +50,10 @@ coverage/
 # Sentry source maps tmp
 .sentryclirc
 
-# Claude (config locale, non versionné)
-.claude/
+# Claude — conventions partagées versionnées (skills, commands, prompts).
+# Restent locaux : préférences perso et artefacts éphémères.
+.claude/settings.local.json
+.claude/worktrees/
 
 # Documentation produit — conservée en local, non versionnée
 # Ces fichiers sont accessibles à Claude en local mais n'ont pas leur place dans le repo technique.
