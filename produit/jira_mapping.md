@@ -9,7 +9,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 - **13 épics** (KAN-1, KAN-4 → KAN-15) — un épic par grand domaine fonctionnel
 - **49 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-157 sous les autres épics — voir tables par épic ci-dessous)
 - **Subtasks** : voir le catalogue par épic ci-dessous. Le mapping peut être incomplet pour les subtasks les plus récentes — Jira fait foi pour la liste exhaustive.
-- État au 2026-05-07 : KAN-1 *Examiner* ; KAN-2 et KAN-3 *À faire* (cadrage technique ouvert, voir `specs/`) ; autres *Ideas*
+- État au 2026-05-12 : KAN-1 *Examiner* ; KAN-2 *Wip* (implémentation web démarrée sur `feat/kan-2-creation-compte`) ; KAN-3 *À faire* (cadrage ouvert) ; autres *Ideas*
 
 ## Convention de référencement
 
@@ -91,7 +91,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | Ticket | Type | Statut | Résumé |
 |--------|------|--------|--------|
 | KAN-1 | Epic | Examiner | Authentication |
-| KAN-2 | Feature | À faire | Création de compte — [Cadrage tech](specs/KAN-2/) |
+| KAN-2 | Feature | Wip | Création de compte — [Cadrage tech](specs/KAN-2/) |
 | KAN-3 | Feature | À faire | Connexion — [Cadrage tech](specs/KAN-3/) |
 | KAN-157 | Feature | Ideas | Récupération de mot de passe |
 
