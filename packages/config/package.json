@@ -13,7 +13,7 @@
     "./eslint/next": "./eslint/next.js",
     "./eslint/expo": "./eslint/expo.js",
     "./prettier": "./prettier/index.json",
-    "./vitest/base": "./vitest/base.ts"
+    "./vitest/base": "./vitest/base.js"
   },
   "files": [
     "tsconfig",
