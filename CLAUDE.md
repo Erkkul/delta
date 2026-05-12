@@ -55,9 +55,13 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 - **Autocomplétion adresses** : API Adresse Gouv.fr
 - **Produits MVP** : secs et agricoles non sensibles uniquement (pas de frais, pas d'alcool, pas de transformés sensibles)
 - **Statut juridique plateforme** : mise en relation, responsabilités limitées (rôle marketplace pur)
-- **Modèle de compte** : multi-rôles progressif — le compte rameneur inclut la capacité d'achat ; un acheteur peut devenir rameneur en complétant son profil ; les producteurs partagent le même système de compte avec accès à leur espace via onglet dédié
+- **Modèle de compte** : multi-rôles progressif — un compte peut cumuler 1 à 3 rôles (rameneur, producteur, acheteur). Le rôle est sélectionné après vérification email, en multi-select, sur écran dédié `/onboarding/role` (AU-06 du flow auth — décision 2026-05-13). Le compte rameneur inclut la capacité d'achat ; un acheteur peut devenir rameneur en complétant son profil ; les producteurs partagent le même système de compte avec accès à leur espace via onglet dédié
 - **Vérification SIRET** : asynchrone — le producteur peut configurer profil et catalogue mais les produits restent non visibles jusqu'à validation
-- **Social login** : Google et Apple disponibles dès le MVP
+- **Social login** : Google disponible dès le MVP. Apple différé à l'enrôlement Apple Developer (99 €/an).
+- **Vérification email** : OTP 6 chiffres obligatoire au signup (écran AU-04 du flow auth — décision 2026-05-13). Cohérent avec la config Supabase `Confirm email ON`
+- **Consents CGU/RGPD** : implicites via mention « En continuant, vous acceptez… » sur les écrans Splash et Signup (décision 2026-05-13). La version acquittée et le timestamp sont tracés en DB (`users.metadata.consents`) à la création de compte
+- **Splash auth** : écran d'entrée du flow auth sur `/welcome` (décision 2026-05-13). La landing publique `/` reste indépendante
+- **Politique mot de passe** : 10 caractères minimum, au moins une majuscule, une minuscule et un chiffre (config Supabase Auth, décision 2026-05-13)
 
 ## Décisions techniques clés (résumé — détails dans `ARCHITECTURE.md`)
 
