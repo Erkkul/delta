@@ -1,10 +1,16 @@
 name: Supabase keepalive
 
-# Ping périodique de l'API REST Supabase pour éviter la pause Free-tier
+# Ping périodique d'un endpoint Supabase pour éviter la pause Free-tier
 # après 7 jours sans activité. Cf. ARCHITECTURE.md §13.3 et tech/setup.md.
 #
-# Plus simple qu'une connexion psql : un round-trip HTTP touche PostgREST
-# qui interroge Postgres, ce qui réinitialise le compteur d'inactivité.
+# Endpoint cible : /auth/v1/health (GoTrue health) — public, pas de clé requise.
+# Toute activité sur un service Supabase (Auth, REST, Storage, Realtime)
+# remet à zéro le compteur d'inactivité du projet.
+#
+# Pourquoi pas /rest/v1/ : la nouvelle génération de clés Supabase
+# (sb_publishable_* / sb_secret_*) refuse la publishable key sur la racine
+# PostgREST avec un 401 "Only secret API keys can be used for this endpoint".
+# On garde le ping côté Auth pour rester sans secret.
 
 on:
   schedule:
@@ -14,22 +20,21 @@ on:
 
 jobs:
   ping:
-    name: Ping REST endpoint
+    name: Ping Auth health endpoint
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Curl /rest/v1/
+      - name: Curl /auth/v1/health
         env:
           SUPABASE_URL: https://knyfrnxkqyyirnsyijfk.supabase.co
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: |
           set -euo pipefail
           code=$(curl -sS -o /tmp/body -w "%{http_code}" \
-            "$SUPABASE_URL/rest/v1/" \
-            -H "apikey: $SUPABASE_PUBLISHABLE_KEY")
+            "$SUPABASE_URL/auth/v1/health")
           echo "HTTP $code"
-          if [ "$code" != "200" ] && [ "$code" != "404" ]; then
-            echo "Unexpected response:"
-            cat /tmp/body
+          cat /tmp/body
+          echo
+          if [ "$code" != "200" ]; then
+            echo "Unexpected response — expected HTTP 200"
             exit 1
           fi
