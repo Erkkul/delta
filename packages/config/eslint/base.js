@@ -23,6 +23,24 @@ import globals from "globals"
 
 /** @type {import("eslint").Linter.Config[]} */
 export default [
+  {
+    // Ignore global. typescript-eslint v8 avec `projectService` tente de typer
+    // chaque fichier via tsconfig — il échoue sur les fichiers de config en
+    // `.mjs` / `.ts` (next, postcss, tailwind, eslint) qui ne sont volontairement
+    // pas inclus dans `tsconfig.json`. Ce sont des fichiers d'outillage : pas
+    // besoin de strict type-checking dessus.
+    ignores: [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/.turbo/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/coverage/**",
+      "**/*.config.{js,mjs,ts,cjs}",
+      "**/eslint.config.{js,mjs,ts}",
+      "**/next-env.d.ts",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
@@ -84,7 +102,7 @@ export default [
     },
   },
   {
-    files: ["**/*.config.{js,mjs,ts}", "**/*.test.{ts,tsx}"],
+    files: ["**/*.test.{ts,tsx}"],
     rules: {
       "@typescript-eslint/no-floating-promises": "off",
     },
