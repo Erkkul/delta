@@ -17,6 +17,7 @@ Delta/
 ├── ARCHITECTURE.md      Architecture technique (source de vérité technique)
 ├── DESIGN.md            Design system (tokens, composants, règles visuelles)
 ├── .claude/             Skills + commands + prompts Claude (versionnés). settings.local.json reste local.
+├── .github/workflows/   CI/CD (lint+typecheck+build) + cron Supabase keepalive. Vercel auto-deploy via intégration GitHub native.
 ├── .mcp.json            Config MCP project-scope (Supabase read-only, secret hors fichier via $SUPABASE_ACCESS_TOKEN)
 │
 ├── vision/              Stratégie, marché, positionnement

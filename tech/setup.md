@@ -102,10 +102,21 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## Hosting
 
 ### Vercel (web + Analytics)
-- **Statut** : À faire
+- **Statut** : Partiel — projet créé et premier deploy OK (2026-05-11). Reste Analytics, domaine custom, bascule Pro au lancement public.
 - **Dashboard** : https://vercel.com/dashboard
 - **Plan** : Hobby (dev) → Pro (lancement public, voir ARCHITECTURE.md §13)
+- **Project slug** : `delta-web-gamma` (auto-généré par Vercel : `delta` + Root Directory `web` + suffixe collision `gamma`)
+- **URL preview** : https://delta-web-gamma.vercel.app
 - **Env vars produites** : configurées dans Vercel UI (miroir de `.env.local`)
+- **Fait le 2026-05-11** :
+  - Compte Vercel créé, GitHub App Vercel autorisée sur l'org `Erkkul`
+  - Projet importé depuis `Erkkul/delta`, **Root Directory = `apps/web`**, Framework Preset auto-détecté Next.js
+  - Premier build vert (pnpm 9 détecté via `packageManager` du `package.json` racine, workspaces résolus correctement)
+  - Intégration GitHub native active : preview deploy automatique par PR + prod deploy automatique sur push `main` via webhook Vercel. **Pas de deploy orchestré depuis GitHub Actions** (décision technique : moins de credentials, moins de surface — cf. ARCHITECTURE.md §18 entrée 1.7). Conséquence : aucun secret Vercel (`VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) à provisionner côté GitHub.
+- **À faire** :
+  - Activer Vercel Analytics (Project → Analytics)
+  - Configurer domaine custom une fois choisi (cf. § Domaine + DNS)
+  - Bascule Pro au lancement public (voir ARCHITECTURE.md §13)
 - **Notes** : connecter repo GitHub. Activer Vercel Analytics. Configurer preview deploys.
 
 ### Expo + EAS (mobile builds & submit)
@@ -138,10 +149,18 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## CI/CD
 
 ### GitHub Actions
-- **Statut** : À faire
-- **Dashboard** : Settings → Secrets du repo
-- **Secrets à configurer** : `VERCEL_TOKEN`, `EXPO_TOKEN`, `SENTRY_AUTH_TOKEN`, plus secrets nécessaires aux tests d'intégration
-- **Notes** : voir ARCHITECTURE.md §12.
+- **Statut** : Partiel — workflows posés (2026-05-11), secret `SUPABASE_PUBLISHABLE_KEY` à configurer côté repo, premier run en attente.
+- **Dashboard secrets** : https://github.com/Erkkul/delta/settings/secrets/actions
+- **Workflows actifs** :
+  - `.github/workflows/ci.yml` — lint + typecheck + build sur push `main` et chaque PR. pnpm détecté via `packageManager`, Node 20, concurrency group par branche, cache pnpm via `actions/setup-node`.
+  - `.github/workflows/supabase-keepalive.yml` — cron `14 3 */3 * *` (tous les 3 jours à 03:14 UTC, marge confortable avant la limite 7 j de pause Free-tier). Curl simple sur `/rest/v1/` avec la publishable key, accepte 200 ou 404 comme succès. Déclenchable manuellement via `workflow_dispatch`.
+- **Secrets à configurer (maintenant)** :
+  - `SUPABASE_PUBLISHABLE_KEY` — valeur récupérée dans Supabase Dashboard → Project Settings → API Keys → "publishable" (commence par `sb_publishable_...`)
+- **Secrets différés (autres briques)** :
+  - `EXPO_TOKEN` — quand Expo/EAS provisionné
+  - `SENTRY_AUTH_TOKEN` — quand Sentry provisionné (upload source maps)
+  - Pas de `VERCEL_TOKEN` / `ORG_ID` / `PROJECT_ID` — intégration GitHub native Vercel suffisante (cf. § Vercel ci-dessus).
+- **Notes** : voir ARCHITECTURE.md §12 (pipeline) et §13.3 (workaround free-tier).
 
 ## Stores mobiles (post-dev MVP)
 
