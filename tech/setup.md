@@ -153,11 +153,11 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 - **Dashboard secrets** : https://github.com/Erkkul/delta/settings/secrets/actions
 - **Workflows actifs** :
   - `.github/workflows/ci.yml` — lint + typecheck + build sur push `main` et chaque PR. pnpm détecté via `packageManager`, Node 20, concurrency group par branche, cache pnpm via `actions/setup-node`.
-  - `.github/workflows/supabase-keepalive.yml` — cron `14 3 */3 * *` (tous les 3 jours à 03:14 UTC, marge confortable avant la limite 7 j de pause Free-tier). Curl sur `/auth/v1/health` (endpoint GoTrue public, pas de clé requise). Déclenchable manuellement via `workflow_dispatch`. Historique : ciblait initialement `/rest/v1/` avec la publishable key — abandonné car la nouvelle gen de clés Supabase (`sb_publishable_*` / `sb_secret_*`) refuse la publishable sur la racine PostgREST (401 « Only secret API keys can be used for this endpoint »). Bascule vers `/auth/v1/health` le 2026-05-11 pour rester sans secret.
+  - `.github/workflows/supabase-keepalive.yml` — cron `14 3 */3 * *` (tous les 3 jours à 03:14 UTC, marge confortable avant la limite 7 j de pause Free-tier). Curl sur `/auth/v1/settings` avec headers `apikey: $SUPABASE_PUBLISHABLE_KEY` + `Authorization: Bearer $SUPABASE_PUBLISHABLE_KEY` (pattern standard du client Supabase JS). Déclenchable manuellement via `workflow_dispatch`. Historique des itérations dans ARCHITECTURE.md §18 entrées 1.7 → 1.10.
 - **Secrets à configurer (maintenant)** :
-  - Aucun pour le moment. Le keepalive utilise un endpoint public.
+  - `SUPABASE_PUBLISHABLE_KEY` — valeur récupérée dans Supabase Dashboard → Project Settings → API Keys → "publishable" (commence par `sb_publishable_...`). Utilisée par le workflow keepalive.
 - **Secrets différés (autres briques)** :
-  - `SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_SECRET_KEY` — quand un workflow Actions aura besoin de requêter PostgREST (ex : monitoring santé prod, jobs Inngest, tests d'intégration)
+  - `SUPABASE_SECRET_KEY` — quand un workflow Actions aura besoin d'accéder à PostgREST en bypass RLS (ex : monitoring prod, tests d'intégration, jobs Inngest hébergés)
   - `EXPO_TOKEN` — quand Expo/EAS provisionné
   - `SENTRY_AUTH_TOKEN` — quand Sentry provisionné (upload source maps)
   - Pas de `VERCEL_TOKEN` / `ORG_ID` / `PROJECT_ID` — intégration GitHub native Vercel suffisante (cf. § Vercel ci-dessus).

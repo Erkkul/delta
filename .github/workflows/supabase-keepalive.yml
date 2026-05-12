@@ -3,14 +3,17 @@ name: Supabase keepalive
 # Ping périodique d'un endpoint Supabase pour éviter la pause Free-tier
 # après 7 jours sans activité. Cf. ARCHITECTURE.md §13.3 et tech/setup.md.
 #
-# Endpoint cible : /auth/v1/health (GoTrue health) — public, pas de clé requise.
+# Endpoint cible : /auth/v1/settings (GoTrue settings).
+# Headers : apikey + Authorization Bearer = pattern standard du client Supabase JS.
+#
 # Toute activité sur un service Supabase (Auth, REST, Storage, Realtime)
 # remet à zéro le compteur d'inactivité du projet.
 #
-# Pourquoi pas /rest/v1/ : la nouvelle génération de clés Supabase
-# (sb_publishable_* / sb_secret_*) refuse la publishable key sur la racine
-# PostgREST avec un 401 "Only secret API keys can be used for this endpoint".
-# On garde le ping côté Auth pour rester sans secret.
+# Historique :
+# - 1ère version : /rest/v1/ + publishable → 401 « Only secret API keys can be used for this endpoint »
+#   (la nouvelle gen de clés sb_publishable_* / sb_secret_* refuse la publishable sur la racine PostgREST)
+# - 2ᵉ version : /auth/v1/health sans clé → 401 « No API key found » (Supabase exige l'apikey partout)
+# - 3ᵉ version (actuelle) : /auth/v1/settings + publishable key avec headers apikey + Authorization Bearer
 
 on:
   schedule:
@@ -20,17 +23,25 @@ on:
 
 jobs:
   ping:
-    name: Ping Auth health endpoint
+    name: Ping Auth settings endpoint
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Curl /auth/v1/health
+      - name: Curl /auth/v1/settings
         env:
           SUPABASE_URL: https://knyfrnxkqyyirnsyijfk.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: |
           set -euo pipefail
+          if [ -z "${SUPABASE_PUBLISHABLE_KEY:-}" ]; then
+            echo "ERROR: secret SUPABASE_PUBLISHABLE_KEY manquant côté repo."
+            echo "Settings → Secrets and variables → Actions → New repository secret."
+            exit 1
+          fi
           code=$(curl -sS -o /tmp/body -w "%{http_code}" \
-            "$SUPABASE_URL/auth/v1/health")
+            "$SUPABASE_URL/auth/v1/settings" \
+            -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_PUBLISHABLE_KEY")
           echo "HTTP $code"
           cat /tmp/body
           echo
