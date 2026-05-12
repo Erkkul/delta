@@ -39,28 +39,39 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
     - Mode read-only par décision : verrou A7 (interdiction d'`apply_migration` via MCP, toute évolution DB passe par fichier dans `supabase/migrations/`). La CLI Supabase couvre tous les besoins RW légitimes. Escalade RW ad-hoc possible via second profil temporaire si justifié.
 - **À faire** :
   - Cron GitHub Actions de ping toutes les 6 nuits pour éviter la pause Free 7j (cf. ARCHITECTURE.md §13.3)
-  - Brancher providers OAuth Google + Apple une fois GCP / Apple Developer provisionnés
+  - Brancher Apple Sign In une fois Apple Developer provisionné (Google fait le 2026-05-12, voir § Supabase Auth — activation providers)
   - Bascule Pro au pré-lancement : déverrouille HIBP leaked password protection, time-box sessions, inactivity timeout, PITR, et supprime la pause auto après 7 j
 - **Notes clés API** : nouveau système Supabase (`sb_publishable_...` / `sb_secret_...`) remplaçant les clés JWT legacy `anon` / `service_role`. Cf. discussion supabase/supabase #29260 (depuis nov. 2025, les nouveaux projets n'ont plus accès aux clés legacy). La clé publishable est exposable côté client (web + mobile) ; les clés secrètes bypass RLS, restent côté serveur, et on en crée une par service backend (jobs Inngest, webhook Stripe) pour permettre la révocation indépendante.
 - **Notes** : RLS-on par défaut activée à la création du projet. Voir ARCHITECTURE.md §5 (modélisation), §9 (sécurité), §13 (stratégie free-tier).
 
 ### Upstash Redis (rate-limit + cache)
-- **Statut** : À faire
+- **Statut** : Fait le 2026-05-12.
 - **Dashboard** : https://console.upstash.com
-- **Plan** : Free
-- **Env vars produites** : `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
-- **Notes** : rate-limit auth + endpoints sensibles. ARCHITECTURE.md §2.
+- **Plan** : Free (10 000 commandes/jour, 256 MB, 1 connexion). Pas de carte requise. Bascule payante quand le trafic réel s'en approchera (cf. ARCHITECTURE.md §13.2).
+- **Env vars produites** : `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (interface REST plutôt que TCP natif — compatible serverless Vercel, contrairement au port 6379 qui ne passe pas en Edge).
+- **Database** : `delta-dev-redis` en region `eu-west-1` (Ireland — la plus proche de Supabase Paris, pas de région Paris chez Upstash). Type *Regional*, TLS activé, *Eviction* activée (eviction des vieilles clés au lieu d'erreur quand 256 MB saturés — confort pour un rate-limit dont les clés s'expirent de toute façon).
+- **Notes** : rate-limit auth + endpoints sensibles (cf. KAN-3 §Risques techniques pour la baseline `5 essais / 15 min / email` côté `/auth/login`). ARCHITECTURE.md §2.
 
 ## Auth / Identité
 
 ### Google Cloud Console (OAuth + Routes API)
-- **Statut** : À faire
+- **Statut** : Partiel — OAuth Google fait le 2026-05-12 (consommé par Supabase Auth). Reste activation Routes API quand on attaquera la déclaration de trajet rameneur (KAN-41).
 - **Dashboard** : https://console.cloud.google.com
-- **Plan** : pay-as-you-go (Routes API ; quota gratuit limité)
+- **Plan** : pay-as-you-go (Routes API ; quota gratuit limité). OAuth seul = gratuit, pas de carte requise.
 - **Env vars produites** :
-  - Supabase Auth : `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` (à coller dans Supabase Auth, pas dans le repo)
-  - Routes API : `GOOGLE_ROUTES_API_KEY`
-- **Notes** : créer projet Google Cloud, activer APIs OAuth + Routes, configurer écran de consentement, redirect URIs (Supabase callback + previews Vercel).
+  - Supabase Auth : `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` (collés dans Supabase Auth Dashboard, jamais dans le repo)
+  - Routes API : `GOOGLE_ROUTES_API_KEY` (à provisionner plus tard)
+- **Project ID** : `delta-dev-496120`
+- **Fait le 2026-05-12** :
+  - Projet `delta-dev` créé via Google Auth Platform (nouvelle UX 2024-2025 qui regroupe l'écran de consentement et la gestion des clients dans une vue unifiée)
+  - Audience configurée en **Externe** (mode *Test*) avec `Erkkul` comme test user. Passage en *In production* différé au pré-lancement (instantané pour nos scopes non-sensibles `openid` / `email` / `profile`)
+  - Scopes activés via *Accès aux données* : `.../auth/userinfo.email`, `.../auth/userinfo.profile`, `openid`
+  - Client OAuth Web créé via *Clients* : nom `Delta — Supabase Auth (dev)`, type *Application Web*, origines JS autorisées `http://localhost:3000` + `https://delta-web-gamma.vercel.app`, **redirect URI unique** `https://knyfrnxkqyyirnsyijfk.supabase.co/auth/v1/callback` (callback Supabase Auth standard dérivé du project ref)
+  - Client ID + Client Secret stockés hors repo (1Password), collés directement dans Supabase Auth Dashboard
+- **À faire** :
+  - Activer **Routes API** quand on attaquera KAN-41 (déclaration de trajet) — nécessitera l'ajout d'un mode de paiement côté GCP (200 $/mois de crédit gratuit, suffisant pour le dev)
+  - Repasser le projet en *In production* sur la page **Audience** au pré-lancement (instantané : scopes non-sensibles)
+- **Notes** : nouvelle UX Google Cloud (« Google Auth Platform ») diffère de la doc legacy *OAuth consent screen*. Si la doc Supabase ou Stack Overflow référence l'ancienne UX, traduire mentalement : *OAuth consent screen* → *Branding/Audience/Accès aux données*, *Credentials* → *Clients*.
 
 ### Apple Developer (Sign in with Apple + App Store)
 - **Statut** : À faire
@@ -70,9 +81,14 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 - **Notes** : gotchas mobile (deep link, identité privée). Tester tôt sur device réel.
 
 ### Supabase Auth — activation providers
-- **Statut** : À faire (dépend de Google + Apple ci-dessus)
-- **Dashboard** : Supabase project → Auth → Providers
-- **Notes** : activer email/password + Google + Apple avec credentials des items précédents.
+- **Statut** : Partiel — email/password (2026-05-08) et Google OAuth (2026-05-12) actifs. Reste Apple Sign In.
+- **Dashboard** : Supabase project → Authentication → Sign In / Providers
+- **Fait le 2026-05-12** (Google) :
+  - Toggle *Enable Sign in with Google* activé
+  - Client ID + Client Secret (générés côté GCP, cf. § Google Cloud Console) collés dans la carte du provider
+  - Callback URL Supabase vérifié identique au redirect URI déclaré côté Google : `https://knyfrnxkqyyirnsyijfk.supabase.co/auth/v1/callback`
+  - **URL Configuration** élargie : Site URL inchangée (`http://localhost:3000`), Redirect URLs étendus à `https://delta-web-gamma.vercel.app/**` et `https://*.vercel.app/**` (wildcard pour autoriser toutes les previews par-PR sans whitelist manuelle ; à durcir au pré-lancement)
+- **À faire** : activer Apple Sign In une fois Apple Developer provisionné (99 €/an, différé hors session web initiale).
 
 ## Paiement
 
@@ -108,6 +124,10 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 - **Project slug** : `delta-web-gamma` (auto-généré par Vercel : `delta` + Root Directory `web` + suffixe collision `gamma`)
 - **URL preview** : https://delta-web-gamma.vercel.app
 - **Env vars produites** : configurées dans Vercel UI (miroir de `.env.local`)
+- **Fait le 2026-05-12** :
+  - 5 env vars miroir ajoutées dans **Project Settings → Environment Variables** sur les 3 scopes (Production + Preview + Development) : `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` (Sensitive), `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (Sensitive)
+  - Template versionné côté repo : `apps/web/.env.local.example` (sans secrets, commenté). Convention de naming documentée : préfixe `NEXT_PUBLIC_*` = exposable au browser, sans préfixe = strictement serveur. Traduit le naming abstrait d'ARCHITECTURE.md §2.1 dans l'idiome Next.js. `apps/mobile` aura plus tard ses équivalents `EXPO_PUBLIC_*`.
+  - `.env.local` créé en local par le dev (jamais commité, cf. `.gitignore` lignes 19-22).
 - **Fait le 2026-05-11** :
   - Compte Vercel créé, GitHub App Vercel autorisée sur l'org `Erkkul`
   - Projet importé depuis `Erkkul/delta`, **Root Directory = `apps/web`**, Framework Preset auto-détecté Next.js
