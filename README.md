@@ -27,7 +27,7 @@ Delta/
 ├── legal/               CGU, CGV, RGPD (à venir)
 ├── business/            Modèle économique, pricing, ops (à venir)
 │
-├── apps/                web (Next.js), mobile (Expo) — à venir
+├── apps/                web (Next.js 15, scaffold posé), mobile (Expo) — à venir
 ├── packages/            core, contracts, db, ui-web, ui-mobile, jobs, ...
 └── supabase/            Config CLI, migrations versionnées, seeds, policies SQL
     ├── config.toml      Config locale Supabase CLI

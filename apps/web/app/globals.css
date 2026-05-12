@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: #FAF7F2; /* cream-50 — règle DESIGN.md §299 */
+    color: #1C1917;            /* cream-950 */
+    font-family: var(--font-body), system-ui, sans-serif;
+  }
+}
