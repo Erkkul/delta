@@ -11,6 +11,7 @@ const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
+    "../../packages/ui-web/src/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {

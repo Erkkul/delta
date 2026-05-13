@@ -10,15 +10,24 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf .next .turbo"
+    "test:e2e": "playwright test",
+    "clean": "rm -rf .next .turbo playwright-report test-results"
   },
   "dependencies": {
+    "@delta/contracts": "workspace:*",
+    "@delta/core": "workspace:*",
+    "@delta/db": "workspace:*",
+    "@delta/ui-web": "workspace:*",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.46.1",
     "next": "^15.0.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@delta/config": "workspace:*",
+    "@playwright/test": "~1.56.0",
     "@types/node": "^20.16.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
