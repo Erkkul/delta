@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf .next .turbo"
+    "test:e2e": "playwright test",
+    "clean": "rm -rf .next .turbo playwright-report test-results"
   },
   "dependencies": {
     "@delta/contracts": "workspace:*",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@delta/config": "workspace:*",
+    "@playwright/test": "~1.56.0",
     "@types/node": "^20.16.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

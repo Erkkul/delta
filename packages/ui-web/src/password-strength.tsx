@@ -1,7 +1,7 @@
 "use client"
 
-import zxcvbn from "zxcvbn"
 import { useMemo } from "react"
+import zxcvbn from "zxcvbn"
 
 /**
  * Indicateur de force du mot de passe basé sur zxcvbn (score 0-4).

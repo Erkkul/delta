@@ -50,6 +50,10 @@ coverage/
 # Sentry source maps tmp
 .sentryclirc
 
+# Playwright (artefacts de runs locaux)
+playwright-report/
+test-results/
+
 # Claude — conventions partagées versionnées (skills, commands, prompts).
 # Restent locaux : préférences perso et artefacts éphémères.
 .claude/settings.local.json

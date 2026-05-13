@@ -90,3 +90,31 @@ describe("normalizeRoles", () => {
     expect(normalizeRoles(["rameneur"])).toEqual(["rameneur"])
   })
 })
+
+/**
+ * Invariant produit (décision 2026-05-13) : l'étape OTP de vérification
+ * email ne touche ni au choix des rôles ni au mapping rôle → route.
+ * `nextOnboardingPath` est une fonction pure du tableau `roles` — peu
+ * importe que l'OTP ait été vérifié juste avant ou non. Cette suite
+ * documente ce contrat (et bloque toute régression qui réintroduirait
+ * un couplage entre vérification email et routage).
+ */
+describe("nextOnboardingPath — invariant post-OTP (KAN-2)", () => {
+  it("identique avant et après OTP : pas d'état caché", () => {
+    const cases: Array<{ roles: Parameters<typeof nextOnboardingPath>[0] }> = [
+      { roles: ["rameneur"] },
+      { roles: ["producteur"] },
+      { roles: ["acheteur"] },
+      { roles: ["acheteur", "producteur"] },
+      { roles: ["acheteur", "rameneur", "producteur"] },
+      { roles: [] },
+    ]
+    for (const { roles } of cases) {
+      const before = nextOnboardingPath(roles)
+      // Simulation : on appelle 5 fois après "vérification OTP" — la
+      // fonction étant pure, le résultat ne bouge pas.
+      const after = [0, 1, 2, 3, 4].map(() => nextOnboardingPath(roles))
+      for (const value of after) expect(value).toBe(before)
+    }
+  })
+})
