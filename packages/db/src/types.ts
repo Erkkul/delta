@@ -29,7 +29,7 @@ export type Database = {
 export type UserRow = {
   id: string
   email: string
-  role: Role
+  roles: Role[]
   metadata: Record<string, unknown>
   created_at: string
   updated_at: string
@@ -39,13 +39,13 @@ export type UserRow = {
 export type UserInsert = {
   id: string
   email: string
-  role: Role
+  roles?: Role[]
   metadata?: Record<string, unknown>
 }
 
 export type UserUpdate = {
   email?: string
-  role?: Role
+  roles?: Role[]
   metadata?: Record<string, unknown>
   deleted_at?: string | null
 }

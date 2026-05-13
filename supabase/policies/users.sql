@@ -9,11 +9,11 @@
 -- Toute évolution des policies passe par une NOUVELLE migration, qui
 -- doit être miroitée ici dans le même commit (cf. ARCHITECTURE.md §14.2).
 --
--- Règles :
---   1. SELECT : un user ne lit que sa propre ligne (auth.uid() = id).
---   2. UPDATE : un user ne met à jour que sa propre ligne, et n'a PAS
---      le droit de modifier `role` (escalade de privilège). Le rôle est
---      changé via une route admin / service dédiée — pas par PATCH client.
+-- Règles (décision 2026-05-13 multi-rôle) :
+--   1. SELECT : self uniquement (auth.uid() = id).
+--   2. UPDATE : self uniquement. Le user peut modifier `roles` (multi-
+--      sélection via /onboarding/role) et `metadata`. `email` et `id`
+--      sont verrouillés par WITH CHECK + ownership Supabase Auth.
 --   3. INSERT : aucune insertion via client utilisateur. Le trigger
 --      SECURITY DEFINER et le client admin (secret key, qui bypass RLS)
 --      sont les seuls chemins légitimes.
@@ -32,20 +32,17 @@ CREATE POLICY "users_select_self"
   USING (auth.uid() = id);
 
 ----------------------------------------------------------------------
--- UPDATE
+-- UPDATE — `roles` et `metadata` modifiables par self ; `id` et `email` verrouillés
 ----------------------------------------------------------------------
--- WITH CHECK garantit que la mise à jour ne change pas l'`id` ni le `role`
--- (l'utilisateur ne peut pas s'auto-promouvoir). `email` est verrouillé
--- côté Supabase Auth — la cohérence est gérée par le provider d'identité.
-DROP POLICY IF EXISTS "users_update_self_metadata" ON public.users;
-CREATE POLICY "users_update_self_metadata"
+DROP POLICY IF EXISTS "users_update_self" ON public.users;
+CREATE POLICY "users_update_self"
   ON public.users
   FOR UPDATE
   TO authenticated
   USING (auth.uid() = id)
   WITH CHECK (
     auth.uid() = id
-    AND role = (SELECT u.role FROM public.users u WHERE u.id = auth.uid())
+    AND id = (SELECT u.id FROM public.users u WHERE u.id = auth.uid())
     AND email = (SELECT u.email FROM public.users u WHERE u.id = auth.uid())
   );
 

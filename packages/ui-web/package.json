@@ -8,7 +8,11 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./signup-form": "./src/signup-form.tsx"
+    "./signup-form": "./src/signup-form.tsx",
+    "./splash": "./src/splash.tsx",
+    "./otp-form": "./src/otp-form.tsx",
+    "./role-selector": "./src/role-selector.tsx",
+    "./password-strength": "./src/password-strength.tsx"
   },
   "scripts": {
     "lint": "eslint .",
@@ -21,12 +25,14 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@delta/contracts": "workspace:*"
+    "@delta/contracts": "workspace:*",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@delta/config": "workspace:*",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/zxcvbn": "^4.4.5",
     "eslint": "^9.12.0",
     "typescript": "^5.5.4"
   }

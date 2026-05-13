@@ -1,3 +1,4 @@
 export * from "./role"
 export * from "./consent"
 export * from "./signup"
+export * from "./role-selection"

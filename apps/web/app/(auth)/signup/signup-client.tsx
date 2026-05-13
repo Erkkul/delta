@@ -1,6 +1,6 @@
 "use client"
 
-import { type Role, type SignupInput } from "@delta/contracts/auth"
+import { type SignupInput } from "@delta/contracts/auth"
 import { auth as coreAuth } from "@delta/core"
 import { SignupForm } from "@delta/ui-web"
 import { useRouter } from "next/navigation"
@@ -12,11 +12,10 @@ const CURRENT_TERMS_VERSION = coreAuth.CURRENT_TERMS_VERSION
 const CURRENT_PRIVACY_VERSION = coreAuth.CURRENT_PRIVACY_VERSION
 
 type Props = {
-  defaultRole?: Role
   initialError: string | null
 }
 
-export function SignupClient({ defaultRole, initialError }: Props) {
+export function SignupClient({ initialError }: Props) {
   const router = useRouter()
   const [topError, setTopError] = useState<string | null>(initialError)
 
@@ -28,7 +27,10 @@ export function SignupClient({ defaultRole, initialError }: Props) {
       body: JSON.stringify(input),
     })
     if (res.status === 201) {
-      router.push(coreAuth.onboardingPathForRole(input.role))
+      // Confirm email ON côté Supabase Auth → l'utilisateur doit valider
+      // l'OTP envoyé par email avant que sa session ne soit ouverte.
+      const next = `/auth/verify-email?email=${encodeURIComponent(input.email)}`
+      router.push(next)
       return
     }
     const payload = (await res.json().catch(() => null)) as
@@ -45,13 +47,11 @@ export function SignupClient({ defaultRole, initialError }: Props) {
     )
   }
 
-  async function handleGoogleSignup(role: Role) {
+  async function handleGoogleSignup() {
     const supabase = getBrowserSupabase()
     const origin =
       typeof window !== "undefined" ? window.location.origin : ""
-    const redirectTo = `${origin}/auth/callback?role=${encodeURIComponent(
-      role,
-    )}`
+    const redirectTo = `${origin}/auth/callback`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo },
@@ -72,7 +72,6 @@ export function SignupClient({ defaultRole, initialError }: Props) {
         </div>
       ) : null}
       <SignupForm
-        defaultRole={defaultRole}
         termsVersion={CURRENT_TERMS_VERSION}
         privacyVersion={CURRENT_PRIVACY_VERSION}
         signupWithEmail={handleEmailSignup}

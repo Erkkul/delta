@@ -17,7 +17,7 @@
     "@delta/core": "workspace:*",
     "@delta/db": "workspace:*",
     "@delta/ui-web": "workspace:*",
-    "@supabase/ssr": "^0.5.2",
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.46.1",
     "next": "^15.0.3",
     "react": "^19.0.0",

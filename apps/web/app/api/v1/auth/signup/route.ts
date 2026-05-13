@@ -6,15 +6,21 @@ import {
 } from "@delta/core/errors"
 import { type NextRequest, NextResponse } from "next/server"
 
+import { publicEnv } from "@/lib/env"
 import { getAdminSupabase } from "@/lib/supabase/server"
 
 /**
- * POST /api/v1/auth/signup
+ * POST /api/v1/auth/signup (KAN-2 v2 — multi-rôle, décision 2026-05-13).
  *
- * Adapter HTTP fin (cf. ARCHITECTURE.md §4.1). Validation + appel use
- * case `core.auth.signupWithEmail`, qui délègue la création Auth.
+ * Input : { email, password, termsVersion, privacyVersion }
+ * Output (201) : { userId }
+ * Codes : 201 / 400 / 409 / 500
  *
- * Codes : 201 / 400 (validation) / 409 (email pris) / 500.
+ * Pas de rôle en input (déféré à AU-06 Choix rôle). Les consents sont
+ * passés à Supabase en `options.data.consents` et copiés en
+ * `users.metadata.consents` par le trigger DB. Vérification email
+ * obligatoire (Supabase Confirm email ON) — l'utilisateur sera
+ * redirigé vers /auth/verify-email après cet appel.
  */
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => null)) as unknown
@@ -25,18 +31,21 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  const env = publicEnv()
   const admin = getAdminSupabase()
 
   try {
     const result = await coreAuth.signupWithEmail(body, {
       async createUserWithPassword(input) {
-        const { data, error } = await admin.auth.admin.createUser({
+        // signUp envoie le OTP par email (vs admin.createUser qui crée
+        // un user déjà confirmé). On garde donc signUp côté serveur en
+        // utilisant le client admin (pas de session attachée).
+        const { data, error } = await admin.auth.signUp({
           email: input.email,
           password: input.password,
-          email_confirm: false,
-          user_metadata: {
-            role: input.metadata.role,
-            consents: input.metadata.consents,
+          options: {
+            data: { consents: input.metadata.consents },
+            emailRedirectTo: `${env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify`,
           },
         })
         const mapped = coreAuth.mapAuthProviderError(error, input.email)

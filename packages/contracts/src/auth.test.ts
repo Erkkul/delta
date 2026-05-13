@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest"
 
 import {
   LoginInput,
+  OtpVerificationInput,
   Role,
   ROLES,
+  RoleSelectionInput,
   SignupInput,
   SignupOutput,
 } from "./auth"
@@ -23,15 +25,12 @@ describe("Role", () => {
 const validSignup = {
   email: "user@example.fr",
   password: "Motdepasse2026",
-  role: "acheteur" as const,
-  acceptedTerms: true,
-  acceptedPrivacy: true,
   termsVersion: "2026-05-12",
   privacyVersion: "2026-05-12",
 }
 
 describe("SignupInput", () => {
-  it("accepte un signup valide", () => {
+  it("accepte un signup valide (sans rôle, sans checkboxes — décision 2026-05-13)", () => {
     const parsed = SignupInput.parse(validSignup)
     expect(parsed.email).toBe("user@example.fr")
   })
@@ -44,21 +43,9 @@ describe("SignupInput", () => {
     expect(parsed.email).toBe("user@example.fr")
   })
 
-  it("rejette un mot de passe trop court", () => {
+  it("rejette un mot de passe trop court (politique 10 caractères)", () => {
     expect(() =>
       SignupInput.parse({ ...validSignup, password: "Aa1" }),
-    ).toThrow()
-  })
-
-  it("exige acceptedTerms = true", () => {
-    expect(() =>
-      SignupInput.parse({ ...validSignup, acceptedTerms: false }),
-    ).toThrow()
-  })
-
-  it("exige acceptedPrivacy = true", () => {
-    expect(() =>
-      SignupInput.parse({ ...validSignup, acceptedPrivacy: false }),
     ).toThrow()
   })
 
@@ -70,17 +57,81 @@ describe("SignupInput", () => {
 })
 
 describe("SignupOutput", () => {
-  it("accepte un payload bien formé", () => {
+  it("accepte un payload bien formé (juste userId, plus de rôle)", () => {
     const parsed = SignupOutput.parse({
       userId: "11111111-1111-4111-8111-111111111111",
-      role: "rameneur",
     })
-    expect(parsed.role).toBe("rameneur")
+    expect(parsed.userId).toBe("11111111-1111-4111-8111-111111111111")
   })
 
   it("rejette un userId non UUID", () => {
+    expect(() => SignupOutput.parse({ userId: "abc" })).toThrow()
+  })
+})
+
+describe("OtpVerificationInput", () => {
+  it("accepte un OTP 6 chiffres", () => {
+    const parsed = OtpVerificationInput.parse({
+      email: "user@example.fr",
+      otp: "123456",
+    })
+    expect(parsed.otp).toBe("123456")
+  })
+
+  it("rejette un OTP non numérique", () => {
     expect(() =>
-      SignupOutput.parse({ userId: "abc", role: "rameneur" }),
+      OtpVerificationInput.parse({ email: "user@example.fr", otp: "12345A" }),
+    ).toThrow()
+  })
+
+  it("rejette un OTP de 5 chiffres", () => {
+    expect(() =>
+      OtpVerificationInput.parse({ email: "user@example.fr", otp: "12345" }),
+    ).toThrow()
+  })
+
+  it("rejette un OTP de 7 chiffres", () => {
+    expect(() =>
+      OtpVerificationInput.parse({ email: "user@example.fr", otp: "1234567" }),
+    ).toThrow()
+  })
+})
+
+describe("RoleSelectionInput", () => {
+  it("accepte un seul rôle", () => {
+    expect(RoleSelectionInput.parse({ roles: ["acheteur"] }).roles).toEqual([
+      "acheteur",
+    ])
+  })
+
+  it("accepte les trois rôles cumulés", () => {
+    const parsed = RoleSelectionInput.parse({
+      roles: ["acheteur", "rameneur", "producteur"],
+    })
+    expect(parsed.roles).toHaveLength(3)
+  })
+
+  it("rejette un tableau vide", () => {
+    expect(() => RoleSelectionInput.parse({ roles: [] })).toThrow()
+  })
+
+  it("rejette les doublons", () => {
+    expect(() =>
+      RoleSelectionInput.parse({ roles: ["acheteur", "acheteur"] }),
+    ).toThrow()
+  })
+
+  it("rejette plus de 3 rôles", () => {
+    expect(() =>
+      RoleSelectionInput.parse({
+        roles: ["acheteur", "rameneur", "producteur", "acheteur"],
+      }),
+    ).toThrow()
+  })
+
+  it("rejette un rôle inconnu", () => {
+    expect(() =>
+      RoleSelectionInput.parse({ roles: ["admin"] }),
     ).toThrow()
   })
 })

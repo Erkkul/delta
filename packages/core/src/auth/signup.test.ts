@@ -11,15 +11,12 @@ import { mapAuthProviderError, signupWithEmail } from "./signup"
 const validInput = {
   email: "jeanne.dupont@example.fr",
   password: "Motdepasse2026",
-  role: "acheteur" as const,
-  acceptedTerms: true,
-  acceptedPrivacy: true,
   termsVersion: "2026-05-12",
   privacyVersion: "2026-05-12",
 }
 
 describe("signupWithEmail", () => {
-  it("crée le user et renvoie {userId, role}", async () => {
+  it("crée le user et renvoie {userId} (plus de role en sortie — v2)", async () => {
     const createUserWithPassword = vi
       .fn()
       .mockResolvedValue({ userId: "uuid-1" })
@@ -28,12 +25,11 @@ describe("signupWithEmail", () => {
       { createUserWithPassword },
       new Date("2026-05-12T10:00:00.000Z"),
     )
-    expect(result).toEqual({ userId: "uuid-1", role: "acheteur" })
+    expect(result).toEqual({ userId: "uuid-1" })
     expect(createUserWithPassword).toHaveBeenCalledWith({
       email: "jeanne.dupont@example.fr",
       password: "Motdepasse2026",
       metadata: {
-        role: "acheteur",
         consents: {
           termsVersion: "2026-05-12",
           privacyVersion: "2026-05-12",
@@ -101,28 +97,10 @@ describe("signupWithEmail", () => {
     ).rejects.toBeInstanceOf(AuthValidationError)
   })
 
-  it("rejette un rôle inconnu", async () => {
+  it("rejette une version de CGU vide", async () => {
     await expect(
       signupWithEmail(
-        { ...validInput, role: "admin" },
-        { createUserWithPassword: vi.fn() },
-      ),
-    ).rejects.toBeInstanceOf(AuthValidationError)
-  })
-
-  it("rejette si acceptedTerms = false", async () => {
-    await expect(
-      signupWithEmail(
-        { ...validInput, acceptedTerms: false },
-        { createUserWithPassword: vi.fn() },
-      ),
-    ).rejects.toBeInstanceOf(AuthValidationError)
-  })
-
-  it("rejette si acceptedPrivacy = false", async () => {
-    await expect(
-      signupWithEmail(
-        { ...validInput, acceptedPrivacy: false },
+        { ...validInput, termsVersion: "" },
         { createUserWithPassword: vi.fn() },
       ),
     ).rejects.toBeInstanceOf(AuthValidationError)

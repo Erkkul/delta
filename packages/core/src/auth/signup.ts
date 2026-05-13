@@ -1,4 +1,4 @@
-import { SignupInput, type Role, type SignupOutput } from "@delta/contracts/auth"
+import { SignupInput, type SignupOutput } from "@delta/contracts/auth"
 
 import {
   AuthValidationError,
@@ -9,12 +9,13 @@ import {
 import { buildConsentRecord, type ConsentRecord } from "./consent"
 
 /**
- * Métadonnées projetées dans `auth.users.raw_user_meta_data`. Le trigger
- * Postgres `on_auth_user_created` lit `role` pour insérer la ligne
- * `public.users` ; `consents` est conservé pour audit RGPD (US-01.10).
+ * Métadonnées projetées dans `auth.users.raw_user_meta_data` lors du
+ * signup email/password. Le trigger Postgres `on_auth_user_created`
+ * copie `consents` dans `users.metadata.consents`. Pas de `role` ici :
+ * la sélection multi-rôle se fait à l'écran AU-06 après vérif email
+ * (décision 2026-05-13).
  */
 export type SignupUserMetadata = {
-  role: Role
   consents: ConsentRecord
 }
 
@@ -26,13 +27,13 @@ export type AuthAdapter = {
   }): Promise<{ userId: string }>
 }
 
-export type SignupResult = SignupOutput
-
 /**
- * Use case `signupWithEmail` — fonction pure de coordination domain.
+ * Use case `signupWithEmail` (AU-02). Fonction pure de coordination.
  * Valide l'input via le contrat Zod, construit les métadonnées RGPD,
- * délègue la création Auth à l'adapter, et renvoie un `SignupResult`
- * typé pour l'adapter HTTP.
+ * délègue la création Auth à l'adapter. Vérification email obligatoire
+ * = la session n'est PAS active à la sortie de cet appel : l'utilisateur
+ * doit passer par AU-04 (verify OTP) avant que la session ne soit
+ * établie côté Supabase.
  *
  * Erreurs typées (cf. errors.ts) :
  *   - AuthValidationError       (input non conforme au schéma Zod)
@@ -43,7 +44,7 @@ export async function signupWithEmail(
   input: unknown,
   auth: AuthAdapter,
   now: Date = new Date(),
-): Promise<SignupResult> {
+): Promise<SignupOutput> {
   const parsed = SignupInput.safeParse(input)
   if (!parsed.success) {
     throw new AuthValidationError(
@@ -56,7 +57,6 @@ export async function signupWithEmail(
   }
 
   const data = parsed.data
-
   const consents = buildConsentRecord({
     termsVersion: data.termsVersion,
     privacyVersion: data.privacyVersion,
@@ -66,16 +66,15 @@ export async function signupWithEmail(
   const { userId } = await auth.createUserWithPassword({
     email: data.email,
     password: data.password,
-    metadata: { role: data.role, consents },
+    metadata: { consents },
   })
 
-  return { userId, role: data.role }
+  return { userId }
 }
 
 /**
  * Mappe une erreur du provider Auth (Supabase) vers une erreur métier typée.
- * Centralise les codes d'erreur connus pour éviter de leur logique dans
- * l'adapter HTTP. Codes documentés Supabase Auth (gotrue) :
+ * Codes documentés Supabase Auth (gotrue) :
  *   - `user_already_exists` / `email_address_already_in_use`
  *   - `weak_password`
  */

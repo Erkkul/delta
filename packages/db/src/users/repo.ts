@@ -8,7 +8,7 @@ type Client = SupabaseClient<Database>
 export type CreateUserInput = {
   id: string
   email: string
-  role: Role
+  roles?: Role[]
   metadata?: Record<string, unknown>
 }
 
@@ -44,9 +44,9 @@ export const usersRepo = {
   },
 
   /**
-   * Insertion explicite — réservée au client admin ou au callback OAuth
-   * lorsque le trigger Postgres n'a pas pu projeter le rôle correct (cf.
-   * spec KAN-2 § Risques techniques : sync auth.users ↔ users métier).
+   * Insertion explicite — réservée au client admin (la RLS rejette toute
+   * insertion via la clé publishable). Utilisée par le callback OAuth si
+   * le trigger DB n'a pas créé la ligne pour une raison de timing.
    */
   async create(client: Client, input: CreateUserInput): Promise<UserRow> {
     const { data, error } = await client
@@ -54,7 +54,7 @@ export const usersRepo = {
       .insert({
         id: input.id,
         email: input.email.trim().toLowerCase(),
-        role: input.role,
+        roles: input.roles ?? [],
         metadata: input.metadata ?? {},
       })
       .select("*")
@@ -63,14 +63,39 @@ export const usersRepo = {
     return data
   },
 
-  async updateRole(
+  /**
+   * Met à jour le tableau `users.roles` (cf. décision 2026-05-13 multi-
+   * rôle). Le caller doit utiliser un client porteur de la session
+   * utilisateur (RLS `users_update_self`) ou un client admin.
+   */
+  async updateRoles(
     client: Client,
     id: string,
-    role: Role,
+    roles: Role[],
   ): Promise<UserRow> {
     const { data, error } = await client
       .from("users")
-      .update({ role })
+      .update({ roles })
+      .eq("id", id)
+      .select("*")
+      .single()
+    if (error) throw error
+    return data
+  },
+
+  /**
+   * Met à jour `users.metadata` (typiquement pour poser/mettre à jour
+   * `consents` après un callback OAuth qui n'est pas passé par /signup).
+   * Merge applicatif côté caller (Postgres jsonb sans merge natif).
+   */
+  async updateMetadata(
+    client: Client,
+    id: string,
+    metadata: Record<string, unknown>,
+  ): Promise<UserRow> {
+    const { data, error } = await client
+      .from("users")
+      .update({ metadata })
       .eq("id", id)
       .select("*")
       .single()

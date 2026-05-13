@@ -1,25 +1,30 @@
 -- Migration: create_users
--- Date: 2026-05-12
+-- Date: 2026-05-12 (révisée 2026-05-13 — pivot multi-rôle)
 -- Ticket: KAN-2 (Création de compte)
--- Cadrage: specs/KAN-2/design.md, ARCHITECTURE.md §5 + §9
+-- Cadrage: specs/KAN-2/design.md, ARCHITECTURE.md §5 + §9 + §18 entrée 1.13
 --
 -- Crée la table métier `users` projetée depuis `auth.users` (Supabase Auth).
 --
--- Architecture retenue (cf. specs/KAN-2/design.md § Risques techniques) :
+-- Architecture retenue (cf. décision produit 2026-05-13 multi-rôle) :
 --   - L'unicité d'identité reste portée par `auth.users` (Supabase Auth).
---   - `public.users` étend cette identité avec les champs métier : rôle,
---     metadata (consents RGPD, etc.).
+--   - `public.users` étend cette identité avec les champs métier : roles
+--     (multi : array du enum user_role), metadata (consents RGPD, etc.).
 --   - Atomicité Auth ↔ métier : trigger AFTER INSERT sur `auth.users`
 --     qui insère atomiquement la ligne `public.users` correspondante.
---   - `role` lu depuis `raw_user_meta_data->>'role'` quand fourni (cas
---     email/password : la valeur est passée via `options.data` côté
---     `auth.signUp`). Fallback `'acheteur'` pour les flows OAuth qui ne
---     transmettent pas notre metadata custom (Google Sign In) — le
---     callback OAuth côté Next met à jour le rôle effectif a posteriori.
+--   - `roles` démarre VIDE (`'{}'`). L'écran AU-06 « Choix rôle » (multi-
+--     select 1..3) le peuple via `PATCH /api/v1/me/roles` après vérif
+--     email. La policy UPDATE autorise le user à modifier ses propres
+--     roles ; `email` et `id` restent verrouillés.
+--   - `metadata.consents` : copié depuis `raw_user_meta_data->>'consents'`
+--     si présent (cas signup email/password — le route handler passe
+--     `options.data = { consents: { termsVersion, privacyVersion,
+--     acceptedAt } }`). Pour les flows OAuth (Google) qui ne transmettent
+--     pas notre metadata custom, le callback `/auth/callback` côté Next
+--     pose les consents a posteriori (idempotent).
 --   - RLS forcée : SELECT/UPDATE limités à `auth.uid() = id` ; INSERT et
 --     DELETE refusés côté client (gérés exclusivement par le trigger
 --     SECURITY DEFINER ou un client admin). Policies dans
---     `supabase/policies/users.sql`.
+--     `supabase/policies/users.sql` (miroir) et inline ci-dessous.
 --
 -- Rollback documenté :
 --   DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
@@ -42,7 +47,7 @@ END;
 $$;
 
 COMMENT ON TYPE public.user_role IS
-  'Rôle initial à la création de compte (KAN-2). Multi-rôles progressif (cf. décision produit 2026-05-03) : un rameneur a aussi capacité d''acheter, un producteur peut être rameneur/acheteur ; le rôle initial détermine seulement le premier onboarding.';
+  'Rôle utilisateur (KAN-2). Multi-rôles progressif (décision produit 2026-05-03 + 2026-05-13) : un compte peut cumuler 1 à 3 rôles dans le tableau users.roles.';
 
 ----------------------------------------------------------------------
 -- 2. Table public.users
@@ -50,7 +55,7 @@ COMMENT ON TYPE public.user_role IS
 CREATE TABLE IF NOT EXISTS public.users (
   id uuid PRIMARY KEY REFERENCES auth.users (id) ON DELETE CASCADE,
   email text NOT NULL,
-  role public.user_role NOT NULL,
+  roles public.user_role[] NOT NULL DEFAULT '{}',
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
@@ -58,7 +63,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 );
 
 COMMENT ON TABLE public.users IS
-  'Compte métier projeté depuis auth.users. Une ligne par utilisateur authentifié, créée par trigger on_auth_user_created (cf. KAN-2 design.md).';
+  'Compte métier projeté depuis auth.users. Une ligne par utilisateur authentifié, créée par trigger on_auth_user_created (cf. KAN-2 design.md). users.roles démarre vide et est peuplé par PATCH /api/v1/me/roles après vérif email.';
 
 -- Index unique case-insensitive sur l'email (Supabase Auth normalise déjà
 -- côté gotrue, on garantit la cohérence côté métier).
@@ -80,6 +85,11 @@ CREATE TRIGGER set_updated_at
 -- (postgres / supabase_admin), qui peut écrire dans public.users malgré
 -- la RLS. Aucun input utilisateur n'est concaténé en SQL dynamique →
 -- pas de vecteur d'injection.
+--
+-- Comportement : insère la ligne users avec roles = '{}'. Si l'appel
+-- côté serveur a fourni `options.data.consents` (cas signup email/pwd),
+-- on les copie dans metadata.consents. Sinon (cas Google OAuth), on
+-- laisse metadata vide ; le callback côté Next posera les consents.
 CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -87,32 +97,19 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_role public.user_role;
   v_meta jsonb;
+  v_consents jsonb;
 BEGIN
-  -- Lecture du rôle déclaré côté client via options.data.role.
-  -- Si invalide ou absent (cas OAuth Google sans round-trip custom),
-  -- fallback sur 'acheteur' (entrée de l'entonnoir multi-rôles progressif).
-  -- Le callback OAuth Next côté apps/web met à jour le rôle si nécessaire.
-  BEGIN
-    v_role := COALESCE(
-      NULLIF(NEW.raw_user_meta_data->>'role', ''),
-      'acheteur'
-    )::public.user_role;
-  EXCEPTION WHEN invalid_text_representation THEN
-    v_role := 'acheteur';
-  END;
-
-  -- Metadata métier : on conserve les consents RGPD si fournis.
-  v_meta := COALESCE(NEW.raw_user_meta_data->'consents', 'null'::jsonb);
-  IF v_meta = 'null'::jsonb THEN
+  -- Copie les consents si fournis via options.data lors du signUp.
+  v_consents := NEW.raw_user_meta_data->'consents';
+  IF v_consents IS NULL OR v_consents = 'null'::jsonb THEN
     v_meta := '{}'::jsonb;
   ELSE
-    v_meta := jsonb_build_object('consents', v_meta);
+    v_meta := jsonb_build_object('consents', v_consents);
   END IF;
 
-  INSERT INTO public.users (id, email, role, metadata)
-  VALUES (NEW.id, NEW.email, v_role, v_meta)
+  INSERT INTO public.users (id, email, roles, metadata)
+  VALUES (NEW.id, NEW.email, '{}'::public.user_role[], v_meta)
   ON CONFLICT (id) DO NOTHING;
 
   RETURN NEW;
@@ -120,7 +117,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION public.handle_new_auth_user() IS
-  'Trigger AFTER INSERT sur auth.users — insère atomiquement la ligne public.users correspondante. Lit role + consents depuis raw_user_meta_data.';
+  'Trigger AFTER INSERT sur auth.users — insère atomiquement la ligne public.users (roles vide, consents copiés depuis raw_user_meta_data si présents).';
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -131,11 +128,6 @@ CREATE TRIGGER on_auth_user_created
 ----------------------------------------------------------------------
 -- 4. RLS — forcée et restrictive par défaut
 ----------------------------------------------------------------------
--- Les policies sont définies dans `supabase/policies/users.sql` et
--- rejouées par cette migration via \ir (à exécuter manuellement) ou
--- via supabase db push (qui inclut les fichiers .sql sous migrations/).
--- On force RLS dès maintenant pour qu'aucune donnée ne fuite si le
--- fichier de policies n'a pas encore tourné.
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users FORCE ROW LEVEL SECURITY;
 
@@ -153,19 +145,19 @@ CREATE POLICY "users_select_self"
   TO authenticated
   USING (auth.uid() = id);
 
--- UPDATE : un user ne met à jour que sa propre ligne, et n'a PAS le droit
--- de modifier `role` (escalade de privilège) ni `email` (verrouillé côté
--- Supabase Auth). Seules les modifs de `metadata` (et `deleted_at` pour
--- soft delete via job) sont effectives en pratique.
-DROP POLICY IF EXISTS "users_update_self_metadata" ON public.users;
-CREATE POLICY "users_update_self_metadata"
+-- UPDATE : un user ne met à jour que sa propre ligne. `roles` et
+-- `metadata` sont modifiables par self. `email` et `id` sont
+-- verrouillés (Supabase Auth est seul propriétaire de l'email ;
+-- WITH CHECK refuse toute modification de ces champs côté client).
+DROP POLICY IF EXISTS "users_update_self" ON public.users;
+CREATE POLICY "users_update_self"
   ON public.users
   FOR UPDATE
   TO authenticated
   USING (auth.uid() = id)
   WITH CHECK (
     auth.uid() = id
-    AND role = (SELECT u.role FROM public.users u WHERE u.id = auth.uid())
+    AND id = (SELECT u.id FROM public.users u WHERE u.id = auth.uid())
     AND email = (SELECT u.email FROM public.users u WHERE u.id = auth.uid())
   );
 
