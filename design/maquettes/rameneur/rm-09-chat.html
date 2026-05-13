@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<!-- Maquette Delta — RM-09 Chat de mission / Ticket(s) Jira : KAN-50 (Chat par mission), KAN-51 (Notifications messages) / Mapping : produit/jira_mapping.md -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM-09 · Chat de mission — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-950:#0C1F0F; --green-900:#14351A; --green-800:#1E4D26;
+    --green-700:#276634; --green-600:#357F43; --green-500:#4A9A58;
+    --green-400:#6DB87A; --green-300:#8FCB9C; --green-200:#C0E4C7;
+    --green-100:#E4F4E7; --green-50:#F2FAF3;
+    --earth-800:#5C3214; --earth-600:#8B5226; --earth-500:#B8703F;
+    --earth-400:#CC8E62; --earth-200:#EDCFB4; --earth-100:#F7E8D6;
+    --earth-50:#FDF5ED;
+    --cream-950:#1C1917; --cream-800:#44403C; --cream-700:#57534E;
+    --cream-600:#78716C; --cream-500:#A8A29E; --cream-400:#C4BFBB;
+    --cream-300:#D6D3D1; --cream-200:#E7E5E4; --cream-100:#F5F5F4;
+    --cream-50:#FAF7F2;
+    --rose-500:#C0392B; --rose-100:#FDEDEC;
+  }
+  html, body { background: var(--cream-100); }
+  body { font-family: 'DM Sans', sans-serif; color: var(--cream-950); min-height: 100vh; }
+
+  /* ════════ DEMO NAV ════════ */
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); margin-right: 4px; }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-weight: 500; font-size: 12px; transition: all 150ms; }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ════════ PREVIEW TOOLBAR ════════ */
+  .preview-toolbar { background: white; border-bottom: 1px solid var(--cream-200); padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: space-between; }
+  .ptb-section { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ptb-label { font-size: 10px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--cream-500); }
+  .ptb-group { display: inline-flex; gap: 2px; background: var(--cream-100); border: 1px solid var(--cream-200); border-radius: 100px; padding: 3px; }
+  .ptb-btn { background: transparent; border: none; padding: 6px 14px; border-radius: 100px; font-family: 'DM Sans'; font-size: 12px; font-weight: 600; color: var(--cream-600); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 150ms; }
+  .ptb-btn:hover { color: var(--green-700); }
+  .ptb-btn.on { background: white; color: var(--green-800); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .ptb-btn svg { width: 13px; height: 13px; }
+
+  /* ════════ STAGE / FRAME ════════ */
+  .stage { display: flex; justify-content: center; padding: 28px 16px 56px; min-height: calc(100vh - 80px); }
+  .frame { width: 100%; max-width: 1280px; background: var(--cream-50); border-radius: 14px; border: 1px solid var(--cream-200); box-shadow: 0 10px 40px rgba(28,25,23,0.06); overflow: hidden; transition: max-width 250ms ease, border-radius 250ms; }
+  body.mobile-mode .frame { max-width: 390px; border-radius: 36px; border: 8px solid var(--cream-950); box-shadow: 0 20px 60px rgba(28,25,23,0.18); }
+  body.mobile-mode .frame::before { content: ''; display: block; width: 100%; height: 22px; background: var(--cream-950); margin: -1px 0 -1px; }
+
+  /* ════════ HEADER ════════ */
+  .header { background: rgba(250,247,242,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cream-200); padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(53,127,67,0.04); }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+  .logo-icon { width: 34px; height: 34px; background: var(--green-800); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 6px rgba(14,53,26,0.25); }
+  .logo-text { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-800); letter-spacing: -0.02em; }
+  .logo-dot { color: var(--earth-500); }
+  .nav-links { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .nav-link { font-size: 14px; font-weight: 500; color: var(--cream-700); text-decoration: none; padding: 6px 12px; border-radius: 8px; transition: color 150ms, background 150ms; position: relative; }
+  .nav-link:hover { color: var(--green-700); background: var(--green-50); }
+  .nav-link.active { color: var(--green-700); font-weight: 600; }
+  .nav-link .nav-badge { position: absolute; top: -2px; right: 0; background: var(--earth-500); color: white; font-size: 10px; font-weight: 700; border-radius: 100px; padding: 1px 6px; box-shadow: 0 2px 6px rgba(184,112,63,0.35); }
+  .nav-sep { width: 1px; height: 20px; background: var(--cream-200); margin: 0 4px; }
+  .avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--green-100); border: 2px solid var(--green-200); display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; flex-shrink: 0; }
+  body.mobile-mode .header { padding: 0 16px; height: 56px; }
+  body.mobile-mode .header .nav-link:not(.active) { display: none; }
+  body.mobile-mode .header .nav-sep { display: none; }
+
+  /* ════════ PAGE LAYOUT ════════ */
+  .page { display: flex; flex-direction: column; height: calc(100vh - 220px); min-height: 640px; }
+  body.mobile-mode .page { height: 720px; min-height: 0; }
+  .preview-label { font-size: 10px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--cream-500); padding: 14px 22px 0; }
+
+  .chat-shell {
+    flex: 1; display: grid;
+    grid-template-columns: 360px 1fr;
+    border-top: 1px solid var(--cream-200);
+    margin-top: 10px;
+    background: var(--cream-50);
+    min-height: 0;
+  }
+  body.mobile-mode .chat-shell { grid-template-columns: 1fr; }
+  body.mobile-mode .chat-pane.list { display: var(--list-display, flex); }
+  body.mobile-mode .chat-pane.thread { display: var(--thread-display, none); }
+
+  /* ════════ LIST PANE ════════ */
+  .chat-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: white; }
+  .chat-pane.list { border-right: 1px solid var(--cream-200); background: var(--cream-50); }
+
+  .list-head { padding: 18px 20px 12px; border-bottom: 1px solid var(--cream-200); background: var(--cream-50); }
+  .list-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; }
+  .list-sub { font-size: 12.5px; color: var(--cream-600); margin-top: 2px; }
+  .list-search { margin-top: 12px; position: relative; }
+  .list-search input { width: 100%; background: white; border: 1px solid var(--cream-300); border-radius: 100px; padding: 9px 14px 9px 36px; font-family: 'DM Sans'; font-size: 13px; color: var(--cream-950); outline: none; transition: all 150ms; }
+  .list-search input::placeholder { color: var(--cream-500); }
+  .list-search input:focus { border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(53,127,67,0.10); }
+  .list-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--cream-500); }
+
+  .list-scroll { flex: 1; overflow-y: auto; padding: 8px 8px 20px; }
+
+  .list-group { padding: 14px 12px 4px; }
+  .list-group-title { font-family: 'Lora', serif; font-size: 13px; font-weight: 700; color: var(--green-800); display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  .list-group-title .producer-emoji { font-size: 15px; }
+  .list-group-title .group-status { margin-left: auto; font-family: 'DM Sans'; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .group-status.active { background: var(--green-700); color: white; }
+  .group-status.upcoming { background: var(--green-100); color: var(--green-800); }
+  .group-status.completed { background: var(--cream-200); color: var(--cream-700); }
+  .list-group-meta { font-size: 11px; color: var(--cream-500); padding-left: 0; margin-bottom: 6px; }
+
+  .conv-item { display: flex; gap: 12px; padding: 10px 12px; border-radius: 12px; cursor: pointer; transition: background 150ms; align-items: flex-start; text-decoration: none; color: inherit; position: relative; }
+  .conv-item:hover { background: white; }
+  .conv-item.selected { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .conv-item.selected::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; background: var(--green-600); border-radius: 0 4px 4px 0; }
+  .conv-item.archived { opacity: 0.65; }
+
+  .conv-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; }
+  .conv-avatar.producer { background: linear-gradient(135deg, var(--earth-200), var(--earth-400)); }
+  .conv-avatar.buyer { background: var(--green-100); color: var(--green-800); font-weight: 700; font-size: 14px; }
+  .conv-avatar .role-pip { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; }
+  .conv-avatar .role-pip.prod { background: var(--earth-500); }
+  .conv-avatar .role-pip.buy { background: var(--green-600); }
+  .conv-avatar .role-pip svg { width: 8px; height: 8px; color: white; }
+
+  .conv-body { flex: 1; min-width: 0; }
+  .conv-row1 { display: flex; align-items: baseline; gap: 6px; }
+  .conv-name { font-size: 13.5px; font-weight: 600; color: var(--cream-950); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+  .conv-time { font-size: 11px; color: var(--cream-500); flex-shrink: 0; }
+  .conv-item.unread .conv-time { color: var(--earth-500); font-weight: 700; }
+  .conv-role { font-size: 10.5px; color: var(--cream-500); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; margin-bottom: 2px; }
+  .conv-preview { font-size: 12.5px; color: var(--cream-600); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
+  .conv-preview svg { width: 12px; height: 12px; flex-shrink: 0; color: var(--cream-500); }
+  .conv-preview .me-prefix { color: var(--cream-500); font-weight: 500; }
+  .conv-item.unread .conv-preview { color: var(--cream-950); font-weight: 600; }
+  .conv-meta-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .conv-unread-pill { background: var(--earth-500); color: white; font-size: 10px; font-weight: 700; border-radius: 100px; padding: 1px 7px; box-shadow: 0 2px 4px rgba(184,112,63,0.3); }
+  .conv-typing { font-size: 11.5px; color: var(--green-700); font-style: italic; font-weight: 500; }
+
+  /* ════════ THREAD PANE ════════ */
+  .thread-bar { padding: 12px 22px; background: white; border-bottom: 1px solid var(--cream-200); display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .back-btn { display: none; width: 32px; height: 32px; border-radius: 50%; background: var(--cream-100); border: none; cursor: pointer; align-items: center; justify-content: center; flex-shrink: 0; }
+  body.mobile-mode .back-btn { display: flex; }
+  .back-btn svg { width: 16px; height: 16px; color: var(--cream-800); }
+  .thread-bar-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; }
+  .thread-bar-avatar.producer { background: linear-gradient(135deg, var(--earth-200), var(--earth-400)); }
+  .thread-bar-avatar.buyer { background: var(--green-100); color: var(--green-800); font-weight: 700; font-size: 14px; }
+  .thread-bar-avatar .presence { position: absolute; bottom: -1px; right: -1px; width: 11px; height: 11px; border-radius: 50%; background: var(--green-500); border: 2px solid white; }
+  .thread-bar-info { flex: 1; min-width: 0; }
+  .thread-bar-name { font-size: 14.5px; font-weight: 600; color: var(--cream-950); display: flex; align-items: center; gap: 6px; }
+  .role-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 100px; }
+  .role-tag.prod { background: var(--earth-50); color: var(--earth-800); border: 1px solid var(--earth-100); }
+  .role-tag.buy { background: var(--green-50); color: var(--green-800); border: 1px solid var(--green-200); }
+  .thread-bar-sub { font-size: 12px; color: var(--cream-600); margin-top: 1px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .thread-bar-sub .sep { color: var(--cream-300); }
+  .thread-bar-sub .typing-indicator { color: var(--green-700); font-style: italic; font-weight: 500; }
+  .thread-bar-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .thread-bar-action { width: 36px; height: 36px; border-radius: 50%; background: var(--cream-50); border: 1px solid var(--cream-200); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 150ms; color: var(--cream-700); }
+  .thread-bar-action:hover { background: var(--green-50); color: var(--green-700); border-color: var(--green-200); }
+  .thread-bar-action svg { width: 16px; height: 16px; }
+
+  /* ── Mission context bar ── */
+  .mission-context { background: var(--green-50); border-bottom: 1px solid var(--green-100); padding: 10px 22px; display: flex; align-items: center; gap: 12px; font-size: 12.5px; color: var(--green-900); flex-shrink: 0; }
+  .mission-context .mc-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--green-100); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+  .mission-context-info { flex: 1; min-width: 0; line-height: 1.4; }
+  .mission-context-info strong { font-weight: 600; color: var(--green-800); }
+  .mission-context .sep { color: var(--green-300); margin: 0 4px; }
+  .mission-context .mc-link { background: white; border: 1px solid var(--green-200); color: var(--green-800); padding: 6px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 150ms; flex-shrink: 0; }
+  .mission-context .mc-link:hover { background: var(--green-100); }
+  .mission-context .mc-link svg { width: 11px; height: 11px; }
+
+  .mission-context.completed { background: var(--cream-100); border-color: var(--cream-200); color: var(--cream-700); }
+  .mission-context.completed .mc-icon { background: var(--cream-200); }
+  .mission-context.completed strong { color: var(--cream-800); }
+  .mission-context.completed .mc-link { border-color: var(--cream-300); color: var(--cream-800); }
+
+  /* ── Messages scroll ── */
+  .messages { flex: 1; overflow-y: auto; padding: 18px 22px; display: flex; flex-direction: column; gap: 4px; background: var(--cream-50); }
+
+  .day-sep { display: flex; align-items: center; gap: 10px; margin: 14px 0 6px; }
+  .day-sep::before, .day-sep::after { content: ''; flex: 1; height: 1px; background: var(--cream-200); }
+  .day-sep span { font-size: 11px; font-weight: 600; color: var(--cream-500); text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 10px; background: white; border: 1px solid var(--cream-200); border-radius: 100px; }
+
+  .system-msg { align-self: center; background: var(--earth-50); border: 1px solid var(--earth-100); color: var(--earth-800); font-size: 11.5px; padding: 5px 12px; border-radius: 100px; margin: 6px 0; display: inline-flex; align-items: center; gap: 5px; }
+  .system-msg svg { width: 11px; height: 11px; }
+
+  .msg { max-width: 78%; display: flex; flex-direction: column; gap: 2px; }
+  .msg.in { align-self: flex-start; align-items: flex-start; }
+  .msg.out { align-self: flex-end; align-items: flex-end; }
+  .msg.consec { margin-top: -2px; }
+  .msg.last-of-group { margin-bottom: 6px; }
+
+  .bubble { padding: 9px 13px; font-size: 14px; line-height: 1.45; word-wrap: break-word; }
+  .msg.in .bubble { background: white; color: var(--cream-950); border: 1px solid var(--cream-200); border-radius: 14px 14px 14px 4px; }
+  .msg.in.consec .bubble { border-radius: 14px 14px 14px 14px; }
+  .msg.out .bubble { background: var(--green-600); color: white; border-radius: 14px 14px 4px 14px; box-shadow: 0 1px 2px rgba(53,127,67,0.15); }
+  .msg.out.consec .bubble { border-radius: 14px 14px 14px 14px; }
+  .msg.out.preset .bubble { background: var(--green-700); }
+  .msg.out.preset .bubble::before { content: '⚡ Réponse rapide'; display: block; font-size: 10px; opacity: 0.75; margin-bottom: 3px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+
+  .bubble-photo { background: white; border: 1px solid var(--cream-200); border-radius: 14px; overflow: hidden; padding: 4px; max-width: 240px; }
+  .msg.out .bubble-photo { background: var(--green-700); border-color: var(--green-700); }
+  .bubble-photo .photo-frame { width: 100%; aspect-ratio: 4/3; background: linear-gradient(135deg, var(--earth-100) 0%, var(--earth-200) 50%, var(--cream-200) 100%); border-radius: 10px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; color: var(--earth-800); font-size: 11px; font-weight: 600; }
+  .bubble-photo .photo-frame::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.18) 8px, rgba(255,255,255,0.18) 9px); }
+  .bubble-photo .photo-frame span { position: relative; background: rgba(255,255,255,0.85); padding: 4px 10px; border-radius: 100px; font-family: 'DM Sans', monospace; }
+  .bubble-photo-caption { padding: 6px 10px 4px; font-size: 12.5px; }
+  .msg.out .bubble-photo-caption { color: white; }
+  .msg.in .bubble-photo-caption { color: var(--cream-700); }
+
+  .bubble-gps { display: flex; gap: 10px; align-items: center; padding: 10px 12px; background: white; border: 1px solid var(--green-200); border-radius: 14px; max-width: 280px; }
+  .msg.out .bubble-gps { background: var(--green-50); }
+  .bubble-gps .gps-icon { width: 36px; height: 36px; background: var(--green-100); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--green-700); }
+  .bubble-gps .gps-icon svg { width: 18px; height: 18px; }
+  .bubble-gps .gps-text { flex: 1; min-width: 0; }
+  .bubble-gps .gps-title { font-size: 13px; font-weight: 600; color: var(--green-800); }
+  .bubble-gps .gps-coords { font-size: 11.5px; color: var(--cream-600); font-family: 'DM Sans', monospace; }
+
+  .msg-meta { font-size: 10.5px; color: var(--cream-500); display: flex; align-items: center; gap: 4px; padding: 0 4px; }
+  .msg.out .msg-meta { color: var(--cream-500); }
+  .msg-meta svg { width: 12px; height: 12px; }
+  .msg-meta .read { color: var(--green-600); }
+  .msg-author { font-size: 11px; font-weight: 600; color: var(--cream-700); padding: 0 4px 1px; }
+
+  .typing-bubble { align-self: flex-start; background: white; border: 1px solid var(--cream-200); border-radius: 14px 14px 14px 4px; padding: 10px 14px; display: flex; gap: 4px; margin-top: 4px; }
+  .typing-bubble span { width: 6px; height: 6px; border-radius: 50%; background: var(--cream-400); animation: typing 1.2s ease-in-out infinite; }
+  .typing-bubble span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-bubble span:nth-child(3) { animation-delay: 0.30s; }
+  @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+  /* ── Composer ── */
+  .composer-shell { background: white; border-top: 1px solid var(--cream-200); flex-shrink: 0; }
+  .preset-row { padding: 10px 22px 0; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .preset-row::-webkit-scrollbar { height: 0; }
+  .preset-chip { background: var(--green-50); border: 1px solid var(--green-200); color: var(--green-800); padding: 7px 13px; border-radius: 100px; font-family: 'DM Sans'; font-size: 12.5px; font-weight: 500; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; transition: all 150ms; flex-shrink: 0; }
+  .preset-chip:hover { background: var(--green-100); border-color: var(--green-300); }
+  .preset-chip svg { width: 12px; height: 12px; }
+  .preset-chip.gps { background: var(--earth-50); border-color: var(--earth-200); color: var(--earth-800); }
+  .preset-chip.gps:hover { background: var(--earth-100); }
+
+  .composer { padding: 12px 22px 16px; display: flex; align-items: flex-end; gap: 10px; }
+  .composer-actions { display: flex; gap: 4px; align-items: center; }
+  .composer-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--cream-50); border: 1px solid var(--cream-200); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 150ms; color: var(--cream-700); }
+  .composer-btn:hover { background: var(--green-50); border-color: var(--green-200); color: var(--green-700); }
+  .composer-btn svg { width: 18px; height: 18px; }
+  .composer-input { flex: 1; min-width: 0; background: var(--cream-50); border: 1px solid var(--cream-300); border-radius: 22px; padding: 9px 14px; font-family: 'DM Sans'; font-size: 14px; color: var(--cream-950); resize: none; max-height: 120px; min-height: 40px; outline: none; transition: all 150ms; line-height: 1.4; }
+  .composer-input::placeholder { color: var(--cream-500); }
+  .composer-input:focus { border-color: var(--green-600); background: white; box-shadow: 0 0 0 3px rgba(53,127,67,0.10); }
+  .composer-send { width: 40px; height: 40px; border-radius: 50%; background: var(--green-600); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 3px 10px rgba(53,127,67,0.25); transition: all 150ms; }
+  .composer-send:hover { background: var(--green-700); transform: translateY(-1px); }
+  .composer-send svg { width: 18px; height: 18px; }
+  .composer-send:disabled { background: var(--cream-300); color: var(--cream-500); box-shadow: none; cursor: not-allowed; }
+
+  /* ── Empty state ── */
+  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; text-align: center; background: var(--cream-50); }
+  .empty-state-illu { width: 80px; height: 80px; border-radius: 50%; background: var(--green-50); border: 1.5px dashed var(--green-300); display: flex; align-items: center; justify-content: center; font-size: 34px; margin-bottom: 16px; }
+  .empty-state h3 { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; color: var(--green-900); margin-bottom: 6px; }
+  .empty-state p { font-size: 13.5px; color: var(--cream-700); line-height: 1.55; max-width: 320px; margin-bottom: 18px; }
+  .empty-suggestions { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 340px; }
+  .empty-suggestion { background: white; border: 1px solid var(--cream-200); border-radius: 12px; padding: 10px 14px; font-size: 13px; color: var(--cream-800); text-align: left; cursor: pointer; transition: all 150ms; display: flex; align-items: center; gap: 10px; }
+  .empty-suggestion:hover { border-color: var(--green-300); background: var(--green-50); color: var(--green-800); }
+  .empty-suggestion .sug-icon { color: var(--green-600); flex-shrink: 0; }
+  .empty-suggestion svg { width: 14px; height: 14px; }
+  .empty-suggestion-arrow { margin-left: auto; color: var(--cream-400); }
+
+  /* ── Locked composer (mission terminée) ── */
+  .composer-locked { padding: 14px 22px; background: var(--cream-100); border-top: 1px solid var(--cream-200); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .composer-locked .lock-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--cream-200); color: var(--cream-700); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .composer-locked .lock-icon svg { width: 16px; height: 16px; }
+  .composer-locked .lock-text { flex: 1; font-size: 12.5px; color: var(--cream-700); line-height: 1.45; }
+  .composer-locked .lock-text strong { color: var(--cream-900); font-weight: 600; }
+
+  /* ── No-thread placeholder (desktop, when no conversation selected) ── */
+  .no-thread { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; text-align: center; background: var(--cream-50); }
+  .no-thread-illu { width: 90px; height: 90px; border-radius: 50%; background: white; border: 1.5px dashed var(--cream-300); display: flex; align-items: center; justify-content: center; font-size: 38px; margin-bottom: 18px; }
+  .no-thread h3 { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-900); margin-bottom: 6px; }
+  .no-thread p { font-size: 13.5px; color: var(--cream-600); line-height: 1.55; max-width: 320px; }
+
+  /* ── State panels ── */
+  .state-panel { display: none; flex: 1; flex-direction: column; min-height: 0; }
+  .state-panel.active { display: flex; }
+
+  @media (max-width: 920px) {
+    .chat-shell { grid-template-columns: 1fr; }
+    .chat-pane.list { display: var(--list-display, flex); }
+    .chat-pane.thread { display: var(--thread-display, none); }
+    .back-btn { display: flex; }
+  }
+  @media (max-width: 720px) {
+    .stage { padding: 12px 8px 28px; }
+    .frame { border-radius: 8px; }
+    .header { padding: 0 16px; }
+    .nav-link:not(.active) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS RAMENEUR</span>
+    <a href="rm-04-declarer-trajet.html" class="demo-nav-link">1 · Déclarer trajet</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-05-liste-opportunites.html" class="demo-nav-link">2 · Opportunités</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-06-detail-opportunite.html" class="demo-nav-link">3 · Détail</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-08-mission-active.html" class="demo-nav-link">4 · Mission active</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">5 · Chat de mission</a>
+  </div>
+</div>
+
+<!-- ══════════ PREVIEW TOOLBAR ══════════ -->
+<div class="preview-toolbar">
+  <div class="ptb-section">
+    <span class="ptb-label">État</span>
+    <div class="ptb-group" id="state-group">
+      <button class="ptb-btn" data-state="list" onclick="setState('list', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        Liste
+      </button>
+      <button class="ptb-btn on" data-state="thread" onclick="setState('thread', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        Conversation
+      </button>
+      <button class="ptb-btn" data-state="empty" onclick="setState('empty', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Vide
+      </button>
+      <button class="ptb-btn" data-state="done" onclick="setState('done', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        Terminée
+      </button>
+    </div>
+  </div>
+  <div class="ptb-section">
+    <span class="ptb-label">Format</span>
+    <div class="ptb-group" id="format-group">
+      <button class="ptb-btn on" data-format="desktop" onclick="setFormat('desktop', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Desktop
+      </button>
+      <button class="ptb-btn" data-format="mobile" onclick="setFormat('mobile', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        Mobile
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STAGE ══════════ -->
+<div class="stage">
+  <div class="frame">
+
+    <header class="header">
+      <a href="rm-07-mes-missions.html" class="logo">
+        <div class="logo-icon">🐜</div>
+        <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#" class="nav-link">Accueil</a>
+        <a href="#" class="nav-link">Mes trajets</a>
+        <a href="rm-07-mes-missions.html" class="nav-link">Missions</a>
+        <a href="#" class="nav-link active">Messages<span class="nav-badge">3</span></a>
+        <div class="nav-sep"></div>
+        <div class="avatar-btn">🌿</div>
+      </nav>
+    </header>
+
+    <div class="preview-label" id="preview-label">RM-09 · Conversation ouverte</div>
+
+    <div class="page">
+      <div class="chat-shell">
+
+        <!-- ══════════ LIST PANE ══════════ -->
+        <aside class="chat-pane list" id="list-pane">
+          <div class="list-head">
+            <div class="list-title">Messages</div>
+            <div class="list-sub">3 conversations · 1 mission active</div>
+            <div class="list-search">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" placeholder="Rechercher producteur ou voisin…">
+            </div>
+          </div>
+
+          <div class="list-scroll">
+
+            <!-- Mission active -->
+            <div class="list-group">
+              <div class="list-group-title">
+                <span class="producer-emoji">🐝</span>
+                La Ruche du Bessin
+                <span class="group-status active">Active</span>
+              </div>
+              <div class="list-group-meta">Pickup aujourd'hui · Bayeux → Paris</div>
+            </div>
+
+            <a href="#" class="conv-item unread" onclick="event.preventDefault(); selectConv(this, 'producer')">
+              <div class="conv-avatar producer">🐝
+                <span class="role-pip prod"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 11l-3 9l9-3l9-9l-9-9l-3 3"/></svg></span>
+              </div>
+              <div class="conv-body">
+                <div class="conv-row1">
+                  <span class="conv-name">Pierre Mahé</span>
+                  <span class="conv-time">14:32</span>
+                </div>
+                <div class="conv-role">Producteur · pickup</div>
+                <div class="conv-preview">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  Photo · Voici les 3 caisses prêtes
+                </div>
+                <div class="conv-meta-row">
+                  <span class="conv-unread-pill">2</span>
+                  <span class="conv-typing">Pierre est en train d'écrire…</span>
+                </div>
+              </div>
+            </a>
+
+            <a href="#" class="conv-item selected" onclick="event.preventDefault(); selectConv(this, 'buyer3')">
+              <div class="conv-avatar buyer">SC
+                <span class="role-pip buy"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg></span>
+              </div>
+              <div class="conv-body">
+                <div class="conv-row1">
+                  <span class="conv-name">Sophie Caron</span>
+                  <span class="conv-time">14:18</span>
+                </div>
+                <div class="conv-role">Voisin 3 · Paris 12<sup>e</sup></div>
+                <div class="conv-preview"><span class="me-prefix">Vous : </span>Je serai en bas de l'immeuble vers 18h30</div>
+              </div>
+            </a>
+
+            <a href="#" class="conv-item unread" onclick="event.preventDefault(); selectConv(this, 'buyer4')">
+              <div class="conv-avatar buyer">JM
+                <span class="role-pip buy"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg></span>
+              </div>
+              <div class="conv-body">
+                <div class="conv-row1">
+                  <span class="conv-name">Julien Marchand</span>
+                  <span class="conv-time">12:04</span>
+                </div>
+                <div class="conv-role">Voisin 4 · Paris 12<sup>e</sup></div>
+                <div class="conv-preview">Hâte de goûter ce miel ! Mon code porte est 1A2B3.</div>
+                <div class="conv-meta-row"><span class="conv-unread-pill">1</span></div>
+              </div>
+            </a>
+
+            <!-- Mission à venir -->
+            <div class="list-group" style="margin-top: 6px">
+              <div class="list-group-title">
+                <span class="producer-emoji">🍎</span>
+                Cidrerie des Marais
+                <span class="group-status upcoming">Vendredi 16</span>
+              </div>
+              <div class="list-group-meta">Pickup dans 6 jours · Évrecy → Paris</div>
+            </div>
+
+            <a href="#" class="conv-item" onclick="event.preventDefault(); selectConv(this, 'empty')">
+              <div class="conv-avatar producer">🍎
+                <span class="role-pip prod"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 11l-3 9l9-3l9-9l-9-9l-3 3"/></svg></span>
+              </div>
+              <div class="conv-body">
+                <div class="conv-row1">
+                  <span class="conv-name">Marie Lebrun</span>
+                  <span class="conv-time">—</span>
+                </div>
+                <div class="conv-role">Producteur · pickup</div>
+                <div class="conv-preview" style="color: var(--cream-500); font-style: italic">Aucun message · entamez la conversation</div>
+              </div>
+            </a>
+
+            <!-- Mission passée -->
+            <div class="list-group" style="margin-top: 6px">
+              <div class="list-group-title">
+                <span class="producer-emoji">🍯</span>
+                Brasserie de la Vallée
+                <span class="group-status completed">Archivée</span>
+              </div>
+              <div class="list-group-meta">Livrée le 3 mai · 4 voisins</div>
+            </div>
+
+            <a href="#" class="conv-item archived" onclick="event.preventDefault(); selectConv(this, 'completed')">
+              <div class="conv-avatar producer">🍯
+                <span class="role-pip prod"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 11l-3 9l9-3l9-9l-9-9l-3 3"/></svg></span>
+              </div>
+              <div class="conv-body">
+                <div class="conv-row1">
+                  <span class="conv-name">Antoine Roux</span>
+                  <span class="conv-time">3 mai</span>
+                </div>
+                <div class="conv-role">Producteur · archivé</div>
+                <div class="conv-preview"><span class="me-prefix">Vous : </span>Merci, tout s'est super bien passé !</div>
+              </div>
+            </a>
+
+            <a href="#" class="conv-item archived" onclick="event.preventDefault(); selectConv(this, 'completed')">
+              <div class="conv-avatar buyer">LF
+                <span class="role-pip buy"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg></span>
+              </div>
+              <div class="conv-body">
+                <div class="conv-row1">
+                  <span class="conv-name">Laura Fournier</span>
+                  <span class="conv-time">3 mai</span>
+                </div>
+                <div class="conv-role">Voisin 1 · archivé</div>
+                <div class="conv-preview">Bien reçu, encore merci ! 🙏</div>
+              </div>
+            </a>
+
+            <a href="#" class="conv-item archived" onclick="event.preventDefault(); selectConv(this, 'completed')">
+              <div class="conv-avatar buyer">DK
+                <span class="role-pip buy"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg></span>
+              </div>
+              <div class="conv-body">
+                <div class="conv-row1">
+                  <span class="conv-name">Driss Kessri</span>
+                  <span class="conv-time">3 mai</span>
+                </div>
+                <div class="conv-role">Voisin 2 · archivé</div>
+                <div class="conv-preview"><span class="me-prefix">Vous : </span>Je suis arrivé !</div>
+              </div>
+            </a>
+
+          </div>
+        </aside>
+
+        <!-- ══════════ THREAD PANE ══════════ -->
+        <section class="chat-pane thread" id="thread-pane">
+
+          <!-- ── State : conversation ouverte ── -->
+          <div id="state-thread" class="state-panel active">
+
+            <div class="thread-bar">
+              <button class="back-btn" onclick="goBackList()">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <div class="thread-bar-avatar buyer">SC<span class="presence"></span></div>
+              <div class="thread-bar-info">
+                <div class="thread-bar-name">
+                  Sophie Caron
+                  <span class="role-tag buy">Voisin 3</span>
+                </div>
+                <div class="thread-bar-sub">
+                  <span>Paris 12<sup>e</sup> · café Le Baron</span>
+                  <span class="sep">·</span>
+                  <span>vu il y a 4 min</span>
+                </div>
+              </div>
+              <div class="thread-bar-actions">
+                <button class="thread-bar-action" title="Voir la fiche du voisin">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </button>
+                <button class="thread-bar-action" title="Plus">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mission-context">
+              <div class="mc-icon">🐝</div>
+              <div class="mission-context-info">
+                <strong>La Ruche du Bessin</strong>
+                <span class="sep">·</span>
+                <span>Pickup aujourd'hui</span>
+                <span class="sep">·</span>
+                <span>Livraison Voisin 3 sur 4</span>
+              </div>
+              <a href="rm-08-mission-active.html" class="mc-link">
+                Voir la mission
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+
+            <div class="messages" id="messages-thread">
+
+              <div class="day-sep"><span>Hier</span></div>
+
+              <div class="msg in last-of-group">
+                <div class="bubble">Bonjour ! J'ai bien vu que vous êtes mon rameneur pour le miel. Vous pensez passer vers quelle heure demain en fin d'après-midi ?</div>
+                <div class="msg-meta">14:22</div>
+              </div>
+
+              <div class="msg out last-of-group">
+                <div class="bubble">Bonjour Sophie ! Oui c'est moi 🙂 Je récupère chez le producteur en matinée puis je remonte sur Paris. Je devrais passer chez vous entre 18h et 19h.</div>
+                <div class="msg-meta">14:48 · <span class="read">Lu</span></div>
+              </div>
+
+              <div class="msg in last-of-group">
+                <div class="bubble">Parfait, je rentre du travail vers 18h30 donc ça colle ! Le café Le Baron est juste en bas, sinon je peux descendre à la voiture.</div>
+                <div class="msg-meta">14:51</div>
+              </div>
+
+              <div class="day-sep"><span>Aujourd'hui</span></div>
+
+              <div class="system-msg">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Pickup confirmé chez La Ruche du Bessin à 11h04
+              </div>
+
+              <div class="msg out">
+                <div class="bubble">Pickup ok ✅ Je suis en route pour Paris, ETA aux alentours de 17h30.</div>
+              </div>
+              <div class="msg out preset last-of-group">
+                <div class="bubble">📦 Je suis en route avec votre commande.</div>
+                <div class="msg-meta">11:12 · <span class="read">Lu</span></div>
+              </div>
+
+              <div class="msg in">
+                <div class="bubble">Super, merci pour l'info !</div>
+              </div>
+              <div class="msg in last-of-group">
+                <div class="bubble-photo">
+                  <div class="photo-frame"><span>📸 photo · pickup chez Pierre</span></div>
+                  <div class="bubble-photo-caption">Voici votre pot, bien emballé 👌</div>
+                </div>
+                <div class="msg-author">via votre rameneur · 11:14</div>
+              </div>
+
+              <div class="msg in last-of-group">
+                <div class="bubble">Oh super, hâte ! Bonne route 🚗</div>
+                <div class="msg-meta">11:15</div>
+              </div>
+
+              <div class="msg out preset last-of-group">
+                <div class="bubble">⏱️ Je serai en retard d'environ 20 min. Désolé pour le contretemps.</div>
+                <div class="msg-meta">14:02 · <span class="read">Lu</span></div>
+              </div>
+
+              <div class="msg in last-of-group">
+                <div class="bubble">Pas de souci, je vous attends. Vous voulez que je vous envoie ma position exacte ?</div>
+                <div class="msg-meta">14:05</div>
+              </div>
+
+              <div class="msg out">
+                <div class="bubble-gps">
+                  <div class="gps-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                  </div>
+                  <div class="gps-text">
+                    <div class="gps-title">Position partagée</div>
+                    <div class="gps-coords">Porte d'Italie · 48.8189, 2.3590</div>
+                  </div>
+                </div>
+              </div>
+              <div class="msg out last-of-group">
+                <div class="bubble">Je serai en bas de l'immeuble vers 18h30 ✋</div>
+                <div class="msg-meta">14:18 · <span class="read">Lu</span></div>
+              </div>
+
+              <div class="typing-bubble"><span></span><span></span><span></span></div>
+
+            </div>
+
+            <div class="composer-shell">
+              <div class="preset-row">
+                <button class="preset-chip">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                  Je suis en route
+                </button>
+                <button class="preset-chip">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                  Retard d'environ X min
+                </button>
+                <button class="preset-chip">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Je suis arrivé sur place
+                </button>
+                <button class="preset-chip">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>
+                  Quel est le code porte ?
+                </button>
+                <button class="preset-chip gps">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                  Partager ma position
+                </button>
+              </div>
+              <div class="composer">
+                <div class="composer-actions">
+                  <button class="composer-btn" title="Joindre une photo">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </button>
+                  <button class="composer-btn" title="Réponses rapides">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  </button>
+                </div>
+                <textarea class="composer-input" placeholder="Écrire un message…" rows="1"></textarea>
+                <button class="composer-send">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── State : liste seule (mobile) — desktop affiche un placeholder ── -->
+          <div id="state-list" class="state-panel">
+            <div class="no-thread">
+              <div class="no-thread-illu">💬</div>
+              <h3>Sélectionnez une conversation</h3>
+              <p>Vos échanges avec les producteurs et les voisins liés à chaque mission apparaissent à gauche. Une mission active = un thread producteur + un thread par voisin.</p>
+            </div>
+          </div>
+
+          <!-- ── State : conversation vide (nouvelle) ── -->
+          <div id="state-empty" class="state-panel">
+            <div class="thread-bar">
+              <button class="back-btn" onclick="goBackList()">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <div class="thread-bar-avatar producer">🍎</div>
+              <div class="thread-bar-info">
+                <div class="thread-bar-name">
+                  Marie Lebrun
+                  <span class="role-tag prod">Producteur</span>
+                </div>
+                <div class="thread-bar-sub">
+                  <span>Cidrerie des Marais · Évrecy (14)</span>
+                  <span class="sep">·</span>
+                  <span>réponse habituelle &lt; 2 h</span>
+                </div>
+              </div>
+              <div class="thread-bar-actions">
+                <button class="thread-bar-action" title="Voir le producteur">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </button>
+                <button class="thread-bar-action" title="Plus">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mission-context">
+              <div class="mc-icon">🍎</div>
+              <div class="mission-context-info">
+                <strong>Cidrerie des Marais</strong>
+                <span class="sep">·</span>
+                <span>Pickup vendredi 16 mai</span>
+                <span class="sep">·</span>
+                <span>2 voisins confirmés</span>
+              </div>
+              <a href="rm-08-mission-active.html" class="mc-link">
+                Voir la mission
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+
+            <div class="empty-state">
+              <div class="empty-state-illu">👋</div>
+              <h3>Entamez la conversation</h3>
+              <p>Aucun message échangé pour l'instant. Marie est prévenue de votre passage — un petit mot pour caler le RDV ?</p>
+              <div class="empty-suggestions">
+                <button class="empty-suggestion">
+                  <span class="sug-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                  </span>
+                  Bonjour Marie, quel créneau vous arrange pour vendredi ?
+                  <span class="empty-suggestion-arrow">
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </span>
+                </button>
+                <button class="empty-suggestion">
+                  <span class="sug-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                  </span>
+                  Pouvez-vous me confirmer l'adresse exacte de pickup ?
+                  <span class="empty-suggestion-arrow">
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </span>
+                </button>
+                <button class="empty-suggestion">
+                  <span class="sug-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                  </span>
+                  J'ai un break · combien de cartons faut-il prévoir ?
+                  <span class="empty-suggestion-arrow">
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div class="composer-shell">
+              <div class="composer">
+                <div class="composer-actions">
+                  <button class="composer-btn" title="Joindre une photo">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </button>
+                  <button class="composer-btn" title="Réponses rapides">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  </button>
+                </div>
+                <textarea class="composer-input" placeholder="Écrire un premier message à Marie…" rows="1"></textarea>
+                <button class="composer-send" disabled>
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── State : mission terminée (lecture seule) ── -->
+          <div id="state-done" class="state-panel">
+            <div class="thread-bar">
+              <button class="back-btn" onclick="goBackList()">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <div class="thread-bar-avatar producer">🍯</div>
+              <div class="thread-bar-info">
+                <div class="thread-bar-name">
+                  Antoine Roux
+                  <span class="role-tag prod">Producteur</span>
+                </div>
+                <div class="thread-bar-sub">
+                  <span>Brasserie de la Vallée · Saint-Lô</span>
+                  <span class="sep">·</span>
+                  <span>conversation archivée</span>
+                </div>
+              </div>
+              <div class="thread-bar-actions">
+                <button class="thread-bar-action" title="Voir le producteur">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="mission-context completed">
+              <div class="mc-icon">✓</div>
+              <div class="mission-context-info">
+                <strong>Brasserie de la Vallée</strong>
+                <span class="sep">·</span>
+                <span>Mission terminée le 3 mai · 4 voisins servis</span>
+              </div>
+              <a href="rm-08-mission-active.html" class="mc-link">
+                Récapitulatif
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+
+            <div class="messages">
+              <div class="day-sep"><span>3 mai</span></div>
+
+              <div class="msg out last-of-group">
+                <div class="bubble">Bonjour Antoine, je suis en route, j'arrive vers 10h chez vous.</div>
+                <div class="msg-meta">09:14 · <span class="read">Lu</span></div>
+              </div>
+
+              <div class="msg in last-of-group">
+                <div class="bubble">Bonjour ! Parfait, tout est prêt à la cave. À tout de suite 👋</div>
+                <div class="msg-meta">09:18</div>
+              </div>
+
+              <div class="system-msg">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Pickup confirmé à 10h12
+              </div>
+
+              <div class="msg out last-of-group">
+                <div class="bubble">Tout est chargé, merci pour l'accueil et la dégustation 🍺 Je file sur Paris !</div>
+                <div class="msg-meta">10:24 · <span class="read">Lu</span></div>
+              </div>
+
+              <div class="msg in last-of-group">
+                <div class="bubble">Avec plaisir ! Bonne route et merci pour le coup de main aux voisins.</div>
+                <div class="msg-meta">10:26</div>
+              </div>
+
+              <div class="system-msg">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Dernière livraison confirmée à 18h47 · Mission terminée
+              </div>
+
+              <div class="msg out last-of-group">
+                <div class="bubble">Merci, tout s'est super bien passé ! Les voisins étaient ravis. À une prochaine fois j'espère 👍</div>
+                <div class="msg-meta">19:02 · <span class="read">Lu</span></div>
+              </div>
+
+              <div class="msg in last-of-group">
+                <div class="bubble">Idem, n'hésitez pas si vous repassez par la Manche. Bonne soirée Camille !</div>
+                <div class="msg-meta">19:14</div>
+              </div>
+            </div>
+
+            <div class="composer-locked">
+              <div class="lock-icon">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0-1.105.895-2 2-2s2 .895 2 2v3a2 2 0 11-4 0v-3zM5 11V8a7 7 0 1114 0v3M5 11h14v10H5V11z"/></svg>
+              </div>
+              <div class="lock-text">
+                <strong>Cette conversation est en lecture seule.</strong><br>
+                La mission est terminée et archivée. Pour toute question ultérieure, contactez le support Delta.
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const labels = {
+    list: 'RM-09 · Vue liste des conversations',
+    thread: 'RM-09 · Conversation ouverte',
+    empty: 'RM-09 · Conversation neuve (état vide)',
+    done: 'RM-09 · Mission terminée (lecture seule)'
+  };
+
+  function setState(name, btn) {
+    document.querySelectorAll('.state-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+    document.querySelectorAll('#state-group .ptb-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('preview-label').textContent = labels[name];
+
+    // Scroll messages to bottom on thread/done
+    setTimeout(() => {
+      document.querySelectorAll('.messages.active, #state-' + name + ' .messages').forEach(m => {
+        m.scrollTop = m.scrollHeight;
+      });
+    }, 50);
+
+    // In mobile mode : "list" state shows list pane only ; others show thread pane only
+    const root = document.documentElement.style;
+    if (document.body.classList.contains('mobile-mode')) {
+      if (name === 'list') {
+        root.setProperty('--list-display', 'flex');
+        root.setProperty('--thread-display', 'none');
+      } else {
+        root.setProperty('--list-display', 'none');
+        root.setProperty('--thread-display', 'flex');
+      }
+    }
+  }
+
+  function setFormat(name, btn) {
+    document.querySelectorAll('#format-group .ptb-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    if (name === 'mobile') {
+      document.body.classList.add('mobile-mode');
+      // Default mobile view : show thread pane (since "thread" state is active)
+      const activeState = document.querySelector('.state-panel.active').id.replace('state-', '');
+      const root = document.documentElement.style;
+      if (activeState === 'list') {
+        root.setProperty('--list-display', 'flex');
+        root.setProperty('--thread-display', 'none');
+      } else {
+        root.setProperty('--list-display', 'none');
+        root.setProperty('--thread-display', 'flex');
+      }
+    } else {
+      document.body.classList.remove('mobile-mode');
+      document.documentElement.style.removeProperty('--list-display');
+      document.documentElement.style.removeProperty('--thread-display');
+    }
+  }
+
+  function goBackList() {
+    if (document.body.classList.contains('mobile-mode')) {
+      document.documentElement.style.setProperty('--list-display', 'flex');
+      document.documentElement.style.setProperty('--thread-display', 'none');
+      // also flip state toggle
+      document.querySelectorAll('#state-group .ptb-btn').forEach(b => b.classList.remove('on'));
+      document.querySelector('#state-group .ptb-btn[data-state="list"]').classList.add('on');
+      document.querySelectorAll('.state-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('state-list').classList.add('active');
+      document.getElementById('preview-label').textContent = labels.list;
+    }
+  }
+
+  function selectConv(el, target) {
+    document.querySelectorAll('.conv-item').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    el.classList.remove('unread');
+    const pill = el.querySelector('.conv-unread-pill');
+    if (pill) pill.remove();
+
+    let nextState = 'thread';
+    if (target === 'empty') nextState = 'empty';
+    else if (target === 'completed') nextState = 'done';
+
+    const btn = document.querySelector('#state-group .ptb-btn[data-state="' + nextState + '"]');
+    if (btn) setState(nextState, btn);
+  }
+
+  // Auto-scroll messages on load
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.messages').forEach(m => {
+      m.scrollTop = m.scrollHeight;
+    });
+  });
+</script>
+
+</body>
+</html>

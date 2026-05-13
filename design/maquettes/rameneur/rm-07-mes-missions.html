@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — RM-07 Mes missions
+  Ticket(s) Jira : KAN-44 (Gestion des trajets), KAN-45 (Suivi mission & états)
+  Mapping : produit/jira_mapping.md
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM-07 · Mes missions — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50:  #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50:  #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50:  #FAF7F2;
+    --gold: #D4A017;
+    --rose-500: #C0392B; --rose-100: #FDEDEC;
+  }
+
+  html, body { background: var(--cream-100); }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--cream-950);
+    min-height: 100vh;
+  }
+
+  /* ════════════ DEMO NAV ════════════ */
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .demo-nav-label {
+    font-weight: 700; letter-spacing: 0.08em; font-size: 10px;
+    color: rgba(255,255,255,0.5); margin-right: 4px;
+  }
+  .demo-nav-link {
+    color: rgba(255,255,255,0.65); text-decoration: none;
+    padding: 4px 11px; border-radius: 100px;
+    font-weight: 500; font-size: 12px; transition: all 150ms;
+  }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+  .demo-nav-hub {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.5); font-size: 11px;
+  }
+  .demo-nav-hub a {
+    color: rgba(255,255,255,0.85); text-decoration: none;
+    padding: 4px 11px; border-radius: 100px;
+    background: rgba(184,112,63,0.45); font-weight: 600;
+  }
+
+  /* ════════════ PREVIEW TOOLBAR ════════════ */
+  .preview-toolbar {
+    background: white; border-bottom: 1px solid var(--cream-200);
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .ptb-section { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ptb-label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--cream-500);
+  }
+  .ptb-group {
+    display: inline-flex; gap: 2px;
+    background: var(--cream-100);
+    border: 1px solid var(--cream-200);
+    border-radius: 100px; padding: 3px;
+  }
+  .ptb-btn {
+    background: transparent; border: none;
+    padding: 6px 14px; border-radius: 100px;
+    font-family: 'DM Sans'; font-size: 12px; font-weight: 600;
+    color: var(--cream-600); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 150ms;
+  }
+  .ptb-btn:hover { color: var(--green-700); }
+  .ptb-btn.on { background: white; color: var(--green-800); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .ptb-btn svg { width: 13px; height: 13px; }
+
+  /* ════════════ STAGE / FRAME ════════════ */
+  .stage {
+    display: flex; justify-content: center;
+    padding: 28px 16px 56px;
+    min-height: calc(100vh - 80px);
+  }
+  .frame {
+    width: 100%; max-width: 1280px;
+    background: var(--cream-50);
+    border-radius: 14px;
+    border: 1px solid var(--cream-200);
+    box-shadow: 0 10px 40px rgba(28,25,23,0.06);
+    overflow: hidden;
+    transition: max-width 250ms ease, border-radius 250ms;
+  }
+  body.mobile-mode .frame {
+    max-width: 390px;
+    border-radius: 36px;
+    border: 8px solid var(--cream-950);
+    box-shadow: 0 20px 60px rgba(28,25,23,0.18);
+  }
+  body.mobile-mode .frame::before {
+    content: ''; display: block;
+    width: 100%; height: 22px;
+    background: var(--cream-950);
+    margin: -1px 0 -1px;
+  }
+
+  /* ════════════ HEADER ════════════ */
+  .header {
+    background: rgba(250,247,242,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 32px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(53,127,67,0.04);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+  .logo-icon {
+    width: 34px; height: 34px; background: var(--green-800); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    box-shadow: 0 2px 6px rgba(14,53,26,0.25);
+  }
+  .logo-text { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-800); letter-spacing: -0.02em; }
+  .logo-dot { color: var(--earth-500); }
+  .nav-links { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .nav-link {
+    font-size: 14px; font-weight: 500; color: var(--cream-700);
+    text-decoration: none; padding: 6px 12px; border-radius: 8px;
+    transition: color 150ms, background 150ms;
+  }
+  .nav-link:hover { color: var(--green-700); background: var(--green-50); }
+  .nav-link.active { color: var(--green-700); font-weight: 600; }
+  .nav-sep { width: 1px; height: 20px; background: var(--cream-200); margin: 0 4px; }
+  .avatar-btn {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--green-100);
+    border: 2px solid var(--green-200); display: flex; align-items: center;
+    justify-content: center; font-size: 15px; cursor: pointer; flex-shrink: 0;
+  }
+  body.mobile-mode .header { padding: 0 16px; height: 56px; }
+  body.mobile-mode .header .nav-link { display: none; }
+  body.mobile-mode .header .nav-sep { display: none; }
+
+  /* ════════════ PAGE ════════════ */
+  .page { max-width: 1180px; margin: 0 auto; padding: 28px 32px 48px; }
+  body.mobile-mode .page { padding: 18px 16px 88px; }
+
+  .preview-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--cream-500);
+    margin-bottom: 6px;
+  }
+
+  /* ════════════ HERO ════════════ */
+  .hero {
+    margin-bottom: 22px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 24px; flex-wrap: wrap;
+  }
+  .hero-title { flex: 1; min-width: 240px; }
+  .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 30px; font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.15; margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .hero h1 .accent { color: var(--earth-500); }
+  .hero p {
+    font-size: 15px; color: var(--cream-600);
+    line-height: 1.55; max-width: 560px;
+  }
+  body.mobile-mode .hero h1 { font-size: 22px; }
+  body.mobile-mode .hero p { font-size: 14px; }
+  .btn-primary-hero {
+    background: var(--green-600); color: white; border: none;
+    border-radius: 100px;
+    padding: 0 22px; height: 46px;
+    font-family: 'DM Sans'; font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(53,127,67,0.26);
+    display: inline-flex; align-items: center; gap: 8px;
+    text-decoration: none;
+    transition: all 200ms ease;
+    flex-shrink: 0;
+  }
+  .btn-primary-hero:hover {
+    background: var(--green-700); transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(53,127,67,0.32);
+  }
+  .btn-primary-hero svg { width: 16px; height: 16px; }
+
+  /* ════════════ FILTER BAR ════════════ */
+  .filter-bar {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    padding: 8px;
+    display: flex; gap: 4px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-bar::-webkit-scrollbar { height: 0; }
+  .filter-chip {
+    background: transparent; border: none;
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-family: 'DM Sans'; font-size: 13px; font-weight: 500;
+    color: var(--cream-700); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+    transition: all 150ms;
+  }
+  .filter-chip:hover { background: var(--cream-100); color: var(--green-700); }
+  .filter-chip.on {
+    background: var(--green-700); color: white;
+    box-shadow: 0 2px 8px rgba(53,127,67,0.22);
+  }
+  .filter-chip .count {
+    background: var(--cream-100); color: var(--cream-700);
+    padding: 1px 7px; border-radius: 100px;
+    font-size: 11px; font-weight: 700;
+  }
+  .filter-chip.on .count { background: rgba(255,255,255,0.18); color: white; }
+  .filter-chip.action-required .count { background: var(--earth-500); color: white; }
+  .filter-chip.action-required.on { background: var(--earth-500); }
+  .filter-chip.action-required.on .count { background: rgba(255,255,255,0.22); color: white; }
+
+  /* ════════════ GROUP HEADER ════════════ */
+  .group-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin: 22px 0 10px; gap: 12px; flex-wrap: wrap;
+  }
+  .group-head:first-child { margin-top: 0; }
+  .group-title {
+    font-family: 'Lora', serif;
+    font-size: 16px; font-weight: 600;
+    color: var(--green-900);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .group-title .pill-count {
+    font-family: 'DM Sans';
+    font-size: 11px; font-weight: 700;
+    background: var(--green-100); color: var(--green-800);
+    padding: 2px 9px; border-radius: 100px;
+  }
+  .group-title .pill-count.action {
+    background: var(--earth-100); color: var(--earth-800);
+  }
+  .group-title .pill-count.muted {
+    background: var(--cream-100); color: var(--cream-600);
+  }
+  .group-sub {
+    font-size: 12px; color: var(--cream-500);
+  }
+
+  /* ════════════ ENTRY CARD (générique) ════════════ */
+  .entry {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    text-decoration: none; color: inherit;
+    display: block;
+    transition: all 200ms;
+    overflow: hidden;
+    position: relative;
+  }
+  .entry:hover {
+    border-color: var(--green-200);
+    box-shadow: 0 6px 22px rgba(53,127,67,0.07);
+    transform: translateY(-1px);
+  }
+  .entry-strip {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--cream-300);
+  }
+  .entry-body {
+    padding: 16px 18px 16px 22px;
+    display: flex; align-items: center; gap: 18px;
+  }
+  body.mobile-mode .entry-body {
+    flex-direction: column; align-items: stretch; gap: 12px;
+  }
+
+  /* — Status variants (left strip + accent) — */
+  .entry.s-searching .entry-strip { background: var(--cream-400); }
+  .entry.s-calculating .entry-strip { background: var(--cream-300); }
+  .entry.s-opportunities .entry-strip { background: var(--earth-500); }
+  .entry.s-no-match .entry-strip { background: var(--cream-300); }
+  .entry.s-upcoming .entry-strip { background: var(--green-300); }
+  .entry.s-active .entry-strip { background: var(--green-600); width: 5px; }
+  .entry.s-completed .entry-strip { background: var(--green-200); }
+  .entry.s-cancelled .entry-strip { background: var(--cream-200); }
+
+  .entry.s-active {
+    background: linear-gradient(135deg, var(--green-50) 0%, white 70%);
+    border-color: var(--green-200);
+    box-shadow: 0 4px 18px rgba(53,127,67,0.10);
+  }
+  .entry.s-opportunities {
+    background: linear-gradient(135deg, var(--earth-50) 0%, white 70%);
+    border-color: var(--earth-100);
+  }
+  .entry.s-cancelled { opacity: 0.62; }
+  .entry.s-cancelled .entry-title,
+  .entry.s-cancelled .entry-meta strong { text-decoration: line-through; text-decoration-color: var(--cream-400); }
+
+  /* — Left block: type + title + meta — */
+  .entry-main { flex: 1; min-width: 0; }
+  .entry-head-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .entry-type-tag {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--green-700);
+    background: var(--green-50);
+    border: 1px solid var(--green-100);
+    padding: 2px 8px;
+    border-radius: 100px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .entry-type-tag.mission { color: var(--earth-800); background: var(--earth-50); border-color: var(--earth-100); }
+  .entry-type-tag svg { width: 10px; height: 10px; }
+  .entry-status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 100px;
+    letter-spacing: 0.01em;
+  }
+  .entry-status-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .entry-status-badge.searching { background: var(--cream-100); color: var(--cream-700); border: 1px solid var(--cream-200); }
+  .entry-status-badge.searching .dot { background: var(--cream-500); }
+  .entry-status-badge.calculating { background: var(--cream-100); color: var(--cream-700); border: 1px solid var(--cream-200); }
+  .entry-status-badge.calculating .dot { background: var(--green-500); animation: pulse-dot 1.4s ease-in-out infinite; }
+  .entry-status-badge.opportunities { background: var(--earth-500); color: white; box-shadow: 0 2px 6px rgba(184,112,63,0.28); }
+  .entry-status-badge.opportunities .dot { background: white; animation: pulse-dot 1.6s ease-in-out infinite; }
+  .entry-status-badge.no-match { background: var(--cream-100); color: var(--cream-700); border: 1px solid var(--cream-200); }
+  .entry-status-badge.no-match .dot { background: var(--cream-400); }
+  .entry-status-badge.upcoming { background: var(--green-50); color: var(--green-800); border: 1px solid var(--green-200); }
+  .entry-status-badge.upcoming .dot { background: var(--green-400); }
+  .entry-status-badge.active { background: var(--green-700); color: white; box-shadow: 0 2px 8px rgba(39,102,52,0.28); }
+  .entry-status-badge.active .dot { background: white; animation: pulse-dot 1.4s ease-in-out infinite; }
+  .entry-status-badge.completed { background: var(--cream-100); color: var(--cream-700); border: 1px solid var(--cream-200); }
+  .entry-status-badge.completed .dot { background: var(--green-500); }
+  .entry-status-badge.cancelled { background: var(--rose-100); color: var(--rose-500); border: 1px solid #F5C7C0; }
+  .entry-status-badge.cancelled .dot { background: var(--rose-500); }
+  @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .entry-route {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    font-family: 'Lora', serif;
+    font-size: 17px; font-weight: 600;
+    color: var(--green-900);
+    line-height: 1.2;
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+  }
+  .entry-route .arrow {
+    color: var(--green-500); flex-shrink: 0;
+    display: inline-flex;
+  }
+  .entry-route .arrow svg { width: 14px; height: 14px; }
+  .entry-title-mission {
+    font-family: 'Lora', serif;
+    font-size: 17px; font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.2;
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .entry-title-mission .producer-emoji { font-size: 18px; line-height: 1; }
+  .entry-route-sm {
+    font-size: 12.5px; color: var(--cream-700);
+    margin-top: 1px; margin-bottom: 4px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .entry-route-sm svg { width: 11px; height: 11px; color: var(--cream-400); }
+
+  .entry-meta {
+    font-size: 12.5px; color: var(--cream-600);
+    display: flex; gap: 8px; flex-wrap: wrap;
+    line-height: 1.4;
+  }
+  .entry-meta .sep { color: var(--cream-300); }
+  .entry-meta strong { color: var(--cream-800); font-weight: 600; }
+
+  /* — Right block: amount + actions — */
+  .entry-aside {
+    display: flex; align-items: center; gap: 14px;
+    flex-shrink: 0;
+  }
+  body.mobile-mode .entry-aside {
+    width: 100%; justify-content: space-between;
+    border-top: 1px dashed var(--cream-200);
+    padding-top: 12px;
+  }
+  .entry-amount { text-align: right; }
+  .entry-amount-label {
+    font-size: 9.5px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--cream-500);
+    margin-bottom: 2px;
+  }
+  .entry-amount-value {
+    font-family: 'Lora', serif;
+    font-size: 19px; font-weight: 700;
+    color: var(--green-700);
+    line-height: 1;
+  }
+  .entry-amount-sub {
+    font-size: 10.5px; color: var(--cream-500);
+    margin-top: 3px;
+  }
+  .entry-amount.escrow .entry-amount-value { color: var(--earth-500); }
+  .entry-amount.cancelled .entry-amount-value { color: var(--cream-500); text-decoration: line-through; }
+
+  .entry-cta {
+    background: var(--green-600); color: white;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 100px;
+    font-family: 'DM Sans';
+    font-size: 12.5px; font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: all 150ms;
+    white-space: nowrap;
+  }
+  .entry-cta:hover { background: var(--green-700); }
+  .entry-cta svg { width: 11px; height: 11px; }
+  .entry-cta.action {
+    background: var(--earth-500);
+    box-shadow: 0 3px 10px rgba(184,112,63,0.32);
+  }
+  .entry-cta.action:hover { background: var(--earth-600); }
+  .entry-cta.ghost {
+    background: white; color: var(--cream-700);
+    border: 1px solid var(--cream-300);
+  }
+  .entry-cta.ghost:hover { border-color: var(--green-300); color: var(--green-700); background: var(--green-50); }
+  .entry-cta.rate {
+    background: white; color: var(--earth-800);
+    border: 1px solid var(--earth-200);
+    background: var(--earth-50);
+  }
+  .entry-cta.rate:hover { background: var(--earth-100); }
+
+  .entry-cancel-link {
+    font-size: 11.5px; color: var(--cream-500);
+    background: transparent; border: none;
+    cursor: pointer; padding: 6px 8px;
+    text-decoration: none;
+    transition: color 150ms;
+  }
+  .entry-cancel-link:hover { color: var(--rose-500); }
+
+  /* — Inline expand: opportunités preview — */
+  .entry-opp-preview {
+    border-top: 1px solid var(--earth-100);
+    background: rgba(253,245,237,0.55);
+    padding: 12px 18px 12px 22px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12.5px; color: var(--earth-800);
+  }
+  .entry-opp-preview .producers {
+    display: inline-flex; align-items: center; margin-left: 4px;
+  }
+  .entry-opp-preview .producer-pill {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background: var(--earth-200);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    margin-left: -8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .entry-opp-preview .producer-pill:first-child { margin-left: 0; }
+  .entry-opp-preview strong { color: var(--earth-800); font-weight: 700; }
+
+  /* — Today highlight on active mission — */
+  .today-strip {
+    background: linear-gradient(90deg, var(--green-700), var(--green-600));
+    color: white;
+    padding: 10px 18px 10px 22px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12.5px; font-weight: 500;
+  }
+  .today-strip .step-icon {
+    width: 26px; height: 26px;
+    border-radius: 50%; background: rgba(255,255,255,0.18);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .today-strip .step-icon svg { width: 13px; height: 13px; color: white; }
+  .today-strip strong { color: white; font-weight: 700; }
+  .today-strip .step-sub { display: block; font-size: 11px; opacity: 0.85; margin-top: 1px; font-weight: 400; }
+  .today-strip .go-btn {
+    margin-left: auto;
+    background: white; color: var(--green-800);
+    padding: 7px 14px; border-radius: 100px;
+    font-size: 12px; font-weight: 700;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+    flex-shrink: 0;
+  }
+  .today-strip .go-btn:hover { background: var(--cream-50); }
+  .today-strip .go-btn svg { width: 11px; height: 11px; }
+
+  /* ════════════ EMPTY STATE ════════════ */
+  .empty-hero {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 20px;
+    padding: 48px 36px;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 22px;
+  }
+  .empty-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(53,127,67,0.06), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(184,112,63,0.05), transparent 40%);
+    pointer-events: none;
+  }
+  .empty-hero-illu {
+    width: 110px; height: 110px;
+    margin: 0 auto 18px;
+    background: var(--green-50);
+    border: 1.5px dashed var(--green-300);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+    position: relative;
+  }
+  .empty-hero h2 {
+    font-family: 'Lora', serif;
+    font-size: 26px; font-weight: 700;
+    color: var(--green-900);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+    position: relative;
+  }
+  .empty-hero p {
+    font-size: 15px; color: var(--cream-700);
+    line-height: 1.55;
+    max-width: 480px;
+    margin: 0 auto 22px;
+    position: relative;
+  }
+  .empty-hero .btn-primary-hero { position: relative; }
+  body.mobile-mode .empty-hero { padding: 32px 22px; }
+  body.mobile-mode .empty-hero h2 { font-size: 22px; }
+  body.mobile-mode .empty-hero-illu { width: 90px; height: 90px; font-size: 40px; }
+
+  .empty-tips {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  body.mobile-mode .empty-tips { grid-template-columns: 1fr; }
+  .empty-tip {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .empty-tip-num {
+    display: inline-flex;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--earth-200);
+    color: var(--earth-800);
+    align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .empty-tip h3 {
+    font-family: 'Lora', serif;
+    font-size: 14px; font-weight: 600;
+    color: var(--green-900);
+    margin-bottom: 3px;
+  }
+  .empty-tip p {
+    font-size: 12.5px; color: var(--cream-600);
+    line-height: 1.5;
+  }
+
+  /* ════════════ MOBILE TABBAR ════════════ */
+  .mobile-tabbar {
+    display: none;
+    position: sticky; bottom: 0;
+    background: white;
+    border-top: 1px solid var(--cream-200);
+    padding: 8px 6px 10px;
+    justify-content: space-around;
+    box-shadow: 0 -4px 16px rgba(28,25,23,0.05);
+    margin-top: 16px;
+  }
+  body.mobile-mode .mobile-tabbar { display: flex; }
+  .mtab {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 6px 2px;
+    color: var(--cream-500); text-decoration: none;
+    font-size: 10px; font-weight: 500;
+  }
+  .mtab.active { color: var(--green-700); font-weight: 700; }
+  .mtab svg { width: 20px; height: 20px; }
+
+  /* ════════════ STATE PANELS ════════════ */
+  .state-panel { display: none; }
+  .state-panel.active { display: block; }
+
+  /* ════════════ CANCEL MODAL ════════════ */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(28,25,23,0.55);
+    z-index: 200;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 440px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.30);
+  }
+  .modal-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--earth-50);
+    border: 1px solid var(--earth-200);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  .modal h3 {
+    font-family: 'Lora', serif; font-size: 22px;
+    color: var(--green-900); margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .modal p { font-size: 14px; color: var(--cream-700); line-height: 1.55; margin-bottom: 14px; }
+  .modal-info {
+    background: var(--cream-50);
+    border: 1px solid var(--cream-200);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12.5px; color: var(--cream-700);
+    margin-bottom: 18px;
+  }
+  .modal-info strong { color: var(--green-800); }
+  .modal-actions {
+    display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;
+  }
+  .modal-btn {
+    padding: 10px 20px; border-radius: 100px;
+    font-family: 'DM Sans'; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none;
+    transition: all 150ms;
+  }
+  .modal-btn.cancel { background: white; color: var(--cream-700); border: 1.5px solid var(--cream-200); }
+  .modal-btn.cancel:hover { border-color: var(--cream-400); color: var(--cream-950); }
+  .modal-btn.confirm { background: var(--rose-500); color: white; box-shadow: 0 3px 10px rgba(192,57,43,0.25); }
+  .modal-btn.confirm:hover { background: #A83224; }
+
+  @media (max-width: 720px) {
+    .stage { padding: 12px 8px 28px; }
+    .frame { border-radius: 8px; }
+    .header { padding: 0 16px; }
+    .nav-link { display: none; }
+    .page { padding: 18px 16px 32px; }
+    .hero h1 { font-size: 24px; }
+    .entry-body { flex-direction: column; align-items: stretch; }
+    .entry-aside { width: 100%; justify-content: space-between; border-top: 1px dashed var(--cream-200); padding-top: 12px; margin-top: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS RAMENEUR</span>
+    <a href="#" class="demo-nav-link">0 · Accueil</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link">1 · Déclarer trajet</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link">2 · Opportunités</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link">3 · Détail mission</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link">4 · Mission active</a>
+    <span class="demo-nav-hub">
+      <span>vue hub</span>
+      <a href="rm-07-mes-missions.html">RM-07 · Mes missions</a>
+    </span>
+  </div>
+</div>
+
+<!-- ══════════ PREVIEW TOOLBAR ══════════ -->
+<div class="preview-toolbar">
+  <div class="ptb-section">
+    <span class="ptb-label">État</span>
+    <div class="ptb-group" id="state-group">
+      <button class="ptb-btn" data-state="empty" onclick="setState('empty', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Vide
+      </button>
+      <button class="ptb-btn on" data-state="nominal" onclick="setState('nominal', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        Nominal
+      </button>
+      <button class="ptb-btn" data-state="loaded" onclick="setState('loaded', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        Chargé
+      </button>
+    </div>
+  </div>
+  <div class="ptb-section">
+    <span class="ptb-label">Format</span>
+    <div class="ptb-group" id="format-group">
+      <button class="ptb-btn on" data-format="desktop" onclick="setFormat('desktop', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Desktop
+      </button>
+      <button class="ptb-btn" data-format="mobile" onclick="setFormat('mobile', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        Mobile
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STAGE ══════════ -->
+<div class="stage">
+  <div class="frame">
+
+    <!-- ══════════ HEADER ══════════ -->
+    <header class="header">
+      <a href="#" class="logo">
+        <div class="logo-icon">🐜</div>
+        <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#" class="nav-link">Accueil</a>
+        <a href="#" class="nav-link">Mes trajets</a>
+        <a href="#" class="nav-link active">Missions</a>
+        <a href="#" class="nav-link">Revenus</a>
+        <div class="nav-sep"></div>
+        <div class="avatar-btn">🌿</div>
+      </nav>
+    </header>
+
+    <!-- ══════════ PAGE ══════════ -->
+    <div class="page">
+
+      <!-- ════════════════════════════════ -->
+      <!-- STATE : EMPTY                    -->
+      <!-- ════════════════════════════════ -->
+      <div id="state-empty" class="state-panel">
+
+        <div class="preview-label">RM-07 · État vide</div>
+
+        <div class="hero">
+          <div class="hero-title">
+            <h1>Vos trajets et missions, <span class="accent">au même endroit</span>.</h1>
+            <p>Dès que vous déclarez un trajet, on cherche les producteurs et voisins sur votre route. Tout retombe ici — vous suivez d'un coup d'œil ce qui avance, ce qui demande votre arbitrage et ce qui est terminé.</p>
+          </div>
+        </div>
+
+        <div class="empty-hero">
+          <div class="empty-hero-illu">🛣️</div>
+          <h2>Aucun trajet pour l'instant</h2>
+          <p>Commencez par déclarer un trajet — domicile-travail, week-end en famille, ou un aller-retour ponctuel. Pas d'engagement avant que vous choisissiez une mission.</p>
+          <a href="#" class="btn-primary-hero">
+            Déclarer un trajet
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+
+        <div class="empty-tips">
+          <div class="empty-tip">
+            <span class="empty-tip-num">1</span>
+            <h3>Vos trajets, sans pression</h3>
+            <p>On scanne en arrière-plan. Vous recevez une notification quand un match apparaît, en général 24-72 h avant le départ.</p>
+          </div>
+          <div class="empty-tip">
+            <span class="empty-tip-num">2</span>
+            <h3>C'est vous qui choisissez</h3>
+            <p>On vous propose, vous décidez. Aucun ordre imposé, aucune mission qui tombe sans votre accord.</p>
+          </div>
+          <div class="empty-tip">
+            <span class="empty-tip-num">3</span>
+            <h3>Annulation flexible</h3>
+            <p>Tant qu'aucune mission n'est réservée, votre trajet peut être annulé librement. Une fois engagé, fenêtre d'annulation jusqu'à 24 h avant le pickup.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════ -->
+      <!-- STATE : NOMINAL                  -->
+      <!-- ════════════════════════════════ -->
+      <div id="state-nominal" class="state-panel active">
+
+        <div class="preview-label">RM-07 · État nominal</div>
+
+        <div class="hero">
+          <div class="hero-title">
+            <h1>Mes missions <span class="accent">&amp; trajets</span></h1>
+            <p>Une mission active aujourd'hui, deux trajets en recherche. Tout ce qui demande votre attention est en haut.</p>
+          </div>
+          <a href="#" class="btn-primary-hero">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Déclarer un trajet
+          </a>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar" data-scope="nominal">
+          <button class="filter-chip on" data-filter="all">Tout <span class="count">6</span></button>
+          <button class="filter-chip" data-filter="upcoming">À venir <span class="count">1</span></button>
+          <button class="filter-chip" data-filter="active">Active <span class="count">1</span></button>
+          <button class="filter-chip" data-filter="searching">En recherche <span class="count">2</span></button>
+          <button class="filter-chip" data-filter="completed">Terminées <span class="count">2</span></button>
+        </div>
+
+        <!-- ─── GROUPE : MISSION ACTIVE ─── -->
+        <div class="group-head" data-group="active">
+          <div class="group-title">Mission active <span class="pill-count">1</span></div>
+          <div class="group-sub">Aujourd'hui</div>
+        </div>
+
+        <a href="#" class="entry s-active" data-status="active">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag mission">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mission
+                </span>
+                <span class="entry-status-badge active"><span class="dot"></span>Active aujourd'hui</span>
+              </div>
+              <div class="entry-title-mission">
+                <span class="producer-emoji">🐝</span>
+                La Ruche du Bessin
+              </div>
+              <div class="entry-route-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Bayeux → Paris 11<sup>e</sup>
+              </div>
+              <div class="entry-meta">
+                <span><strong>Pickup aujourd'hui</strong></span>
+                <span class="sep">·</span>
+                <span>Apiculteur</span>
+                <span class="sep">·</span>
+                <span>4 voisins · Paris 11<sup>e</sup>, 12<sup>e</sup></span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <div class="entry-amount escrow">
+                <div class="entry-amount-label">En escrow</div>
+                <div class="entry-amount-value">+18,00 €</div>
+                <div class="entry-amount-sub">libéré à la dernière livraison</div>
+              </div>
+              <a href="#" class="entry-cta">
+                Ouvrir la mission
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="today-strip">
+            <div class="step-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14l-1 11H6L5 8zm3-4h8l1 4H7l1-4z"/></svg>
+            </div>
+            <div>
+              <strong>Prochaine étape : pickup chez Pierre Mahé</strong>
+              <span class="step-sub">QR code à présenter à votre arrivée à Bayeux.</span>
+            </div>
+            <a href="#" class="go-btn">
+              Scanner
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </a>
+
+        <!-- ─── GROUPE : À VENIR ─── -->
+        <div class="group-head" data-group="upcoming">
+          <div class="group-title">Mission à venir <span class="pill-count">1</span></div>
+          <div class="group-sub">Pickup dans &gt; 24 h</div>
+        </div>
+
+        <a href="#" class="entry s-upcoming" data-status="upcoming">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag mission">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mission
+                </span>
+                <span class="entry-status-badge upcoming"><span class="dot"></span>Confirmée · pickup dans 6 jours</span>
+              </div>
+              <div class="entry-title-mission">
+                <span class="producer-emoji">🍎</span>
+                Cidrerie des Marais
+              </div>
+              <div class="entry-route-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Évrecy → Paris 11<sup>e</sup>
+              </div>
+              <div class="entry-meta">
+                <span>Pickup <strong>vendredi 16 mai</strong></span>
+                <span class="sep">·</span>
+                <span>Cidrerie artisanale</span>
+                <span class="sep">·</span>
+                <span>2 voisins</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <div class="entry-amount escrow">
+                <div class="entry-amount-label">En escrow</div>
+                <div class="entry-amount-value">+12,40 €</div>
+                <div class="entry-amount-sub">3 voisins payés</div>
+              </div>
+              <a href="#" class="entry-cta ghost">
+                Voir le détail
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </a>
+
+        <!-- ─── GROUPE : EN RECHERCHE ─── -->
+        <div class="group-head" data-group="searching">
+          <div class="group-title">Trajets en recherche d'opportunité <span class="pill-count muted">2</span></div>
+          <div class="group-sub">On scanne en arrière-plan</div>
+        </div>
+
+        <a href="#" class="entry s-searching" data-status="searching">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  Trajet
+                </span>
+                <span class="entry-status-badge searching"><span class="dot"></span>Aucune opportunité pour l'instant</span>
+              </div>
+              <div class="entry-route">
+                <span>Paris 11<sup>e</sup></span>
+                <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <span>Saint-Lô</span>
+              </div>
+              <div class="entry-meta">
+                <span>📅 Sam. 17 mai</span>
+                <span class="sep">·</span>
+                <span>🚗 Coffre</span>
+                <span class="sep">·</span>
+                <span>Aller-retour</span>
+                <span class="sep">·</span>
+                <span>déclaré il y a 2 j</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <button class="entry-cancel-link" onclick="event.preventDefault(); event.stopPropagation(); openCancelModal('Paris 11ᵉ → Saint-Lô', '17 mai')">Annuler le trajet</button>
+              <a href="#" class="entry-cta ghost">
+                Détails
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </a>
+
+        <a href="#" class="entry s-calculating" data-status="searching">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  Trajet
+                </span>
+                <span class="entry-status-badge calculating"><span class="dot"></span>Calcul en cours</span>
+              </div>
+              <div class="entry-route">
+                <span>Paris 11<sup>e</sup></span>
+                <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <span>Vannes</span>
+              </div>
+              <div class="entry-meta">
+                <span>📅 Ven. 23 mai</span>
+                <span class="sep">·</span>
+                <span>🚐 Break</span>
+                <span class="sep">·</span>
+                <span>Aller simple</span>
+                <span class="sep">·</span>
+                <span>déclaré il y a 4 min</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <button class="entry-cancel-link" onclick="event.preventDefault(); event.stopPropagation(); openCancelModal('Paris 11ᵉ → Vannes', '23 mai')">Annuler le trajet</button>
+              <a href="#" class="entry-cta ghost">
+                Détails
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </a>
+
+        <!-- ─── GROUPE : TERMINÉES ─── -->
+        <div class="group-head" data-group="completed">
+          <div class="group-title">Missions terminées <span class="pill-count muted">2</span></div>
+          <div class="group-sub">Avril–mai 2026</div>
+        </div>
+
+        <a href="#" class="entry s-completed" data-status="completed">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag mission">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mission
+                </span>
+                <span class="entry-status-badge completed"><span class="dot"></span>Terminée · à noter</span>
+              </div>
+              <div class="entry-title-mission">
+                <span class="producer-emoji">🍯</span>
+                Brasserie de la Vallée
+              </div>
+              <div class="entry-route-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Saint-Lô → Paris 12<sup>e</sup>
+              </div>
+              <div class="entry-meta">
+                <span>Livrée le <strong>3 mai</strong></span>
+                <span class="sep">·</span>
+                <span>4 voisins servis</span>
+                <span class="sep">·</span>
+                <span>Versement reçu le 5 mai</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <div class="entry-amount">
+                <div class="entry-amount-label">Perçu</div>
+                <div class="entry-amount-value">+22,40 €</div>
+              </div>
+              <a href="#" class="entry-cta rate">
+                ★ Noter le producteur
+              </a>
+            </div>
+          </div>
+        </a>
+
+        <a href="#" class="entry s-completed" data-status="completed">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag mission">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mission
+                </span>
+                <span class="entry-status-badge completed"><span class="dot"></span>Terminée · noté ★ 5</span>
+              </div>
+              <div class="entry-title-mission">
+                <span class="producer-emoji">🫙</span>
+                L'Atelier des Saveurs
+              </div>
+              <div class="entry-route-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Caen → Paris 11<sup>e</sup>
+              </div>
+              <div class="entry-meta">
+                <span>Livrée le <strong>22 avril</strong></span>
+                <span class="sep">·</span>
+                <span>3 voisins servis</span>
+                <span class="sep">·</span>
+                <span>Versement reçu le 24 avril</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <div class="entry-amount">
+                <div class="entry-amount-label">Perçu</div>
+                <div class="entry-amount-value">+9,80 €</div>
+              </div>
+              <a href="#" class="entry-cta ghost">
+                Récapitulatif
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- ════════════════════════════════ -->
+      <!-- STATE : LOADED (8+ entrées)      -->
+      <!-- ════════════════════════════════ -->
+      <div id="state-loaded" class="state-panel">
+
+        <div class="preview-label">RM-07 · État chargé</div>
+
+        <div class="hero">
+          <div class="hero-title">
+            <h1><span class="accent">5 opportunités</span> à arbitrer.</h1>
+            <p>Deux de vos trajets ont des matchs. Filtrez par statut pour vous concentrer sur ce qui demande votre arbitrage en premier.</p>
+          </div>
+          <a href="#" class="btn-primary-hero">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Nouveau trajet
+          </a>
+        </div>
+
+        <div class="filter-bar" data-scope="loaded">
+          <button class="filter-chip on" data-filter="all">Tout <span class="count">10</span></button>
+          <button class="filter-chip action-required" data-filter="opportunities">À arbitrer <span class="count">2</span></button>
+          <button class="filter-chip" data-filter="upcoming">À venir <span class="count">1</span></button>
+          <button class="filter-chip" data-filter="active">Active <span class="count">1</span></button>
+          <button class="filter-chip" data-filter="searching">En recherche <span class="count">2</span></button>
+          <button class="filter-chip" data-filter="completed">Terminées <span class="count">3</span></button>
+          <button class="filter-chip" data-filter="cancelled">Annulées <span class="count">1</span></button>
+        </div>
+
+        <!-- ── À ARBITRER (action requise) ── -->
+        <div class="group-head" data-group="opportunities">
+          <div class="group-title">À arbitrer · opportunités à choisir <span class="pill-count action">2</span></div>
+          <div class="group-sub">Action recommandée</div>
+        </div>
+
+        <a href="#" class="entry s-opportunities" data-status="opportunities">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  Trajet
+                </span>
+                <span class="entry-status-badge opportunities"><span class="dot"></span>3 opportunités</span>
+              </div>
+              <div class="entry-route">
+                <span>Paris 11<sup>e</sup></span>
+                <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <span>Caen</span>
+              </div>
+              <div class="entry-meta">
+                <span>📅 Sam. 17 mai</span>
+                <span class="sep">·</span>
+                <span>🚗 Coffre</span>
+                <span class="sep">·</span>
+                <span>Gain potentiel <strong>jusqu'à 28 €</strong></span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <button class="entry-cancel-link" onclick="event.preventDefault(); event.stopPropagation(); openCancelModal('Paris 11ᵉ → Caen', '17 mai')">Annuler trajet</button>
+              <a href="#" class="entry-cta action">
+                Choisir
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="entry-opp-preview">
+            <span>Producteurs détectés :</span>
+            <span class="producers">
+              <span class="producer-pill" style="background:linear-gradient(135deg,var(--earth-200),var(--earth-400))">🐝</span>
+              <span class="producer-pill" style="background:linear-gradient(135deg,var(--earth-100),var(--earth-200))">🍎</span>
+              <span class="producer-pill" style="background:linear-gradient(135deg,var(--green-100),var(--earth-100))">🍏</span>
+            </span>
+            <span><strong>La Ruche du Bessin</strong>, Cidrerie des Marais, Verger Saint-Pierre</span>
+          </div>
+        </a>
+
+        <a href="#" class="entry s-opportunities" data-status="opportunities">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  Trajet
+                </span>
+                <span class="entry-status-badge opportunities"><span class="dot"></span>2 opportunités</span>
+              </div>
+              <div class="entry-route">
+                <span>Paris 11<sup>e</sup></span>
+                <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <span>Rennes</span>
+              </div>
+              <div class="entry-meta">
+                <span>📅 Mar. 27 mai</span>
+                <span class="sep">·</span>
+                <span>👜 Sac</span>
+                <span class="sep">·</span>
+                <span>Gain potentiel <strong>jusqu'à 14 €</strong></span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <button class="entry-cancel-link" onclick="event.preventDefault(); event.stopPropagation(); openCancelModal('Paris 11ᵉ → Rennes', '27 mai')">Annuler trajet</button>
+              <a href="#" class="entry-cta action">
+                Choisir
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="entry-opp-preview">
+            <span>Producteurs détectés :</span>
+            <span class="producers">
+              <span class="producer-pill" style="background:linear-gradient(135deg,var(--cream-200),var(--earth-100))">🫙</span>
+              <span class="producer-pill" style="background:linear-gradient(135deg,var(--earth-100),var(--earth-200))">🧀</span>
+            </span>
+            <span>L'Atelier des Saveurs, Fromagerie Le Pré</span>
+          </div>
+        </a>
+
+        <!-- ── ACTIVE ── -->
+        <div class="group-head" data-group="active">
+          <div class="group-title">Mission active <span class="pill-count">1</span></div>
+          <div class="group-sub">Aujourd'hui</div>
+        </div>
+
+        <a href="#" class="entry s-active" data-status="active">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag mission">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mission
+                </span>
+                <span class="entry-status-badge active"><span class="dot"></span>Livraison aujourd'hui · 2 sur 4</span>
+              </div>
+              <div class="entry-title-mission">
+                <span class="producer-emoji">🍯</span>
+                Brasserie de la Vallée
+              </div>
+              <div class="entry-route-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Saint-Lô → Paris 12<sup>e</sup>
+              </div>
+              <div class="entry-meta">
+                <span><strong>Livraisons en cours</strong></span>
+                <span class="sep">·</span>
+                <span>Brassicole artisanale</span>
+                <span class="sep">·</span>
+                <span>4 voisins · 2 livrés, 2 restants</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <div class="entry-amount escrow">
+                <div class="entry-amount-label">Acquis / total</div>
+                <div class="entry-amount-value">11,20&nbsp;€ <span style="color:var(--cream-500); font-size:13px">/ 22,40 €</span></div>
+                <div class="entry-amount-sub">2 voisins restants</div>
+              </div>
+              <a href="#" class="entry-cta">
+                Ouvrir la mission
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="today-strip">
+            <div class="step-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3L22 4M5 12a7 7 0 1010 5"/></svg>
+            </div>
+            <div>
+              <strong>Prochaine livraison : voisin 3, Paris 12<sup>e</sup></strong>
+              <span class="step-sub">Café Le Baron · QR code prêt à scanner.</span>
+            </div>
+            <a href="#" class="go-btn">
+              Scanner
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </a>
+
+        <!-- ── À VENIR ── -->
+        <div class="group-head" data-group="upcoming">
+          <div class="group-title">Mission à venir <span class="pill-count">1</span></div>
+        </div>
+
+        <a href="#" class="entry s-upcoming" data-status="upcoming">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag mission">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mission
+                </span>
+                <span class="entry-status-badge upcoming"><span class="dot"></span>Confirmée · pickup dans 4 jours</span>
+              </div>
+              <div class="entry-title-mission">
+                <span class="producer-emoji">🐝</span>
+                La Ruche du Bessin
+              </div>
+              <div class="entry-route-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Bayeux → Paris 11<sup>e</sup>
+              </div>
+              <div class="entry-meta">
+                <span>Pickup <strong>jeudi 14 mai</strong></span>
+                <span class="sep">·</span>
+                <span>Apiculteur</span>
+                <span class="sep">·</span>
+                <span>4 voisins</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <div class="entry-amount escrow">
+                <div class="entry-amount-label">En escrow</div>
+                <div class="entry-amount-value">+18,00 €</div>
+                <div class="entry-amount-sub">4 voisins payés</div>
+              </div>
+              <a href="#" class="entry-cta ghost">
+                Voir le détail
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </a>
+
+        <!-- ── EN RECHERCHE ── -->
+        <div class="group-head" data-group="searching">
+          <div class="group-title">Trajets en recherche d'opportunité <span class="pill-count muted">2</span></div>
+          <div class="group-sub">On scanne en arrière-plan</div>
+        </div>
+
+        <a href="#" class="entry s-no-match" data-status="searching">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  Trajet
+                </span>
+                <span class="entry-status-badge no-match"><span class="dot"></span>Aucune opportunité pour l'instant</span>
+              </div>
+              <div class="entry-route">
+                <span>Paris 11<sup>e</sup></span>
+                <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <span>Lyon</span>
+              </div>
+              <div class="entry-meta">
+                <span>📅 Lun. 2 juin</span>
+                <span class="sep">·</span>
+                <span>🚗 Coffre</span>
+                <span class="sep">·</span>
+                <span>Aller simple</span>
+                <span class="sep">·</span>
+                <span>déclaré il y a 1 j</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <button class="entry-cancel-link" onclick="event.preventDefault(); event.stopPropagation(); openCancelModal('Paris 11ᵉ → Lyon', '2 juin')">Annuler trajet</button>
+              <a href="#" class="entry-cta ghost">
+                Détails
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </a>
+
+        <a href="#" class="entry s-calculating" data-status="searching">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  Trajet
+                </span>
+                <span class="entry-status-badge calculating"><span class="dot"></span>Calcul en cours</span>
+              </div>
+              <div class="entry-route">
+                <span>Paris 11<sup>e</sup></span>
+                <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <span>Bordeaux</span>
+              </div>
+              <div class="entry-meta">
+                <span>📅 Sam. 7 juin</span>
+                <span class="sep">·</span>
+                <span>🚐 Break</span>
+                <span class="sep">·</span>
+                <span>Aller-retour</span>
+                <span class="sep">·</span>
+                <span>déclaré il y a 2 min</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <button class="entry-cancel-link" onclick="event.preventDefault(); event.stopPropagation(); openCancelModal('Paris 11ᵉ → Bordeaux', '7 juin')">Annuler trajet</button>
+              <a href="#" class="entry-cta ghost">
+                Détails
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </a>
+
+        <!-- ── TERMINÉES ── -->
+        <div class="group-head" data-group="completed">
+          <div class="group-title">Missions terminées <span class="pill-count muted">3</span></div>
+          <div class="group-sub">Mars–mai 2026</div>
+        </div>
+
+        <a href="#" class="entry s-completed" data-status="completed">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag mission">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mission
+                </span>
+                <span class="entry-status-badge completed"><span class="dot"></span>Terminée · à noter</span>
+              </div>
+              <div class="entry-title-mission">
+                <span class="producer-emoji">🍎</span>
+                Cidrerie des Marais
+              </div>
+              <div class="entry-route-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Évrecy → Paris 11<sup>e</sup>
+              </div>
+              <div class="entry-meta">
+                <span>Livrée le <strong>28 avril</strong></span>
+                <span class="sep">·</span>
+                <span>2 voisins servis</span>
+                <span class="sep">·</span>
+                <span>Versement reçu le 30 avril</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <div class="entry-amount">
+                <div class="entry-amount-label">Perçu</div>
+                <div class="entry-amount-value">+12,40 €</div>
+              </div>
+              <a href="#" class="entry-cta rate">★ Noter le producteur</a>
+            </div>
+          </div>
+        </a>
+
+        <a href="#" class="entry s-completed" data-status="completed">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag mission">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mission
+                </span>
+                <span class="entry-status-badge completed"><span class="dot"></span>Terminée · noté ★ 5</span>
+              </div>
+              <div class="entry-title-mission">
+                <span class="producer-emoji">🫙</span>
+                L'Atelier des Saveurs
+              </div>
+              <div class="entry-route-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Caen → Paris 11<sup>e</sup>
+              </div>
+              <div class="entry-meta">
+                <span>Livrée le <strong>22 avril</strong></span>
+                <span class="sep">·</span>
+                <span>3 voisins servis</span>
+                <span class="sep">·</span>
+                <span>Versement reçu le 24 avril</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <div class="entry-amount">
+                <div class="entry-amount-label">Perçu</div>
+                <div class="entry-amount-value">+9,80 €</div>
+              </div>
+              <a href="#" class="entry-cta ghost">
+                Récap
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </a>
+
+        <a href="#" class="entry s-completed" data-status="completed">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag mission">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mission
+                </span>
+                <span class="entry-status-badge completed"><span class="dot"></span>Terminée · noté ★ 4</span>
+              </div>
+              <div class="entry-title-mission">
+                <span class="producer-emoji">🍏</span>
+                Verger de Saint-Pierre
+              </div>
+              <div class="entry-route-sm">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                Saint-Pierre-sur-Dives → Paris 11<sup>e</sup>
+              </div>
+              <div class="entry-meta">
+                <span>Livrée le <strong>14 mars</strong></span>
+                <span class="sep">·</span>
+                <span>1 voisin servi</span>
+                <span class="sep">·</span>
+                <span>Versement reçu le 16 mars</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <div class="entry-amount">
+                <div class="entry-amount-label">Perçu</div>
+                <div class="entry-amount-value">+5,50 €</div>
+              </div>
+              <a href="#" class="entry-cta ghost">
+                Récap
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </a>
+
+        <!-- ── ANNULÉE ── -->
+        <div class="group-head" data-group="cancelled">
+          <div class="group-title">Trajets annulés <span class="pill-count muted">1</span></div>
+          <div class="group-sub">Annulé par vos soins</div>
+        </div>
+
+        <div class="entry s-cancelled" data-status="cancelled">
+          <span class="entry-strip"></span>
+          <div class="entry-body">
+            <div class="entry-main">
+              <div class="entry-head-row">
+                <span class="entry-type-tag">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  Trajet
+                </span>
+                <span class="entry-status-badge cancelled"><span class="dot"></span>Annulé · 3 mai</span>
+              </div>
+              <div class="entry-route">
+                <span>Paris 11<sup>e</sup></span>
+                <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                <span>Nantes</span>
+              </div>
+              <div class="entry-meta">
+                <span>📅 prévu sam. 4 mai</span>
+                <span class="sep">·</span>
+                <span>🚗 Coffre</span>
+                <span class="sep">·</span>
+                <span>aucune mission n'avait été réservée</span>
+              </div>
+            </div>
+            <div class="entry-aside">
+              <a href="#" class="entry-cta ghost">
+                Re-déclarer
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Mobile tabbar (mobile-mode only) -->
+    <nav class="mobile-tabbar">
+      <a href="#" class="mtab">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Accueil
+      </a>
+      <a href="#" class="mtab">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        Trajets
+      </a>
+      <a href="#" class="mtab active">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        Missions
+      </a>
+      <a href="#" class="mtab">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Revenus
+      </a>
+    </nav>
+
+  </div>
+</div>
+
+<!-- ══════════ CANCEL MODAL ══════════ -->
+<div class="modal-overlay" id="cancel-modal" onclick="if(event.target===this) closeCancelModal()">
+  <div class="modal">
+    <div class="modal-icon">⚠️</div>
+    <h3>Annuler ce trajet&nbsp;?</h3>
+    <p id="modal-trip-info">Trajet <strong id="modal-trip-route">—</strong> du <strong id="modal-trip-date">—</strong>.</p>
+    <div class="modal-info">
+      <strong>Fenêtre d'annulation</strong> — tant qu'aucune mission n'a été réservée sur ce trajet, vous pouvez l'annuler librement, sans frais. Une fois une mission engagée, l'annulation reste possible jusqu'à <strong>24 h avant le pickup</strong>. Au-delà, des pénalités s'appliquent côté producteur et acheteurs.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeCancelModal()">Garder le trajet</button>
+      <button class="modal-btn confirm" onclick="closeCancelModal()">Confirmer l'annulation</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ═══════════ STATE / FORMAT TOGGLES ═══════════ */
+  function setState(state, btn) {
+    document.querySelectorAll('.state-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('state-' + state).classList.add('active');
+    document.querySelectorAll('#state-group .ptb-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    // Reset filter to "all" when switching state
+    document.querySelectorAll('.filter-bar').forEach(bar => {
+      bar.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('on'));
+      const allBtn = bar.querySelector('[data-filter="all"]');
+      if (allBtn) allBtn.classList.add('on');
+    });
+    applyFilter('all', null);
+    // scroll to top of frame
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function setFormat(fmt, btn) {
+    document.body.classList.toggle('mobile-mode', fmt === 'mobile');
+    document.querySelectorAll('#format-group .ptb-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+
+  /* ═══════════ FILTER BY STATUS ═══════════ */
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const bar = chip.closest('.filter-bar');
+      bar.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('on'));
+      chip.classList.add('on');
+      applyFilter(chip.dataset.filter, bar);
+    });
+  });
+
+  function applyFilter(filter, bar) {
+    // Determine scope: which state-panel
+    const panel = bar ? bar.closest('.state-panel') : document.querySelector('.state-panel.active');
+    if (!panel) return;
+    const entries = panel.querySelectorAll('.entry');
+    const groups  = panel.querySelectorAll('.group-head');
+
+    if (filter === 'all') {
+      entries.forEach(e => e.style.display = '');
+      groups.forEach(g  => g.style.display = '');
+      return;
+    }
+    // Map filter chip -> entry data-status values it should match
+    const map = {
+      opportunities: ['opportunities'],
+      upcoming:      ['upcoming'],
+      active:        ['active'],
+      searching:     ['searching'],
+      completed:     ['completed'],
+      cancelled:     ['cancelled'],
+    };
+    const allowed = map[filter] || [];
+    entries.forEach(e => {
+      e.style.display = allowed.includes(e.dataset.status) ? '' : 'none';
+    });
+    // Group headers map (data-group) -> filter
+    const groupMap = {
+      opportunities: 'opportunities',
+      upcoming:      'upcoming',
+      active:        'active',
+      searching:     'searching',
+      completed:     'completed',
+      cancelled:     'cancelled',
+    };
+    groups.forEach(g => {
+      g.style.display = (groupMap[g.dataset.group] === filter) ? '' : 'none';
+    });
+  }
+
+  /* ═══════════ CANCEL MODAL ═══════════ */
+  function openCancelModal(route, date) {
+    document.getElementById('modal-trip-route').textContent = route;
+    document.getElementById('modal-trip-date').textContent = date;
+    document.getElementById('cancel-modal').classList.add('open');
+  }
+  function closeCancelModal() {
+    document.getElementById('cancel-modal').classList.remove('open');
+  }
+</script>
+
+</body>
+</html>

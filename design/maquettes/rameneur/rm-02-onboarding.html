@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<!-- Maquette Delta — RM-02 Onboarding rameneur / Ticket(s) Jira : KAN-37 (Onboarding & Stripe Identity), KAN-38 (Capacité véhicule) / Mapping : produit/jira_mapping.md -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM-02 · Onboarding rameneur — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50:  #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50:  #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50:  #FAF7F2;
+    --rose-500: #C0392B; --rose-100: #FDEDEC;
+  }
+
+  html, body { background: var(--cream-100); }
+  body { font-family: 'DM Sans', sans-serif; color: var(--cream-950); min-height: 100vh; }
+
+  /* ════════════ DEMO NAV ════════════ */
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); margin-right: 4px; }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-weight: 500; font-size: 12px; transition: all 150ms; }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ════════════ PREVIEW TOOLBAR ════════════ */
+  .preview-toolbar {
+    background: white; border-bottom: 1px solid var(--cream-200);
+    padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .ptb-section { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ptb-label { font-size: 10px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--cream-500); }
+  .ptb-group { display: inline-flex; gap: 2px; background: var(--cream-100); border: 1px solid var(--cream-200); border-radius: 100px; padding: 3px; }
+  .ptb-btn {
+    background: transparent; border: none; padding: 6px 12px; border-radius: 100px;
+    font-family: 'DM Sans'; font-size: 12px; font-weight: 600; color: var(--cream-600);
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 150ms;
+  }
+  .ptb-btn:hover { color: var(--green-700); }
+  .ptb-btn.on { background: white; color: var(--green-800); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .ptb-btn svg { width: 13px; height: 13px; }
+
+  /* ════════════ STAGE / FRAME ════════════ */
+  .stage { display: flex; justify-content: center; padding: 28px 16px 56px; min-height: calc(100vh - 80px); }
+  .frame {
+    width: 100%; max-width: 1280px; background: var(--cream-50);
+    border-radius: 14px; border: 1px solid var(--cream-200);
+    box-shadow: 0 10px 40px rgba(28,25,23,0.06); overflow: hidden;
+    transition: max-width 250ms ease, border-radius 250ms;
+  }
+  body.mobile-mode .frame {
+    max-width: 390px; border-radius: 36px;
+    border: 8px solid var(--cream-950);
+    box-shadow: 0 20px 60px rgba(28,25,23,0.18);
+  }
+  body.mobile-mode .frame::before {
+    content: ''; display: block; width: 100%; height: 22px;
+    background: var(--cream-950); margin: -1px 0 -1px;
+  }
+
+  /* ════════════ HEADER (allégé pour onboarding) ════════════ */
+  .header {
+    background: rgba(250,247,242,0.96); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 32px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+  .logo-icon { width: 34px; height: 34px; background: var(--green-800); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 6px rgba(14,53,26,0.25); }
+  .logo-text { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-800); letter-spacing: -0.02em; }
+  .logo-dot { color: var(--earth-500); }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .step-counter {
+    font-size: 12px; font-weight: 600; color: var(--cream-700);
+    display: inline-flex; align-items: center; gap: 8px;
+    background: white; border: 1px solid var(--cream-200);
+    padding: 6px 12px; border-radius: 100px;
+  }
+  .step-counter strong { color: var(--green-800); font-weight: 700; }
+  .header-help {
+    font-size: 13px; font-weight: 500; color: var(--cream-700);
+    text-decoration: none; padding: 6px 12px; border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .header-help:hover { color: var(--green-700); background: var(--green-50); }
+  .header-help svg { width: 14px; height: 14px; }
+  body.mobile-mode .header { padding: 0 16px; height: 56px; }
+  body.mobile-mode .header-help span { display: none; }
+  body.mobile-mode .step-counter { font-size: 11px; padding: 5px 10px; }
+
+  /* ════════════ PROGRESS BAR ════════════ */
+  .progress-wrap {
+    background: white;
+    border-bottom: 1px solid var(--cream-200);
+    padding: 18px 32px 22px;
+  }
+  body.mobile-mode .progress-wrap { padding: 14px 16px 18px; }
+  .progress-track {
+    display: flex; gap: 6px; max-width: 720px; margin: 0 auto;
+  }
+  .progress-seg {
+    flex: 1; height: 4px; border-radius: 100px;
+    background: var(--cream-200);
+    transition: background 250ms ease;
+  }
+  .progress-seg.done { background: var(--green-600); }
+  .progress-seg.current { background: var(--green-600); }
+  .progress-labels {
+    display: flex; gap: 6px; max-width: 720px; margin: 10px auto 0;
+  }
+  .progress-label {
+    flex: 1; font-size: 10.5px; color: var(--cream-500);
+    font-weight: 500; text-align: center; line-height: 1.3;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .progress-label .num {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.06em;
+    color: var(--cream-400);
+  }
+  .progress-label.current { color: var(--green-800); font-weight: 600; }
+  .progress-label.current .num { color: var(--green-600); }
+  .progress-label.done { color: var(--green-700); }
+  .progress-label.done .num { color: var(--green-500); }
+  body.mobile-mode .progress-labels { display: none; }
+
+  /* ════════════ PAGE / CONTENT ════════════ */
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 36px 32px 48px;
+  }
+  body.mobile-mode .page { padding: 24px 18px 32px; }
+
+  .step-eyebrow {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--earth-500);
+    margin-bottom: 10px;
+  }
+  .step-title {
+    font-family: 'Lora', serif; font-size: 30px; font-weight: 700;
+    color: var(--green-900); line-height: 1.15; letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  .step-title .accent { color: var(--earth-500); }
+  body.mobile-mode .step-title { font-size: 24px; }
+  .step-sub {
+    font-size: 15px; color: var(--cream-700); line-height: 1.55;
+    max-width: 580px; margin-bottom: 28px;
+  }
+  body.mobile-mode .step-sub { font-size: 14px; margin-bottom: 22px; }
+
+  /* ════════════ STATE PANELS ════════════ */
+  .state-panel { display: none; }
+  .state-panel.active { display: block; }
+
+  /* ════════════ ÉTAPE 1 — comment ça marche ════════════ */
+  .how-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-bottom: 28px;
+  }
+  body.mobile-mode .how-grid { grid-template-columns: 1fr; gap: 12px; }
+  .how-card {
+    background: white; border: 1px solid var(--cream-200);
+    border-radius: 16px; padding: 22px 18px 20px;
+    position: relative; overflow: hidden;
+  }
+  .how-card-num {
+    position: absolute; top: 14px; right: 16px;
+    font-family: 'Lora', serif; font-size: 38px; font-weight: 700;
+    color: var(--green-100); line-height: 1; user-select: none;
+  }
+  .how-illu {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: var(--green-50); border: 1px solid var(--green-100);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px; color: var(--green-700);
+  }
+  .how-illu svg { width: 26px; height: 26px; }
+  .how-illu.earth { background: var(--earth-50); border-color: var(--earth-100); color: var(--earth-600); }
+  .how-card h3 {
+    font-family: 'Lora', serif; font-size: 17px; font-weight: 600;
+    color: var(--green-900); margin-bottom: 6px; line-height: 1.25;
+  }
+  .how-card p { font-size: 13px; color: var(--cream-700); line-height: 1.5; }
+
+  .reassure-strip {
+    background: var(--green-50); border: 1px solid var(--green-100);
+    border-radius: 14px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    font-size: 13.5px; color: var(--green-900); line-height: 1.5;
+  }
+  .reassure-strip-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: white; border: 1px solid var(--green-200);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--green-700); flex-shrink: 0;
+  }
+  .reassure-strip-icon svg { width: 18px; height: 18px; }
+  .reassure-strip strong { font-weight: 700; color: var(--green-800); }
+
+  /* ════════════ ÉTAPE 2 — capacité véhicule ════════════ */
+  .capacity-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px; }
+  .capacity-card {
+    background: white; border: 1.5px solid var(--cream-300);
+    border-radius: 16px; padding: 18px 20px;
+    display: flex; align-items: center; gap: 18px;
+    cursor: pointer; transition: all 150ms ease;
+    position: relative;
+  }
+  .capacity-card:hover { border-color: var(--green-300); background: var(--green-50); }
+  .capacity-card.selected {
+    border-color: var(--green-600); background: var(--green-50);
+    box-shadow: 0 0 0 3px rgba(53,127,67,0.10);
+  }
+  .capacity-icon {
+    width: 60px; height: 60px; flex-shrink: 0;
+    background: var(--cream-100); border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--green-700); transition: all 150ms;
+  }
+  .capacity-card.selected .capacity-icon {
+    background: white; border-color: var(--green-200); color: var(--green-700);
+  }
+  .capacity-icon svg { width: 30px; height: 30px; }
+  .capacity-body { flex: 1; min-width: 0; }
+  .capacity-title {
+    font-family: 'Lora', serif; font-size: 17px; font-weight: 600;
+    color: var(--green-900); margin-bottom: 3px; line-height: 1.25;
+  }
+  .capacity-desc { font-size: 13px; color: var(--cream-700); line-height: 1.45; }
+  .capacity-volume {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    color: var(--earth-600); text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .capacity-radio {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    border: 1.5px solid var(--cream-300); background: white;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 150ms;
+  }
+  .capacity-card.selected .capacity-radio {
+    border-color: var(--green-600); background: var(--green-600);
+  }
+  .capacity-card.selected .capacity-radio::after {
+    content: ''; width: 8px; height: 8px; border-radius: 50%; background: white;
+  }
+  body.mobile-mode .capacity-card { padding: 14px 14px; gap: 12px; }
+  body.mobile-mode .capacity-icon { width: 48px; height: 48px; border-radius: 12px; }
+  body.mobile-mode .capacity-icon svg { width: 24px; height: 24px; }
+  body.mobile-mode .capacity-title { font-size: 15px; }
+
+  /* ════════════ ÉTAPE 3 — Stripe Identity ════════════ */
+  .substate-toggle {
+    display: inline-flex; gap: 2px;
+    background: var(--cream-100); border: 1px solid var(--cream-200);
+    border-radius: 100px; padding: 3px; margin-bottom: 18px;
+  }
+  .substate-toggle button {
+    background: transparent; border: none; padding: 5px 12px;
+    border-radius: 100px; font-family: 'DM Sans'; font-size: 11.5px;
+    font-weight: 600; color: var(--cream-600); cursor: pointer;
+  }
+  .substate-toggle button.on {
+    background: white; color: var(--green-800);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .substate-panel { display: none; }
+  .substate-panel.active { display: block; }
+
+  .kyc-card {
+    background: white; border: 1px solid var(--cream-200);
+    border-radius: 18px; padding: 26px;
+    margin-bottom: 20px; position: relative; overflow: hidden;
+  }
+  body.mobile-mode .kyc-card { padding: 20px 18px; }
+  .kyc-head {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+  }
+  .kyc-shield {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: var(--green-50); border: 1px solid var(--green-100);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--green-700); flex-shrink: 0;
+  }
+  .kyc-shield svg { width: 28px; height: 28px; }
+  .kyc-head-text h3 {
+    font-family: 'Lora', serif; font-size: 18px; font-weight: 600;
+    color: var(--green-900); line-height: 1.2; margin-bottom: 2px;
+  }
+  .kyc-provider {
+    font-size: 11.5px; color: var(--cream-600); display: inline-flex; align-items: center; gap: 4px;
+  }
+  .kyc-provider .badge {
+    background: var(--cream-100); color: var(--cream-700); font-weight: 600;
+    padding: 1px 7px; border-radius: 4px; font-size: 10.5px;
+    letter-spacing: 0.02em;
+  }
+  .kyc-list {
+    list-style: none; display: flex; flex-direction: column; gap: 10px;
+    margin-bottom: 20px;
+  }
+  .kyc-list li {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 13.5px; color: var(--cream-800); line-height: 1.5;
+  }
+  .kyc-list li .check {
+    width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+    background: var(--green-100); color: var(--green-700);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  }
+  .kyc-list li .check svg { width: 11px; height: 11px; }
+  .kyc-list li strong { color: var(--green-900); font-weight: 700; }
+
+  .kyc-status {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    margin-bottom: 16px; font-size: 13px;
+  }
+  .kyc-status.pending { background: var(--earth-50); border: 1px solid var(--earth-100); color: var(--earth-800); }
+  .kyc-status.verified { background: var(--green-50); border: 1px solid var(--green-200); color: var(--green-800); }
+  .kyc-status .icon {
+    width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+    background: white; display: flex; align-items: center; justify-content: center;
+  }
+  .kyc-status.pending .icon { color: var(--earth-500); border: 1px solid var(--earth-200); }
+  .kyc-status.verified .icon { color: var(--green-600); border: 1px solid var(--green-200); }
+  .kyc-status .icon svg { width: 16px; height: 16px; }
+  .kyc-status .icon.spinner svg { animation: spin 1.2s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .kyc-status-text { flex: 1; min-width: 0; line-height: 1.4; }
+  .kyc-status-text strong { display: block; font-weight: 700; margin-bottom: 1px; }
+  .kyc-status-text .sub { color: inherit; opacity: 0.85; font-size: 12.5px; }
+
+  .kyc-explain {
+    background: var(--cream-50); border: 1px dashed var(--cream-300);
+    border-radius: 12px; padding: 12px 14px;
+    font-size: 12.5px; color: var(--cream-700); line-height: 1.5;
+  }
+  .kyc-explain strong { color: var(--green-800); font-weight: 700; }
+
+  /* ════════════ ÉTAPE 4 — photo + bio ════════════ */
+  .skip-banner {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--earth-50); border: 1px solid var(--earth-100);
+    color: var(--earth-800); border-radius: 100px;
+    padding: 5px 13px 5px 9px; font-size: 12px; font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .skip-banner .star {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--earth-500); color: white;
+    display: flex; align-items: center; justify-content: center; font-size: 11px;
+  }
+  .photo-card {
+    background: white; border: 1px solid var(--cream-200);
+    border-radius: 18px; padding: 24px;
+    display: flex; gap: 20px; align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  body.mobile-mode .photo-card { padding: 18px; flex-direction: column; gap: 14px; align-items: stretch; }
+  .photo-upload {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--green-50); border: 2px dashed var(--green-300);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--green-700); flex-shrink: 0; cursor: pointer;
+    transition: all 150ms;
+    text-align: center;
+  }
+  .photo-upload:hover { background: var(--green-100); border-color: var(--green-500); }
+  .photo-upload svg { width: 24px; height: 24px; margin-bottom: 4px; }
+  .photo-upload .photo-label { font-size: 10.5px; font-weight: 600; line-height: 1.2; }
+  body.mobile-mode .photo-upload { width: 96px; height: 96px; align-self: center; }
+  .photo-fields { flex: 1; min-width: 0; }
+  .field-label {
+    font-size: 12px; font-weight: 600; color: var(--cream-700);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+  }
+  .field-label .opt {
+    font-weight: 500; color: var(--cream-500); font-size: 11px;
+  }
+  .field-input, .field-textarea {
+    width: 100%; background: var(--cream-50);
+    border: 1px solid var(--cream-300); border-radius: 12px;
+    padding: 12px 14px; font-family: 'DM Sans'; font-size: 14px;
+    color: var(--cream-950); transition: all 150ms;
+    resize: none;
+  }
+  .field-input:focus, .field-textarea:focus {
+    outline: none; border-color: var(--green-600);
+    box-shadow: 0 0 0 3px rgba(53,127,67,0.10);
+    background: white;
+  }
+  .field-textarea { min-height: 86px; line-height: 1.5; }
+  .field-counter {
+    font-size: 11px; color: var(--cream-500);
+    text-align: right; margin-top: 4px;
+  }
+  .photo-tip {
+    background: var(--green-50); border: 1px solid var(--green-100);
+    border-radius: 12px; padding: 11px 14px;
+    font-size: 12.5px; color: var(--green-900); line-height: 1.5;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .photo-tip svg { width: 16px; height: 16px; color: var(--green-600); flex-shrink: 0; }
+  .photo-tip strong { font-weight: 700; }
+
+  /* ════════════ ÉTAPE 5 — récap ════════════ */
+  .recap-card {
+    background: white; border: 1px solid var(--cream-200);
+    border-radius: 18px; overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .recap-row {
+    padding: 16px 22px; border-bottom: 1px solid var(--cream-100);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .recap-row:last-child { border-bottom: none; }
+  body.mobile-mode .recap-row { padding: 14px 16px; gap: 12px; }
+  .recap-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--green-50); color: var(--green-700);
+    border: 1px solid var(--green-100);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .recap-icon svg { width: 18px; height: 18px; }
+  .recap-text { flex: 1; min-width: 0; }
+  .recap-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--cream-500);
+    margin-bottom: 3px;
+  }
+  .recap-value {
+    font-size: 14.5px; font-weight: 600; color: var(--cream-950);
+    line-height: 1.3;
+  }
+  .recap-value .muted { color: var(--cream-500); font-weight: 500; font-size: 13px; }
+  .recap-edit {
+    background: transparent; border: 1px solid var(--cream-300);
+    color: var(--cream-700); padding: 5px 11px;
+    border-radius: 100px; font-size: 11.5px; font-weight: 600;
+    cursor: pointer; flex-shrink: 0;
+    font-family: 'DM Sans';
+  }
+  .recap-edit:hover { background: var(--cream-50); color: var(--green-700); border-color: var(--green-300); }
+
+  .verified-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--green-100); color: var(--green-800);
+    padding: 3px 9px; border-radius: 100px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .verified-pill svg { width: 11px; height: 11px; }
+
+  .cgu-block {
+    background: white; border: 1px solid var(--cream-200);
+    border-radius: 14px; padding: 16px 18px;
+    display: flex; gap: 12px; align-items: flex-start;
+    margin-bottom: 18px;
+    cursor: pointer;
+  }
+  .cgu-block.checked { border-color: var(--green-300); background: var(--green-50); }
+  .cgu-checkbox {
+    width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
+    border: 1.5px solid var(--cream-400); border-radius: 6px;
+    background: white; display: flex; align-items: center; justify-content: center;
+    transition: all 150ms;
+  }
+  .cgu-block.checked .cgu-checkbox {
+    background: var(--green-600); border-color: var(--green-600);
+    color: white;
+  }
+  .cgu-checkbox svg { width: 12px; height: 12px; opacity: 0; }
+  .cgu-block.checked .cgu-checkbox svg { opacity: 1; }
+  .cgu-text { flex: 1; font-size: 13px; color: var(--cream-800); line-height: 1.55; }
+  .cgu-text a { color: var(--green-700); font-weight: 600; text-decoration: underline; }
+  .cgu-text strong { font-weight: 700; color: var(--cream-950); }
+
+  .gain-recap {
+    background: linear-gradient(135deg, var(--green-700) 0%, var(--green-600) 100%);
+    color: white; border-radius: 16px; padding: 18px 22px;
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 6px 18px rgba(53,127,67,0.18);
+  }
+  body.mobile-mode .gain-recap { padding: 16px; }
+  .gain-recap-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .gain-recap-icon svg { width: 22px; height: 22px; color: white; }
+  .gain-recap-text { flex: 1; min-width: 0; line-height: 1.4; }
+  .gain-recap-text strong { font-size: 15px; font-weight: 700; display: block; }
+  .gain-recap-text .sub { font-size: 12.5px; opacity: 0.9; margin-top: 2px; }
+
+  /* ════════════ FOOTER ACTIONS ════════════ */
+  .step-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; margin-top: 32px; padding-top: 20px;
+    border-top: 1px solid var(--cream-200);
+  }
+  body.mobile-mode .step-footer { margin-top: 24px; padding-top: 16px; }
+  .btn-primary {
+    background: var(--green-600); color: white; border: none;
+    border-radius: 100px; padding: 0 26px; height: 48px;
+    font-family: 'DM Sans'; font-size: 14px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(53,127,67,0.26);
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: all 200ms;
+  }
+  .btn-primary:hover { background: var(--green-700); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(53,127,67,0.32); }
+  .btn-primary:disabled { background: var(--cream-300); color: var(--cream-500); cursor: not-allowed; box-shadow: none; transform: none; }
+  .btn-primary svg { width: 16px; height: 16px; }
+  .btn-secondary {
+    background: var(--green-50); color: var(--green-700);
+    border: 1px solid var(--green-200); border-radius: 100px;
+    padding: 0 22px; height: 48px;
+    font-family: 'DM Sans'; font-size: 14px; font-weight: 600;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: all 150ms;
+  }
+  .btn-secondary:hover { background: var(--green-100); }
+  .btn-back {
+    background: transparent; border: none; color: var(--cream-700);
+    font-family: 'DM Sans'; font-size: 14px; font-weight: 500;
+    cursor: pointer; padding: 0 8px; height: 48px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-back:hover { color: var(--green-700); }
+  .btn-back svg { width: 14px; height: 14px; }
+  .btn-skip {
+    background: transparent; border: none;
+    color: var(--cream-600); font-family: 'DM Sans'; font-size: 13px; font-weight: 500;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+    padding: 0 6px;
+  }
+  .btn-skip:hover { color: var(--green-700); }
+
+  .step-footer-right { display: flex; align-items: center; gap: 10px; }
+  body.mobile-mode .step-footer { flex-direction: column-reverse; align-items: stretch; }
+  body.mobile-mode .btn-primary, body.mobile-mode .btn-secondary { justify-content: center; height: 52px; }
+  body.mobile-mode .btn-back { justify-content: center; height: 44px; }
+  body.mobile-mode .step-footer-right { flex-direction: column; gap: 8px; }
+
+  /* responsive */
+  @media (max-width: 720px) {
+    .how-grid { grid-template-columns: 1fr; }
+    .page { padding: 24px 18px 32px; }
+    .step-title { font-size: 26px; }
+    .preview-toolbar { padding: 8px 12px; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS RAMENEUR</span>
+    <a href="#" class="demo-nav-link">RM-01 · Authentification</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-02-onboarding.html" class="demo-nav-link active">RM-02 · Onboarding</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-03-accueil.html" class="demo-nav-link">RM-03 · Accueil</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link">RM-04 · Déclarer trajet</a>
+  </div>
+</div>
+
+<!-- ══════════ PREVIEW TOOLBAR ══════════ -->
+<div class="preview-toolbar">
+  <div class="ptb-section">
+    <span class="ptb-label">Étape</span>
+    <div class="ptb-group" id="step-group">
+      <button class="ptb-btn on" data-step="1" onclick="setStep(1, this)">1 · Bienvenue</button>
+      <button class="ptb-btn" data-step="2" onclick="setStep(2, this)">2 · Véhicule</button>
+      <button class="ptb-btn" data-step="3" onclick="setStep(3, this)">3 · Identité</button>
+      <button class="ptb-btn" data-step="4" onclick="setStep(4, this)">4 · Profil</button>
+      <button class="ptb-btn" data-step="5" onclick="setStep(5, this)">5 · Récap</button>
+    </div>
+  </div>
+  <div class="ptb-section">
+    <span class="ptb-label">Format</span>
+    <div class="ptb-group" id="format-group">
+      <button class="ptb-btn on" data-format="desktop" onclick="setFormat('desktop', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Desktop
+      </button>
+      <button class="ptb-btn" data-format="mobile" onclick="setFormat('mobile', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        Mobile
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STAGE ══════════ -->
+<div class="stage">
+  <div class="frame">
+
+    <!-- ══════════ HEADER allégé ══════════ -->
+    <header class="header">
+      <a href="#" class="logo">
+        <div class="logo-icon">🐜</div>
+        <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+      </a>
+      <div class="header-right">
+        <div class="step-counter">
+          Étape <strong id="hd-step-num">1</strong>/5
+        </div>
+        <a href="#" class="header-help">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093M12 17h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Aide</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- ══════════ PROGRESS ══════════ -->
+    <div class="progress-wrap">
+      <div class="progress-track" id="progress-track">
+        <div class="progress-seg current" data-seg="1"></div>
+        <div class="progress-seg" data-seg="2"></div>
+        <div class="progress-seg" data-seg="3"></div>
+        <div class="progress-seg" data-seg="4"></div>
+        <div class="progress-seg" data-seg="5"></div>
+      </div>
+      <div class="progress-labels" id="progress-labels">
+        <div class="progress-label current"><span class="num">01</span><span>Bienvenue</span></div>
+        <div class="progress-label"><span class="num">02</span><span>Véhicule</span></div>
+        <div class="progress-label"><span class="num">03</span><span>Identité</span></div>
+        <div class="progress-label"><span class="num">04</span><span>Profil</span></div>
+        <div class="progress-label"><span class="num">05</span><span>Récap</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════ PAGE / STEPS ══════════ -->
+    <div class="page">
+
+      <!-- ══════════ ÉTAPE 1 — BIENVENUE ══════════ -->
+      <div id="step-1" class="state-panel active">
+        <div class="step-eyebrow">Bienvenue chez Delta</div>
+        <h1 class="step-title">Vos trajets, <span class="accent">utiles</span> à votre voisinage.</h1>
+        <p class="step-sub">Vous décidez où et quand vous allez. Delta repère les producteurs et les voisins sur votre route — vous choisissez ce qui vous arrange. Trois minutes pour finir l'inscription.</p>
+
+        <div class="how-grid">
+          <div class="how-card">
+            <span class="how-card-num">1</span>
+            <div class="how-illu">
+              <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <h3>Vous déclarez un trajet</h3>
+            <p>D'où, où, quand. Dates seulement — pas d'horaire à respecter.</p>
+          </div>
+          <div class="how-card">
+            <span class="how-card-num">2</span>
+            <div class="how-illu earth">
+              <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            </div>
+            <h3>On vous propose des missions</h3>
+            <p>Un producteur côté destination, des voisins côté origine. Gain et détour estimés.</p>
+          </div>
+          <div class="how-card">
+            <span class="how-card-num">3</span>
+            <div class="how-illu">
+              <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <h3>Vous choisissez et vous gagnez</h3>
+            <p><strong style="color:var(--green-800);font-weight:700">10 %</strong> du panier, versés 24-48 h après la livraison confirmée.</p>
+          </div>
+        </div>
+
+        <div class="reassure-strip">
+          <div class="reassure-strip-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <div>
+            <strong>Aucun engagement.</strong> Vous acceptez ou refusez chaque mission. Pas d'horaire imposé, pas d'objectifs hebdo.
+          </div>
+        </div>
+
+        <div class="step-footer">
+          <button class="btn-back" disabled style="visibility:hidden">Retour</button>
+          <div class="step-footer-right">
+            <button class="btn-primary" onclick="setStep(2)">
+              Commencer
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ ÉTAPE 2 — CAPACITÉ VÉHICULE ══════════ -->
+      <div id="step-2" class="state-panel">
+        <div class="step-eyebrow">KAN-38 · Capacité véhicule</div>
+        <h1 class="step-title">Quelle place avez-vous <span class="accent">à bord</span> ?</h1>
+        <p class="step-sub">Une estimation suffit — vous pourrez la modifier à chaque trajet. On vous propose des missions adaptées au volume que vous indiquez.</p>
+
+        <div class="capacity-list" id="capacity-list">
+          <div class="capacity-card" data-cap="bag" onclick="selectCapacity(this)">
+            <div class="capacity-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            </div>
+            <div class="capacity-body">
+              <div class="capacity-title">Un sac à main ou un sac à dos</div>
+              <div class="capacity-desc">Quelques bocaux, un panier de fruits, un fromage. Idéal pour les trajets en train ou à pied.</div>
+              <div class="capacity-volume">≈ 5 à 10 L · jusqu'à 3 kg</div>
+            </div>
+            <div class="capacity-radio"></div>
+          </div>
+
+          <div class="capacity-card selected" data-cap="trunk" onclick="selectCapacity(this)">
+            <div class="capacity-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 17h8m-8 0a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zM3 7v10h18V7M3 7l2-3h14l2 3M3 7h18"/></svg>
+            </div>
+            <div class="capacity-body">
+              <div class="capacity-title">Un coffre de voiture</div>
+              <div class="capacity-desc">Plusieurs cagettes, des cartons standards. Le format le plus courant chez nos rameneurs.</div>
+              <div class="capacity-volume">≈ 200 à 400 L · jusqu'à 25 kg</div>
+            </div>
+            <div class="capacity-radio"></div>
+          </div>
+
+          <div class="capacity-card" data-cap="van" onclick="selectCapacity(this)">
+            <div class="capacity-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM3 7v10h2m12 0h2v-5l-3-4h-3M3 7h11m0 0v6h7"/></svg>
+            </div>
+            <div class="capacity-body">
+              <div class="capacity-title">Un break ou utilitaire</div>
+              <div class="capacity-desc">Volume large, charges plus lourdes. Possibilité de regrouper plusieurs missions sur le même trajet.</div>
+              <div class="capacity-volume">≥ 500 L · jusqu'à 80 kg</div>
+            </div>
+            <div class="capacity-radio"></div>
+          </div>
+        </div>
+
+        <div class="reassure-strip">
+          <div class="reassure-strip-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>Ajustable trajet par trajet. Si vous changez de véhicule un week-end, vous précisez la capacité au moment où vous déclarez.</div>
+        </div>
+
+        <div class="step-footer">
+          <button class="btn-back" onclick="setStep(1)">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Retour
+          </button>
+          <div class="step-footer-right">
+            <button class="btn-primary" onclick="setStep(3)">
+              Continuer
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ ÉTAPE 3 — STRIPE IDENTITY ══════════ -->
+      <div id="step-3" class="state-panel">
+        <div class="step-eyebrow">KAN-37 · Vérification d'identité</div>
+        <h1 class="step-title">On vérifie qui vous êtes <span class="accent">— rapidement</span>.</h1>
+        <p class="step-sub">C'est obligatoire pour recevoir vos paiements. La vérification est gérée par Stripe Identity, le standard européen, et prend généralement moins de 2 minutes.</p>
+
+        <div class="substate-toggle" role="tablist">
+          <button class="on" data-sub="idle" onclick="setSubstate('idle', this)">Avant lancement</button>
+          <button data-sub="pending" onclick="setSubstate('pending', this)">En cours</button>
+          <button data-sub="verified" onclick="setSubstate('verified', this)">Vérifiée</button>
+        </div>
+
+        <!-- IDLE -->
+        <div class="substate-panel active" data-sub-panel="idle">
+          <div class="kyc-card">
+            <div class="kyc-head">
+              <div class="kyc-shield">
+                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              </div>
+              <div class="kyc-head-text">
+                <h3>Pièce d'identité + selfie</h3>
+                <div class="kyc-provider">propulsé par <span class="badge">Stripe Identity</span></div>
+              </div>
+            </div>
+
+            <ul class="kyc-list">
+              <li>
+                <span class="check"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+                <span>Une <strong>pièce d'identité</strong> (carte d'identité, passeport ou permis de conduire)</span>
+              </li>
+              <li>
+                <span class="check"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+                <span>Un <strong>selfie</strong> pris en direct depuis votre appareil — pour confirmer que c'est bien vous</span>
+              </li>
+              <li>
+                <span class="check"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+                <span>Pas de RIB à cette étape — il sera demandé lorsque vous recevrez votre premier paiement</span>
+              </li>
+            </ul>
+
+            <div class="kyc-explain">
+              <strong>Pourquoi ?</strong> La législation française nous oblige à vérifier l'identité de toute personne qui reçoit un paiement via la plateforme. Vos pièces ne sont jamais stockées chez Delta — elles transitent uniquement par Stripe, qui les chiffre et les détruit après vérification.
+            </div>
+          </div>
+
+          <div class="step-footer">
+            <button class="btn-back" onclick="setStep(2)">
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              Retour
+            </button>
+            <div class="step-footer-right">
+              <button class="btn-primary" onclick="setSubstate('pending')">
+                Lancer la vérification
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PENDING -->
+        <div class="substate-panel" data-sub-panel="pending">
+          <div class="kyc-card">
+            <div class="kyc-status pending">
+              <div class="icon spinner">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              </div>
+              <div class="kyc-status-text">
+                <strong>Vérification en cours…</strong>
+                <span class="sub">Stripe analyse vos documents. Vous pouvez fermer cette page — on vous prévient par e-mail quand c'est terminé (≈ 2 min).</span>
+              </div>
+            </div>
+            <div class="kyc-explain">
+              Vous pouvez continuer à compléter votre profil pendant ce temps. La vérification se poursuit en arrière-plan.
+            </div>
+          </div>
+
+          <div class="step-footer">
+            <button class="btn-back" onclick="setSubstate('idle')">
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              Retour
+            </button>
+            <div class="step-footer-right">
+              <button class="btn-secondary" onclick="setStep(4)">
+                Continuer pendant ce temps
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- VERIFIED -->
+        <div class="substate-panel" data-sub-panel="verified">
+          <div class="kyc-card">
+            <div class="kyc-status verified">
+              <div class="icon">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              </div>
+              <div class="kyc-status-text">
+                <strong>Identité vérifiée</strong>
+                <span class="sub">Vous êtes prêt à recevoir des paiements. La pastille « vérifié » apparaîtra sur votre profil rameneur.</span>
+              </div>
+            </div>
+            <div class="kyc-explain">
+              <strong>Bon à savoir :</strong> les producteurs et voisins voient la pastille « identité vérifiée » sur les missions que vous acceptez. Elle augmente nettement la confiance et le taux de réservation.
+            </div>
+          </div>
+
+          <div class="step-footer">
+            <button class="btn-back" onclick="setStep(2)">
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+              Retour
+            </button>
+            <div class="step-footer-right">
+              <button class="btn-primary" onclick="setStep(4)">
+                Continuer
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ ÉTAPE 4 — PHOTO + BIO ══════════ -->
+      <div id="step-4" class="state-panel">
+        <div class="step-eyebrow">Optionnel · recommandé</div>
+        <h1 class="step-title">Mettez un visage <span class="accent">sur votre profil</span>.</h1>
+        <p class="step-sub">C'est facultatif — mais c'est ce qui change tout côté voisins et producteurs.</p>
+
+        <div class="skip-banner">
+          <span class="star">★</span>
+          Les rameneurs avec photo sont <strong style="margin-left:2px">3× plus choisis</strong>
+        </div>
+
+        <div class="photo-card">
+          <div class="photo-upload">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span class="photo-label">Ajouter<br>une photo</span>
+          </div>
+          <div class="photo-fields">
+            <div class="field-label">Prénom affiché<span class="opt">obligatoire</span></div>
+            <input type="text" class="field-input" value="Thomas" placeholder="Comment voulez-vous être appelé ?">
+            <div style="height:14px"></div>
+            <div class="field-label">Bio courte<span class="opt">(facultatif · 140 caractères max)</span></div>
+            <textarea class="field-textarea" maxlength="140" placeholder="Quelques mots pour vous présenter — votre quartier, votre véhicule, ce que vous transportez volontiers…">Navetteur Bayeux–Paris, je passe par chez vous tous les jeudis. Un coffre Clio prêt à dépanner.</textarea>
+            <div class="field-counter"><span id="bio-counter">82</span>/140</div>
+          </div>
+        </div>
+
+        <div class="photo-tip">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <div><strong>Conseil :</strong> une photo prise en extérieur, souriante, fonctionne mieux qu'une photo d'identité. Évitez les lunettes de soleil.</div>
+        </div>
+
+        <div class="step-footer">
+          <button class="btn-back" onclick="setStep(3)">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Retour
+          </button>
+          <div class="step-footer-right">
+            <button class="btn-skip" onclick="setStep(5)">Passer cette étape</button>
+            <button class="btn-primary" onclick="setStep(5)">
+              Enregistrer et continuer
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ ÉTAPE 5 — RÉCAP + CGU ══════════ -->
+      <div id="step-5" class="state-panel">
+        <div class="step-eyebrow">Dernière étape</div>
+        <h1 class="step-title">Tout est prêt, <span class="accent">Thomas</span>.</h1>
+        <p class="step-sub">Vérifiez le récapitulatif, acceptez les conditions générales, et bienvenue.</p>
+
+        <div class="recap-card">
+          <div class="recap-row">
+            <div class="recap-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 17h8m-8 0a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zM3 7v10h18V7M3 7l2-3h14l2 3M3 7h18"/></svg>
+            </div>
+            <div class="recap-text">
+              <div class="recap-label">Capacité véhicule</div>
+              <div class="recap-value">Un coffre de voiture <span class="muted">· ≈ 200-400 L</span></div>
+            </div>
+            <button class="recap-edit" onclick="setStep(2)">Modifier</button>
+          </div>
+
+          <div class="recap-row">
+            <div class="recap-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <div class="recap-text">
+              <div class="recap-label">Identité</div>
+              <div class="recap-value">Vérifiée
+                <span class="verified-pill">
+                  <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Stripe
+                </span>
+              </div>
+            </div>
+            <button class="recap-edit" onclick="setStep(3)">Voir</button>
+          </div>
+
+          <div class="recap-row">
+            <div class="recap-icon">
+              <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <div class="recap-text">
+              <div class="recap-label">Profil</div>
+              <div class="recap-value">Thomas <span class="muted">· photo + bio renseignées</span></div>
+            </div>
+            <button class="recap-edit" onclick="setStep(4)">Modifier</button>
+          </div>
+        </div>
+
+        <div class="gain-recap">
+          <div class="gain-recap-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+          </div>
+          <div class="gain-recap-text">
+            <strong>Vous touchez 10 % du panier de chaque mission.</strong>
+            <div class="sub">Producteur 85 % · rameneur 10 % · plateforme 5 %. Versement 24-48 h après livraison confirmée.</div>
+          </div>
+        </div>
+
+        <div class="cgu-block checked" id="cgu-block" onclick="toggleCgu()">
+          <div class="cgu-checkbox">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <div class="cgu-text">
+            J'accepte les <a href="#">conditions générales rameneur</a> et la <a href="#">charte de service</a> de Delta. Je confirme transporter les colis avec soin et respecter les délais de livraison annoncés.
+          </div>
+        </div>
+
+        <div class="step-footer">
+          <button class="btn-back" onclick="setStep(4)">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Retour
+          </button>
+          <div class="step-footer-right">
+            <button class="btn-primary" id="finish-btn" onclick="alert('→ Redirection vers RM-03 Accueil rameneur')">
+              Commencer sur Delta
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ═══════ Step navigation ═══════
+  function setStep(n, btn) {
+    document.querySelectorAll('.state-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    document.getElementById('hd-step-num').textContent = n;
+
+    // toolbar buttons
+    document.querySelectorAll('#step-group .ptb-btn').forEach(b => b.classList.remove('on'));
+    const tgt = btn || document.querySelector('#step-group .ptb-btn[data-step="' + n + '"]');
+    if (tgt) tgt.classList.add('on');
+
+    // progress segments
+    document.querySelectorAll('.progress-seg').forEach(s => {
+      const i = parseInt(s.dataset.seg, 10);
+      s.classList.remove('done', 'current');
+      if (i < n) s.classList.add('done');
+      else if (i === n) s.classList.add('current');
+    });
+    // progress labels
+    document.querySelectorAll('.progress-label').forEach((l, idx) => {
+      const i = idx + 1;
+      l.classList.remove('done', 'current');
+      if (i < n) l.classList.add('done');
+      else if (i === n) l.classList.add('current');
+    });
+
+    // reset step 3 substate to idle when (re)entering
+    if (n === 3) setSubstate('idle');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ═══════ Format toggle ═══════
+  function setFormat(fmt, btn) {
+    document.body.classList.toggle('mobile-mode', fmt === 'mobile');
+    document.querySelectorAll('#format-group .ptb-btn').forEach(b => b.classList.remove('on'));
+    if (btn) btn.classList.add('on');
+    else document.querySelector('#format-group .ptb-btn[data-format="' + fmt + '"]').classList.add('on');
+  }
+
+  // ═══════ Step 3 sub-states ═══════
+  function setSubstate(sub, btn) {
+    document.querySelectorAll('[data-sub-panel]').forEach(p => p.classList.remove('active'));
+    const panel = document.querySelector('[data-sub-panel="' + sub + '"]');
+    if (panel) panel.classList.add('active');
+    document.querySelectorAll('.substate-toggle button').forEach(b => b.classList.remove('on'));
+    const tgt = btn || document.querySelector('.substate-toggle button[data-sub="' + sub + '"]');
+    if (tgt) tgt.classList.add('on');
+  }
+
+  // ═══════ Capacity selection ═══════
+  function selectCapacity(card) {
+    document.querySelectorAll('.capacity-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+  }
+
+  // ═══════ CGU toggle ═══════
+  function toggleCgu() {
+    const block = document.getElementById('cgu-block');
+    const btn = document.getElementById('finish-btn');
+    block.classList.toggle('checked');
+    btn.disabled = !block.classList.contains('checked');
+  }
+
+  // ═══════ Bio counter ═══════
+  document.querySelector('.field-textarea')?.addEventListener('input', e => {
+    document.getElementById('bio-counter').textContent = e.target.value.length;
+  });
+</script>
+</body>
+</html>

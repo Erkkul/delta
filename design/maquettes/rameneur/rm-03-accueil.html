@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — RM-03 Accueil rameneur
+  Ticket(s) Jira : KAN-39 (Tableau de bord rameneur)
+  Mapping : produit/jira_mapping.md
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM-03 · Accueil rameneur — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<template id="__bundler_thumbnail" data-bg-color="#F5F5F4">
+  <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+    <rect width="240" height="240" fill="#F5F5F4"/>
+    <rect x="40" y="40" width="160" height="160" rx="36" fill="#14351A"/>
+    <text x="120" y="148" font-family="serif" font-size="96" font-weight="700" text-anchor="middle" fill="#F2FAF3">🐜</text>
+    <circle cx="186" cy="56" r="14" fill="#B8703F"/>
+  </svg>
+</template>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0C1F0F; --green-900: #14351A; --green-800: #1E4D26;
+    --green-700: #276634; --green-600: #357F43; --green-500: #4A9A58;
+    --green-400: #6DB87A; --green-300: #8FCB9C; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50:  #F2FAF3;
+    --earth-800: #5C3214; --earth-600: #8B5226; --earth-500: #B8703F;
+    --earth-400: #CC8E62; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --earth-50:  #FDF5ED;
+    --cream-950: #1C1917; --cream-800: #44403C; --cream-700: #57534E;
+    --cream-600: #78716C; --cream-500: #A8A29E; --cream-400: #C4BFBB;
+    --cream-300: #D6D3D1; --cream-200: #E7E5E4; --cream-100: #F5F5F4;
+    --cream-50:  #FAF7F2;
+  }
+
+  html, body { background: var(--cream-100); }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--cream-950);
+    min-height: 100vh;
+  }
+
+  /* ════════════ DEMO NAV (parcours rameneur) ════════════ */
+  .demo-nav {
+    background: var(--cream-950); color: white;
+    padding: 8px 16px; font-size: 12px;
+  }
+  .demo-nav-inner {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .demo-nav-label {
+    font-weight: 700; letter-spacing: 0.08em; font-size: 10px;
+    color: rgba(255,255,255,0.5); margin-right: 4px;
+  }
+  .demo-nav-link {
+    color: rgba(255,255,255,0.65); text-decoration: none;
+    padding: 4px 11px; border-radius: 100px;
+    font-weight: 500; font-size: 12px;
+    transition: all 150ms;
+  }
+  .demo-nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* ════════════ PREVIEW TOOLBAR ════════════ */
+  .preview-toolbar {
+    background: white;
+    border-bottom: 1px solid var(--cream-200);
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .ptb-section { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ptb-label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--cream-500);
+  }
+  .ptb-group {
+    display: inline-flex; gap: 2px;
+    background: var(--cream-100);
+    border: 1px solid var(--cream-200);
+    border-radius: 100px;
+    padding: 3px;
+  }
+  .ptb-btn {
+    background: transparent; border: none;
+    padding: 6px 14px; border-radius: 100px;
+    font-family: 'DM Sans'; font-size: 12px; font-weight: 600;
+    color: var(--cream-600); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 150ms;
+  }
+  .ptb-btn:hover { color: var(--green-700); }
+  .ptb-btn.on { background: white; color: var(--green-800); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .ptb-btn svg { width: 13px; height: 13px; }
+
+  /* ════════════ STAGE (contient les frames) ════════════ */
+  .stage {
+    display: flex; justify-content: center;
+    padding: 28px 16px 56px;
+    min-height: calc(100vh - 80px);
+  }
+
+  /* — Mode desktop : prend toute la largeur — */
+  .frame {
+    width: 100%;
+    max-width: 1280px;
+    background: var(--cream-50);
+    border-radius: 14px;
+    border: 1px solid var(--cream-200);
+    box-shadow: 0 10px 40px rgba(28,25,23,0.06);
+    overflow: hidden;
+    transition: max-width 250ms ease, border-radius 250ms;
+  }
+
+  /* — Mode mobile : largeur 390 px avec cadre device — */
+  body.mobile-mode .frame {
+    max-width: 390px;
+    border-radius: 36px;
+    border: 8px solid var(--cream-950);
+    box-shadow: 0 20px 60px rgba(28,25,23,0.18);
+  }
+  body.mobile-mode .frame::before {
+    content: '';
+    display: block;
+    width: 100%; height: 22px;
+    background: var(--cream-950);
+    margin: -1px 0 -1px;
+  }
+  body.mobile-mode .header { padding: 0 16px; height: 56px; }
+  body.mobile-mode .header .nav-link { display: none; }
+  body.mobile-mode .header .nav-sep { display: none; }
+  body.mobile-mode .page { padding: 18px 16px 88px; }
+  body.mobile-mode .hero h1 { font-size: 24px; }
+  body.mobile-mode .hero p { font-size: 14px; }
+  body.mobile-mode .grid-2 { grid-template-columns: 1fr !important; gap: 14px !important; }
+  body.mobile-mode .grid-3 { grid-template-columns: 1fr !important; }
+  body.mobile-mode .stat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  body.mobile-mode .quick-links { grid-template-columns: repeat(3, 1fr) !important; }
+  body.mobile-mode .empty-steps { grid-template-columns: 1fr !important; }
+  body.mobile-mode .mobile-tabbar { display: flex; }
+  body.mobile-mode .empty-hero { padding: 28px 22px !important; }
+  body.mobile-mode .empty-hero-illu { width: 90px !important; height: 90px !important; }
+  body.mobile-mode .empty-hero h2 { font-size: 22px !important; }
+  body.mobile-mode .trip-card-row { flex-direction: column; align-items: stretch !important; }
+  body.mobile-mode .trip-card-cta { align-self: stretch !important; }
+  body.mobile-mode .stat-card-big-value { font-size: 26px !important; }
+
+  /* ════════════ HEADER ════════════ */
+  .header {
+    background: rgba(250,247,242,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 32px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 8px rgba(53,127,67,0.04);
+  }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+  .logo-icon {
+    width: 34px; height: 34px; background: var(--green-800); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    box-shadow: 0 2px 6px rgba(14,53,26,0.25);
+  }
+  .logo-text { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-800); letter-spacing: -0.02em; }
+  .logo-dot { color: var(--earth-500); }
+  .nav-links { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .nav-link {
+    font-size: 14px; font-weight: 500; color: var(--cream-700);
+    text-decoration: none; padding: 6px 12px; border-radius: 8px;
+    transition: color 150ms, background 150ms;
+  }
+  .nav-link:hover { color: var(--green-700); background: var(--green-50); }
+  .nav-link.active { color: var(--green-700); font-weight: 600; }
+  .nav-sep { width: 1px; height: 20px; background: var(--cream-200); margin: 0 4px; }
+  .pause-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green-50); border: 1px solid var(--green-200);
+    border-radius: 100px;
+    padding: 5px 11px 5px 8px;
+    font-size: 12px; font-weight: 600;
+    color: var(--green-800);
+    cursor: pointer;
+    transition: all 150ms;
+  }
+  .pause-toggle:hover { background: var(--green-100); }
+  .pause-toggle .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green-500);
+  }
+  .pause-toggle.paused { background: var(--earth-50); border-color: var(--earth-200); color: var(--earth-800); }
+  .pause-toggle.paused .dot { background: var(--earth-500); }
+  .avatar-btn {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--green-100);
+    border: 2px solid var(--green-200); display: flex; align-items: center;
+    justify-content: center; font-size: 15px; cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ════════════ PAGE ════════════ */
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 32px 48px;
+  }
+  .preview-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--cream-500);
+    margin-bottom: 6px;
+  }
+
+  /* Hero */
+  .hero { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+  .hero-title { flex: 1; min-width: 240px; }
+  .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.15;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .hero h1 .accent { color: var(--earth-500); }
+  .hero p {
+    font-size: 15px;
+    color: var(--cream-600);
+    line-height: 1.55;
+    max-width: 540px;
+  }
+  .btn-primary-hero {
+    background: var(--green-600);
+    color: white; border: none;
+    border-radius: 100px;
+    padding: 0 22px; height: 46px;
+    font-family: 'DM Sans'; font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(53,127,67,0.26);
+    display: inline-flex; align-items: center; gap: 8px;
+    text-decoration: none;
+    transition: all 200ms ease;
+    flex-shrink: 0;
+  }
+  .btn-primary-hero:hover { background: var(--green-700); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(53,127,67,0.32); }
+  .btn-primary-hero svg { width: 16px; height: 16px; }
+
+  /* ════════════ GRID LAYOUT ════════════ */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 22px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+  }
+
+  /* ════════════ SECTION TITLES ════════════ */
+  .sec-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 12px; gap: 12px; flex-wrap: wrap;
+  }
+  .sec-title {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--green-900);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sec-title .pill-count {
+    font-family: 'DM Sans';
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--green-100); color: var(--green-800);
+    padding: 2px 9px; border-radius: 100px;
+    letter-spacing: 0.02em;
+  }
+  .sec-link {
+    font-size: 12.5px;
+    color: var(--green-700);
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .sec-link:hover { color: var(--green-800); }
+  .sec-link svg { width: 12px; height: 12px; }
+
+  /* ════════════ MISSION ACTIVE CARD (large, hero) ════════════ */
+  .mission-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-left: 4px solid var(--green-600);
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 4px 20px rgba(53,127,67,0.08);
+    overflow: hidden;
+    margin-bottom: 14px;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 200ms;
+  }
+  .mission-card:hover { box-shadow: 0 8px 28px rgba(53,127,67,0.12); transform: translateY(-1px); }
+  .mission-card-top {
+    padding: 18px 20px 14px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .mission-card-info { flex: 1; min-width: 200px; }
+  .mission-status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green-100); color: var(--green-800);
+    border: 1px solid var(--green-200);
+    padding: 5px 12px; border-radius: 100px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 10px;
+  }
+  .mission-status-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-500); animation: pulse-dot 2s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .mission-card-title {
+    font-family: 'Lora', serif;
+    font-size: 22px; font-weight: 700;
+    color: var(--green-900);
+    line-height: 1.2;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .mission-card-meta {
+    font-size: 13px;
+    color: var(--cream-600);
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .mission-card-meta .sep { color: var(--cream-300); }
+  .mission-gain {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .mission-gain-label {
+    font-size: 10px;
+    color: var(--cream-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .mission-gain-value {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-700);
+    line-height: 1;
+  }
+  .mission-card-footer {
+    background: var(--green-50);
+    border-top: 1px solid var(--green-100);
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .mission-next-step {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px;
+    color: var(--green-900);
+    flex: 1; min-width: 180px;
+  }
+  .mission-next-step .step-icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: white;
+    border: 1.5px solid var(--green-300);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .mission-next-step .step-icon svg { width: 14px; height: 14px; color: var(--green-700); }
+  .mission-next-step strong { color: var(--green-900); font-weight: 700; }
+  .mission-next-step .step-sub { font-size: 11.5px; color: var(--cream-700); display: block; margin-top: 1px; }
+  .mission-go-btn {
+    background: var(--green-700);
+    color: white;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    text-decoration: none;
+    transition: all 150ms;
+    flex-shrink: 0;
+  }
+  .mission-go-btn:hover { background: var(--green-800); }
+  .mission-go-btn svg { width: 12px; height: 12px; }
+
+  /* ════════════ TRIP / TRAJET CARD (compact) ════════════ */
+  .trip-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    transition: all 200ms;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .trip-card:hover { border-color: var(--green-200); box-shadow: 0 4px 16px rgba(53,127,67,0.06); }
+  .trip-card.has-opp { border-color: var(--earth-200); background: linear-gradient(135deg, var(--earth-50) 0%, white 60%); }
+  .trip-card-row {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .trip-route {
+    flex: 1; min-width: 0;
+  }
+  .trip-route-line {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Lora', serif;
+    font-size: 16px; font-weight: 600;
+    color: var(--green-900);
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .trip-route-line .arrow {
+    color: var(--green-500);
+    flex-shrink: 0;
+  }
+  .trip-route-line .arrow svg { width: 14px; height: 14px; }
+  .trip-meta {
+    font-size: 12px;
+    color: var(--cream-600);
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .trip-meta .sep { color: var(--cream-300); }
+  .trip-card-status {
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .trip-card-status .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--cream-500);
+    margin-bottom: 2px;
+  }
+  .trip-status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .trip-status-badge.searching { background: var(--cream-100); color: var(--cream-700); border: 1px solid var(--cream-200); }
+  .trip-status-badge.has-opp { background: var(--earth-100); color: var(--earth-800); border: 1px solid var(--earth-200); }
+  .trip-status-badge.has-opp .count {
+    background: var(--earth-500); color: white;
+    padding: 1px 7px; border-radius: 100px;
+    font-size: 10px; font-weight: 700;
+    margin-left: 2px;
+  }
+  .trip-card-cta {
+    flex-shrink: 0;
+  }
+  .trip-cta-btn {
+    background: var(--green-600);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: all 150ms;
+  }
+  .trip-cta-btn:hover { background: var(--green-700); }
+  .trip-cta-btn svg { width: 11px; height: 11px; }
+  .trip-cta-link {
+    font-size: 12.5px;
+    color: var(--cream-600);
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .trip-cta-link:hover { color: var(--green-700); }
+
+  /* ════════════ EMPTY STATE HERO ════════════ */
+  .empty-hero {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 20px;
+    padding: 44px 36px;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 22px;
+  }
+  .empty-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(53,127,67,0.06), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(184,112,63,0.05), transparent 40%);
+    pointer-events: none;
+  }
+  .empty-hero-illu {
+    width: 110px; height: 110px;
+    margin: 0 auto 18px;
+    background: var(--green-50);
+    border: 1.5px dashed var(--green-300);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+    position: relative;
+  }
+  .empty-hero h2 {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-900);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+    position: relative;
+  }
+  .empty-hero p {
+    font-size: 15px;
+    color: var(--cream-700);
+    line-height: 1.55;
+    max-width: 480px;
+    margin: 0 auto 20px;
+    position: relative;
+  }
+  .empty-hero .btn-primary-hero { position: relative; }
+
+  .empty-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .empty-step {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    text-align: left;
+  }
+  .empty-step-num {
+    display: inline-flex;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--earth-200);
+    color: var(--earth-800);
+    align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    margin-bottom: 10px;
+    font-family: 'DM Sans';
+  }
+  .empty-step h3 {
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--green-900);
+    margin-bottom: 4px;
+  }
+  .empty-step p {
+    font-size: 13px;
+    color: var(--cream-600);
+    line-height: 1.5;
+  }
+
+  /* ════════════ REVENUS / SIDEBAR CARDS ════════════ */
+  .side-card {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .side-card-title {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green-800);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .side-card-title-link {
+    font-family: 'DM Sans';
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--cream-600);
+    text-decoration: none;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .side-card-title-link:hover { color: var(--green-700); }
+
+  .stat-card-big {
+    background: linear-gradient(135deg, var(--green-700) 0%, var(--green-600) 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 6px 20px rgba(53,127,67,0.18);
+  }
+  .stat-card-big .side-card-title { color: rgba(255,255,255,0.85); }
+  .stat-card-big-amount {
+    display: flex; align-items: baseline; gap: 6px;
+    margin-bottom: 4px;
+  }
+  .stat-card-big-value {
+    font-family: 'Lora', serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .stat-card-big-currency { font-size: 18px; font-weight: 600; opacity: 0.85; }
+  .stat-card-big-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 14px;
+  }
+  .stat-card-big-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.15);
+    margin: 14px 0;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-row .label {
+    color: rgba(255,255,255,0.8);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stat-row .value {
+    font-weight: 600;
+    color: white;
+  }
+  .stat-row .label .marker {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .stat-row .label .marker.acquired { background: var(--green-300); }
+  .stat-row .label .marker.escrow { background: var(--earth-400); }
+
+  /* small stat grid for inside revenus */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .stat-mini {
+    background: var(--cream-50);
+    border: 1px solid var(--cream-200);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-mini .v { font-family: 'Lora', serif; font-size: 18px; font-weight: 700; color: var(--green-800); line-height: 1.1; }
+  .stat-mini .l { font-size: 10.5px; color: var(--cream-600); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+
+  /* ════════════ QUICK LINKS ════════════ */
+  .quick-links {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .quick-link {
+    background: white;
+    border: 1px solid var(--cream-200);
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: all 200ms;
+    cursor: pointer;
+    display: block;
+  }
+  .quick-link:hover {
+    border-color: var(--green-200);
+    background: var(--green-50);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(53,127,67,0.08);
+  }
+  .quick-link-icon {
+    width: 38px; height: 38px;
+    margin: 0 auto 8px;
+    background: var(--green-100);
+    color: var(--green-800);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .quick-link-icon svg { width: 18px; height: 18px; }
+  .quick-link-label {
+    font-size: 12px; font-weight: 600;
+    color: var(--cream-800);
+    line-height: 1.3;
+  }
+  .quick-link-sub {
+    font-size: 10.5px;
+    color: var(--cream-500);
+    margin-top: 1px;
+  }
+  .quick-link-badge {
+    display: inline-block;
+    background: var(--earth-500);
+    color: white;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 100px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  /* ════════════ TIPS / INFO STRIP ════════════ */
+  .info-strip {
+    background: linear-gradient(135deg, var(--earth-50) 0%, var(--cream-50) 100%);
+    border: 1px solid var(--earth-100);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    font-size: 13px;
+    color: var(--earth-800);
+    line-height: 1.5;
+    margin-top: 18px;
+  }
+  .info-strip-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: white;
+    border: 1px solid var(--earth-200);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .info-strip strong { color: var(--earth-800); font-weight: 700; }
+  .info-strip a { color: var(--green-700); font-weight: 600; text-decoration: none; }
+  .info-strip a:hover { text-decoration: underline; }
+
+  /* ════════════ MOBILE TABBAR (visible only mobile-mode) ════════════ */
+  .mobile-tabbar {
+    display: none;
+    position: sticky; bottom: 0;
+    background: white;
+    border-top: 1px solid var(--cream-200);
+    padding: 8px 6px 10px;
+    justify-content: space-around;
+    box-shadow: 0 -4px 16px rgba(28,25,23,0.05);
+    margin-top: 16px;
+  }
+  .mtab {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 6px 2px;
+    color: var(--cream-500);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .mtab.active { color: var(--green-700); font-weight: 700; }
+  .mtab svg { width: 20px; height: 20px; }
+
+  /* ════════════ STATE PANELS ════════════ */
+  .state-panel { display: none; }
+  .state-panel.active { display: block; }
+
+  /* —— Petites adaptations responsive natives —— */
+  @media (max-width: 920px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .quick-links { grid-template-columns: repeat(3, 1fr); }
+    .empty-steps { grid-template-columns: 1fr; }
+    .preview-toolbar { padding: 8px 12px; gap: 10px; }
+    .ptb-section { gap: 6px; }
+  }
+  @media (max-width: 640px) {
+    .stage { padding: 12px 8px 28px; }
+    .frame { border-radius: 8px; }
+    .header { padding: 0 16px; }
+    .nav-link { display: none; }
+    .page { padding: 18px 16px 32px; }
+    .hero h1 { font-size: 24px; }
+    .quick-links { grid-template-columns: repeat(3, 1fr); }
+    .stat-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ DEMO NAV ══════════ -->
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PARCOURS RAMENEUR</span>
+    <a href="rm-03-accueil.html" class="demo-nav-link active">0 · Accueil</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-04-declarer-trajet.html" class="demo-nav-link">1 · Déclarer trajet</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-05-liste-opportunites.html" class="demo-nav-link">2 · Opportunités</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-06-detail-opportunite.html" class="demo-nav-link">3 · Détail mission</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-08-mission-active.html" class="demo-nav-link">4 · Mission active</a>
+  </div>
+</div>
+
+<!-- ══════════ PREVIEW TOOLBAR ══════════ -->
+<div class="preview-toolbar">
+  <div class="ptb-section">
+    <span class="ptb-label">État</span>
+    <div class="ptb-group" id="state-group">
+      <button class="ptb-btn on" data-state="empty" onclick="setState('empty', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Premier login
+      </button>
+      <button class="ptb-btn" data-state="nominal" onclick="setState('nominal', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        Nominal
+      </button>
+      <button class="ptb-btn" data-state="loaded" onclick="setState('loaded', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        Chargé
+      </button>
+    </div>
+  </div>
+  <div class="ptb-section">
+    <span class="ptb-label">Format</span>
+    <div class="ptb-group" id="format-group">
+      <button class="ptb-btn on" data-format="desktop" onclick="setFormat('desktop', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Desktop
+      </button>
+      <button class="ptb-btn" data-format="mobile" onclick="setFormat('mobile', this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        Mobile
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STAGE ══════════ -->
+<div class="stage">
+  <div class="frame">
+
+    <!-- ══════════ HEADER ══════════ -->
+    <header class="header">
+      <a href="#" class="logo">
+        <div class="logo-icon">🐜</div>
+        <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#" class="nav-link active">Accueil</a>
+        <a href="rm-04-declarer-trajet.html" class="nav-link">Mes trajets</a>
+        <a href="#" class="nav-link">Missions</a>
+        <a href="#" class="nav-link">Revenus</a>
+        <div class="nav-sep"></div>
+        <button class="pause-toggle" id="pause-toggle" onclick="togglePause()">
+          <span class="dot"></span>
+          <span id="pause-label">Disponible</span>
+        </button>
+        <div class="avatar-btn">🌿</div>
+      </nav>
+    </header>
+
+    <!-- ══════════ PAGE ══════════ -->
+    <div class="page">
+
+      <!-- ═════════════════════════════════════════════════ -->
+      <!-- STATE : EMPTY (premier login)                     -->
+      <!-- ═════════════════════════════════════════════════ -->
+      <div id="state-empty" class="state-panel active">
+
+        <div class="preview-label">RM-03 · Premier login (état vide)</div>
+
+        <div class="hero">
+          <div class="hero-title">
+            <h1>Bienvenue sur Delta, <span class="accent">Thomas</span>.</h1>
+            <p>Vous êtes prêt à démarrer. Déclarez votre premier trajet, on vous montre qui en a besoin sur votre route.</p>
+          </div>
+        </div>
+
+        <div class="empty-hero">
+          <div class="empty-hero-illu">🐜</div>
+          <h2>Aucun trajet pour l'instant</h2>
+          <p>Vous décidez où et quand vous allez. Delta repère les producteurs et les voisins sur votre chemin — vous choisissez ce qui vous arrange. Aucun engagement tant que vous n'avez pas réservé.</p>
+          <a href="rm-04-declarer-trajet.html" class="btn-primary-hero">
+            Déclarer mon premier trajet
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+
+        <div class="sec-head" style="margin-top: 28px;">
+          <h2 class="sec-title">Comment ça marche</h2>
+        </div>
+
+        <div class="empty-steps">
+          <div class="empty-step">
+            <span class="empty-step-num">1</span>
+            <h3>Vous déclarez un trajet</h3>
+            <p>D'où, où, quand, et la place dans votre coffre. Dates seulement — pas d'horaire à respecter.</p>
+          </div>
+          <div class="empty-step">
+            <span class="empty-step-num">2</span>
+            <h3>On vous propose des opportunités</h3>
+            <p>Un producteur côté destination, un ou plusieurs voisins côté origine, le gain net et le détour estimé pour chacune.</p>
+          </div>
+          <div class="empty-step">
+            <span class="empty-step-num">3</span>
+            <h3>Vous choisissez et vous gagnez</h3>
+            <p>10 % du panier de la mission, versés sur votre compte 24-48 h après la dernière livraison confirmée.</p>
+          </div>
+        </div>
+
+        <div class="info-strip">
+          <div class="info-strip-icon">💡</div>
+          <div>
+            <strong>Astuce :</strong> les trajets récurrents (navette domicile–travail, week-ends en famille) sont les plus rentables. Vous pouvez en déclarer plusieurs à l'avance — on cherche les opportunités pour chacun en arrière-plan.
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════════════════════════════════════════════════ -->
+      <!-- STATE : NOMINAL (1 mission active + 2 trajets)    -->
+      <!-- ═════════════════════════════════════════════════ -->
+      <div id="state-nominal" class="state-panel">
+
+        <div class="preview-label">RM-03 · État nominal</div>
+
+        <div class="hero">
+          <div class="hero-title">
+            <h1>Bonjour, <span class="accent">Thomas</span>.</h1>
+            <p>Une mission est en cours. Deux autres trajets cherchent des opportunités — on vous prévient dès qu'il y en a.</p>
+          </div>
+          <a href="rm-04-declarer-trajet.html" class="btn-primary-hero">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Déclarer un trajet
+          </a>
+        </div>
+
+        <div class="grid-2">
+
+          <!-- LEFT : missions + trajets -->
+          <div>
+
+            <!-- Mission active (carte large) -->
+            <div class="sec-head">
+              <h2 class="sec-title">
+                Mission active
+                <span class="pill-count">1</span>
+              </h2>
+            </div>
+
+            <a href="rm-08-mission-active.html" class="mission-card">
+              <div class="mission-card-top">
+                <div class="mission-card-info">
+                  <span class="mission-status-badge">
+                    <span class="dot"></span>
+                    Confirmée · pickup dans 2 jours
+                  </span>
+                  <div class="mission-card-title">La Ruche du Bessin</div>
+                  <div class="mission-card-meta">
+                    <span>🐝 Bayeux → Paris 11<sup>e</sup></span>
+                    <span class="sep">·</span>
+                    <span>Jeudi 14 mai</span>
+                    <span class="sep">·</span>
+                    <span>4 voisins</span>
+                  </div>
+                </div>
+                <div class="mission-gain">
+                  <div class="mission-gain-label">Gain net</div>
+                  <div class="mission-gain-value">+18,00 €</div>
+                </div>
+              </div>
+              <div class="mission-card-footer">
+                <div class="mission-next-step">
+                  <div class="step-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6.364 1.636l-.707.707M20 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                  </div>
+                  <div>
+                    <strong>Prochaine étape : pickup chez Pierre Mahé.</strong>
+                    <span class="step-sub">QR code à présenter à votre arrivée.</span>
+                  </div>
+                </div>
+                <a href="rm-08-mission-active.html" class="mission-go-btn">
+                  Ouvrir
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </a>
+              </div>
+            </a>
+
+            <!-- Trajets en recherche -->
+            <div class="sec-head" style="margin-top: 24px;">
+              <h2 class="sec-title">
+                Mes trajets déclarés
+                <span class="pill-count">2</span>
+              </h2>
+              <a href="rm-04-declarer-trajet.html" class="sec-link">
+                Tout voir
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+
+            <a href="rm-05-liste-opportunites.html" class="trip-card">
+              <div class="trip-card-row">
+                <div class="trip-route">
+                  <div class="trip-route-line">
+                    <span>Paris 11<sup>e</sup></span>
+                    <span class="arrow">
+                      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </span>
+                    <span>Saint-Lô</span>
+                  </div>
+                  <div class="trip-meta">
+                    <span>📅 Sam. 17 mai</span>
+                    <span class="sep">·</span>
+                    <span>🚗 Coffre</span>
+                    <span class="sep">·</span>
+                    <span>Aller-retour</span>
+                  </div>
+                </div>
+                <div class="trip-card-status">
+                  <span class="trip-status-badge searching">
+                    <span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--cream-400)"></span>
+                    Recherche en cours
+                  </span>
+                </div>
+                <div class="trip-card-cta">
+                  <span class="trip-cta-link">
+                    Détails
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+
+            <a href="rm-05-liste-opportunites.html" class="trip-card">
+              <div class="trip-card-row">
+                <div class="trip-route">
+                  <div class="trip-route-line">
+                    <span>Paris 11<sup>e</sup></span>
+                    <span class="arrow">
+                      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </span>
+                    <span>Vannes</span>
+                  </div>
+                  <div class="trip-meta">
+                    <span>📅 Ven. 23 mai</span>
+                    <span class="sep">·</span>
+                    <span>🚐 Break</span>
+                    <span class="sep">·</span>
+                    <span>Aller simple</span>
+                  </div>
+                </div>
+                <div class="trip-card-status">
+                  <span class="trip-status-badge searching">
+                    <span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--cream-400)"></span>
+                    Recherche en cours
+                  </span>
+                </div>
+                <div class="trip-card-cta">
+                  <span class="trip-cta-link">
+                    Détails
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+
+            <div class="info-strip">
+              <div class="info-strip-icon">🔔</div>
+              <div>
+                <strong>Aucune opportunité pour l'instant.</strong> On scanne les producteurs et voisins en arrière-plan. Vous recevrez une notification dès qu'un match apparaît — généralement entre 24 h et 72 h avant le départ.
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT : revenus + accès rapides -->
+          <div>
+
+            <!-- Revenus du mois (gros) -->
+            <div class="side-card stat-card-big">
+              <div class="side-card-title">
+                <span>Revenus de mai</span>
+                <a href="#" class="side-card-title-link" style="color:rgba(255,255,255,0.85)">Détail →</a>
+              </div>
+              <div class="stat-card-big-amount">
+                <span class="stat-card-big-value">62,00</span>
+                <span class="stat-card-big-currency">€</span>
+              </div>
+              <div class="stat-card-big-sub">3 missions terminées · 1 en cours</div>
+
+              <div class="stat-card-big-divider"></div>
+
+              <div class="stat-row">
+                <span class="label"><span class="marker acquired"></span>Versé sur votre compte</span>
+                <span class="value">44,00 €</span>
+              </div>
+              <div class="stat-row">
+                <span class="label"><span class="marker escrow"></span>En attente de versement</span>
+                <span class="value">18,00 €</span>
+              </div>
+            </div>
+
+            <!-- Stats compactes -->
+            <div class="side-card">
+              <div class="side-card-title">
+                <span>Vos chiffres</span>
+                <a href="#" class="side-card-title-link">Historique →</a>
+              </div>
+              <div class="stat-grid">
+                <div class="stat-mini">
+                  <div class="v">12</div>
+                  <div class="l">Missions</div>
+                </div>
+                <div class="stat-mini">
+                  <div class="v">4,9</div>
+                  <div class="l">Note ★</div>
+                </div>
+                <div class="stat-mini">
+                  <div class="v">238</div>
+                  <div class="l">km évités</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick links -->
+            <div class="side-card">
+              <div class="side-card-title">Accès rapides</div>
+              <div class="quick-links">
+                <a href="#" class="quick-link" title="RM-07 Mes missions">
+                  <div class="quick-link-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                  </div>
+                  <div class="quick-link-label">Mes missions</div>
+                  <div class="quick-link-sub">RM-07</div>
+                </a>
+                <a href="#" class="quick-link" title="RM-09 Messagerie">
+                  <div class="quick-link-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                  </div>
+                  <div class="quick-link-label">Chat <span class="quick-link-badge">2</span></div>
+                  <div class="quick-link-sub">RM-09</div>
+                </a>
+                <a href="#" class="quick-link" title="RM-10 Revenus">
+                  <div class="quick-link-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <div class="quick-link-label">Revenus</div>
+                  <div class="quick-link-sub">RM-10</div>
+                </a>
+                <a href="#" class="quick-link" title="RM-11 Profil public">
+                  <div class="quick-link-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  </div>
+                  <div class="quick-link-label">Mon profil</div>
+                  <div class="quick-link-sub">RM-11</div>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════════════════════════════════════════════════ -->
+      <!-- STATE : LOADED (plusieurs trajets + opportunités) -->
+      <!-- ═════════════════════════════════════════════════ -->
+      <div id="state-loaded" class="state-panel">
+
+        <div class="preview-label">RM-03 · État chargé</div>
+
+        <div class="hero">
+          <div class="hero-title">
+            <h1><span class="accent">7</span> opportunités vous attendent.</h1>
+            <p>Trois trajets sur quatre ont des matchs. C'est à vous de choisir lesquels vous arrangent.</p>
+          </div>
+          <a href="rm-04-declarer-trajet.html" class="btn-primary-hero">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Nouveau trajet
+          </a>
+        </div>
+
+        <div class="grid-2">
+
+          <!-- LEFT -->
+          <div>
+
+            <!-- Mission active -->
+            <div class="sec-head">
+              <h2 class="sec-title">
+                Mission active
+                <span class="pill-count">1</span>
+              </h2>
+            </div>
+
+            <a href="rm-08-mission-active.html" class="mission-card">
+              <div class="mission-card-top">
+                <div class="mission-card-info">
+                  <span class="mission-status-badge" style="background:#DBEAFE;color:#1E40AF;border-color:#BFDBFE;">
+                    <span class="dot" style="background:#3B82F6;"></span>
+                    Livraison en cours · 2 sur 4
+                  </span>
+                  <div class="mission-card-title">Brasserie de la Vallée</div>
+                  <div class="mission-card-meta">
+                    <span>🍯 Saint-Lô → Paris 12<sup>e</sup></span>
+                    <span class="sep">·</span>
+                    <span>Aujourd'hui</span>
+                    <span class="sep">·</span>
+                    <span>Gain net <strong style="color:var(--green-700)">+22,40 €</strong></span>
+                  </div>
+                </div>
+              </div>
+              <div class="mission-card-footer">
+                <div class="mission-next-step">
+                  <div class="step-icon" style="border-color:#BFDBFE;background:#DBEAFE;">
+                    <svg fill="none" stroke="#1E40AF" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14l-1 11H6L5 8z"/></svg>
+                  </div>
+                  <div>
+                    <strong>Prochaine livraison : Voisin 3, Paris 12<sup>e</sup>.</strong>
+                    <span class="step-sub">Café Le Baron · QR code prêt à scanner.</span>
+                  </div>
+                </div>
+                <a href="rm-08-mission-active.html" class="mission-go-btn">
+                  Ouvrir
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </a>
+              </div>
+            </a>
+
+            <!-- Trajets avec opportunités -->
+            <div class="sec-head" style="margin-top: 24px;">
+              <h2 class="sec-title">
+                Trajets · opportunités à choisir
+                <span class="pill-count" style="background:var(--earth-100);color:var(--earth-800);">7 nouvelles</span>
+              </h2>
+              <a href="rm-04-declarer-trajet.html" class="sec-link">
+                Tout voir
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+
+            <a href="rm-05-liste-opportunites.html" class="trip-card has-opp">
+              <div class="trip-card-row">
+                <div class="trip-route">
+                  <div class="trip-route-line">
+                    <span>Paris 11<sup>e</sup></span>
+                    <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                    <span>Caen</span>
+                  </div>
+                  <div class="trip-meta">
+                    <span>📅 Sam. 17 mai</span>
+                    <span class="sep">·</span>
+                    <span>🚗 Coffre</span>
+                    <span class="sep">·</span>
+                    <span>Gain potentiel jusqu'à <strong style="color:var(--earth-800)">28 €</strong></span>
+                  </div>
+                </div>
+                <div class="trip-card-status">
+                  <span class="trip-status-badge has-opp">
+                    Opportunités
+                    <span class="count">3</span>
+                  </span>
+                </div>
+                <div class="trip-card-cta">
+                  <a href="rm-05-liste-opportunites.html" class="trip-cta-btn">
+                    Choisir
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  </a>
+                </div>
+              </div>
+            </a>
+
+            <a href="rm-05-liste-opportunites.html" class="trip-card has-opp">
+              <div class="trip-card-row">
+                <div class="trip-route">
+                  <div class="trip-route-line">
+                    <span>Paris 11<sup>e</sup></span>
+                    <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                    <span>Vannes</span>
+                  </div>
+                  <div class="trip-meta">
+                    <span>📅 Ven. 23 mai</span>
+                    <span class="sep">·</span>
+                    <span>🚐 Break</span>
+                    <span class="sep">·</span>
+                    <span>Gain potentiel jusqu'à <strong style="color:var(--earth-800)">42 €</strong></span>
+                  </div>
+                </div>
+                <div class="trip-card-status">
+                  <span class="trip-status-badge has-opp">
+                    Opportunités
+                    <span class="count">3</span>
+                  </span>
+                </div>
+                <div class="trip-card-cta">
+                  <a href="rm-05-liste-opportunites.html" class="trip-cta-btn">
+                    Choisir
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  </a>
+                </div>
+              </div>
+            </a>
+
+            <a href="rm-05-liste-opportunites.html" class="trip-card has-opp">
+              <div class="trip-card-row">
+                <div class="trip-route">
+                  <div class="trip-route-line">
+                    <span>Paris 11<sup>e</sup></span>
+                    <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                    <span>Rennes</span>
+                  </div>
+                  <div class="trip-meta">
+                    <span>📅 Lun. 26 mai</span>
+                    <span class="sep">·</span>
+                    <span>🎒 Sac à dos</span>
+                    <span class="sep">·</span>
+                    <span>Gain potentiel <strong style="color:var(--earth-800)">8 €</strong></span>
+                  </div>
+                </div>
+                <div class="trip-card-status">
+                  <span class="trip-status-badge has-opp">
+                    Opportunité
+                    <span class="count">1</span>
+                  </span>
+                </div>
+                <div class="trip-card-cta">
+                  <a href="rm-05-liste-opportunites.html" class="trip-cta-btn">
+                    Choisir
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  </a>
+                </div>
+              </div>
+            </a>
+
+            <a href="rm-05-liste-opportunites.html" class="trip-card">
+              <div class="trip-card-row">
+                <div class="trip-route">
+                  <div class="trip-route-line">
+                    <span>Paris 11<sup>e</sup></span>
+                    <span class="arrow"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
+                    <span>Le Mans</span>
+                  </div>
+                  <div class="trip-meta">
+                    <span>📅 Sam. 31 mai</span>
+                    <span class="sep">·</span>
+                    <span>🚗 Coffre</span>
+                    <span class="sep">·</span>
+                    <span>Aller-retour</span>
+                  </div>
+                </div>
+                <div class="trip-card-status">
+                  <span class="trip-status-badge searching">
+                    <span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--cream-400)"></span>
+                    Recherche en cours
+                  </span>
+                </div>
+                <div class="trip-card-cta">
+                  <span class="trip-cta-link">
+                    Détails
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+
+          </div>
+
+          <!-- RIGHT -->
+          <div>
+
+            <div class="side-card stat-card-big">
+              <div class="side-card-title">
+                <span>Revenus de mai</span>
+                <a href="#" class="side-card-title-link" style="color:rgba(255,255,255,0.85)">Détail →</a>
+              </div>
+              <div class="stat-card-big-amount">
+                <span class="stat-card-big-value">186,40</span>
+                <span class="stat-card-big-currency">€</span>
+              </div>
+              <div class="stat-card-big-sub">9 missions terminées · 1 en cours</div>
+
+              <div class="stat-card-big-divider"></div>
+
+              <div class="stat-row">
+                <span class="label"><span class="marker acquired"></span>Versé sur votre compte</span>
+                <span class="value">164,00 €</span>
+              </div>
+              <div class="stat-row">
+                <span class="label"><span class="marker escrow"></span>En attente de versement</span>
+                <span class="value">22,40 €</span>
+              </div>
+            </div>
+
+            <div class="side-card">
+              <div class="side-card-title">
+                <span>Vos chiffres</span>
+                <a href="#" class="side-card-title-link">Historique →</a>
+              </div>
+              <div class="stat-grid">
+                <div class="stat-mini">
+                  <div class="v">38</div>
+                  <div class="l">Missions</div>
+                </div>
+                <div class="stat-mini">
+                  <div class="v">4,8</div>
+                  <div class="l">Note ★</div>
+                </div>
+                <div class="stat-mini">
+                  <div class="v">812</div>
+                  <div class="l">km évités</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="side-card">
+              <div class="side-card-title">Accès rapides</div>
+              <div class="quick-links">
+                <a href="#" class="quick-link" title="RM-07 Mes missions">
+                  <div class="quick-link-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                  </div>
+                  <div class="quick-link-label">Mes missions</div>
+                  <div class="quick-link-sub">RM-07</div>
+                </a>
+                <a href="#" class="quick-link" title="RM-09 Messagerie">
+                  <div class="quick-link-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                  </div>
+                  <div class="quick-link-label">Chat <span class="quick-link-badge">5</span></div>
+                  <div class="quick-link-sub">RM-09</div>
+                </a>
+                <a href="#" class="quick-link" title="RM-10 Revenus">
+                  <div class="quick-link-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <div class="quick-link-label">Revenus</div>
+                  <div class="quick-link-sub">RM-10</div>
+                </a>
+                <a href="#" class="quick-link" title="RM-11 Profil public">
+                  <div class="quick-link-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  </div>
+                  <div class="quick-link-label">Mon profil</div>
+                  <div class="quick-link-sub">RM-11</div>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════ MOBILE TABBAR (visible uniquement en mode mobile) ══════════ -->
+    <nav class="mobile-tabbar">
+      <a href="#" class="mtab active">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Accueil
+      </a>
+      <a href="rm-04-declarer-trajet.html" class="mtab">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Trajet
+      </a>
+      <a href="#" class="mtab">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        Chat
+      </a>
+      <a href="#" class="mtab">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        Profil
+      </a>
+    </nav>
+
+  </div>
+</div>
+
+<script>
+  function setState(name, btn) {
+    document.querySelectorAll('.state-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('state-' + name).classList.add('active');
+    document.querySelectorAll('#state-group .ptb-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  function setFormat(name, btn) {
+    if (name === 'mobile') document.body.classList.add('mobile-mode');
+    else document.body.classList.remove('mobile-mode');
+    document.querySelectorAll('#format-group .ptb-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+  function togglePause() {
+    const t = document.getElementById('pause-toggle');
+    const lbl = document.getElementById('pause-label');
+    t.classList.toggle('paused');
+    lbl.textContent = t.classList.contains('paused') ? 'En pause' : 'Disponible';
+  }
+</script>
+
+</body>
+</html>
