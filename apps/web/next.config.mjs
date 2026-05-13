@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  typedRoutes: true,
   // Packages workspace transpilés à la volée par Next plutôt que pré-build via tsc.
   // Garde `main` pointant vers `src/index.ts` et évite un build step intermédiaire.
   transpilePackages: [
@@ -10,9 +11,6 @@ const nextConfig = {
     "@delta/db",
     "@delta/ui-web",
   ],
-  experimental: {
-    typedRoutes: true,
-  },
 }
 
 export default nextConfig
