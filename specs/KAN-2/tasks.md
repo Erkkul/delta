@@ -40,6 +40,10 @@
 - [ ] Tests Vitest : refondus pour le nouveau périmètre (multi-rôle, OTP, splash).
 - [ ] Mise à jour des .md transverses (CLAUDE.md, ARCHITECTURE.md §18 entrée 1.13, jira_mapping si nécessaire).
 
+### Phase 2bis — Stub onboardings (commit suivant)
+
+- [x] Page `apps/web/app/(auth)/onboarding/[role]/page.tsx` — stub dynamique pour `acheteur`/`rameneur`/`producteur` afin de fermer la boucle KAN-2 (sinon 404 après `nextOnboardingPath`). Pointe vers les tickets qui porteront le vrai écran : KAN-25 (AC-02), KAN-37 (RM-02), KAN-16 (PR-02).
+
 ### Phase 3 — Reportées (sessions ultérieures)
 
 - [ ] Seeds dev : 3 users (un par rôle) pour tests locaux — conditionné à `apps/mobile`.
