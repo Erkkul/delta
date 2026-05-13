@@ -33,7 +33,7 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 | Backlog MVP (épics, features, subtasks) | Jira KAN — erkulaws.atlassian.net |
 | Mapping ticket Jira ↔ écran ↔ maquette | `produit/jira_mapping.md` |
 | Journal des arbitrages produit (avec dates) | `produit/decisions/decisions_produit.md` |
-| Maquettes HTML cliquables | `design/maquettes/rameneur/` |
+| Maquettes HTML cliquables | `design/maquettes/[persona]/` (sous-dossiers `acheteur/`, `producteur/`, `rameneur/`) |
 | Stack technique, structure du monorepo, conventions de code | `ARCHITECTURE.md` — sections 2 à 4 |
 | Modélisation DB, RLS, migrations | `ARCHITECTURE.md` — section 5 |
 | Implémentation machine à états mission, pipeline matching, flow Stripe | `ARCHITECTURE.md` — sections 6 à 8 |
@@ -134,6 +134,16 @@ Le mapping Jira ↔ repo doit rester en permanence synchronisé avec le projet K
 - Vérifier la nomenclature `[persona-id]-[slug].html` (rm / ac / pr)
 - Confirmer que l'écran est listé dans le sitemap PRD §10 ; sinon, l'ajouter d'abord
 - Ranger dans `design/maquettes/[persona]/`
+
+### Avant d'écrire ou modifier une UI — règle impérative
+Avant d'écrire la moindre ligne d'UI sur un écran référencé dans le sitemap PRD §10 (PR-XX / AC-XX / RM-XX), **lire intégralement** la ou les maquette(s) HTML correspondante(s) avec le Read tool : `design/maquettes/[persona]/[id]-[slug].html`. Un écran qui existe en plusieurs déclinaisons persona a une maquette **par persona** — lire **toutes les variantes présentes** (ex : `pr-01-authentication.html`, `ac-01-authentication.html`, `rm-01-authentication.html` pour l'écran d'inscription/connexion).
+
+Hiérarchie source de vérité visuelle :
+- **Maquette HTML** : layout, ordre des champs, microcopy, états, responsive desktop + mobile. Source unique de vérité du rendu attendu.
+- **DESIGN.md** : tokens (couleurs, typo, espacements), composants partagés, règles à ne jamais enfreindre. Source unique de vérité du design system.
+- **En cas de conflit** entre maquette et DESIGN.md : appliquer la maquette ET signaler le conflit dans une note `specs/KAN-XXX/notes.md` (ou un commentaire sur le ticket Jira) pour arbitrage — ne pas trancher seul.
+
+**Comportement attendu de Claude** : avant d'écrire un composant, une page ou un layout, lister explicitement les chemins de maquette lus, avec un résumé en 2-3 lignes de ce qui en est extrait (champs, ordre, microcopy clé, états). Si aucune maquette n'existe pour un écran référencé au sitemap, le signaler avant d'inventer un layout — ne pas générer en aveugle.
 
 ### Avant de créer un nouveau fichier de doc
 - Demander confirmation si le fichier crée un nouveau dossier de premier niveau
