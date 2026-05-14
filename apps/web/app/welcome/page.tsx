@@ -20,6 +20,21 @@ export default function WelcomePage() {
       imageSrc={HERO_IMAGE_SRC}
       signupHref="/signup"
       loginHref="/login"
+      producerCard={{
+        emoji: "🍯",
+        name: "Rucher des Marais",
+        location: "Bayeux · 14 km de Caen",
+        quote:
+          "80 ruches sur les prairies du bocage normand, sans traitement chimique.",
+      }}
+      trustStripItems={[
+        <>
+          <span className="text-[#D4AF37]">★</span>{" "}
+          <b className="font-semibold text-white/90">4,8</b> · 1 247 avis
+        </>,
+        <>32 producteurs</>,
+        <>14 villes desservies</>,
+      ]}
       trustNote={<>4,8 / 5 · 32 producteurs · 14 villes</>}
     />
   )
