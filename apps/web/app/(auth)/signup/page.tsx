@@ -1,4 +1,12 @@
+import { AuthHeroPanel, AuthSplitLayout } from "@delta/ui-web"
+
 import { SignupClient } from "./signup-client"
+
+// Image partagée avec /welcome (cf. design/maquettes/*/01-authentication.html
+// → auth-screens-desktop.jsx `photoBg_d`). À remplacer par un asset local
+// avant prod — voir TODO dans `apps/web/app/welcome/page.tsx`.
+const HERO_IMAGE_SRC =
+  "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1400&q=80"
 
 export const metadata = {
   title: "Créer un compte — Delta",
@@ -11,9 +19,28 @@ type SearchParams = Promise<{ error?: string }>
 export default async function SignupPage(props: { searchParams: SearchParams }) {
   const params = await props.searchParams
   return (
-    <section className="flex flex-col gap-7">
+    <AuthSplitLayout
+      hero={
+        <AuthHeroPanel
+          imageSrc={HERO_IMAGE_SRC}
+          eyebrow="Bienvenue sur Delta"
+          title={
+            <>
+              Rejoignez 1 247
+              <br />
+              voisins gourmands.
+            </>
+          }
+          subtitle="Producteurs locaux, rameneurs sur leur trajet, et acheteurs locaux — un seul compte pour tout."
+          badges={[
+            { icon: <ShieldIcon />, label: "Données en France" },
+            { icon: <CheckIcon />, label: "Sans abonnement" },
+          ]}
+        />
+      }
+    >
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-cream-950">
+        <h1 className="font-display text-3xl font-semibold leading-tight tracking-tight text-cream-950 desktop:text-4xl">
           Créer un compte
         </h1>
         <p className="font-body text-md leading-relaxed text-cream-700">
@@ -49,7 +76,7 @@ export default async function SignupPage(props: { searchParams: SearchParams }) 
         </a>
         .
       </p>
-    </section>
+    </AuthSplitLayout>
   )
 }
 
@@ -62,4 +89,40 @@ function mapSignupError(code: string | undefined): string | null {
     default:
       return null
   }
+}
+
+function ShieldIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
 }

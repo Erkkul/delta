@@ -44,6 +44,17 @@
 
 - [x] Page `apps/web/app/(auth)/onboarding/[role]/page.tsx` — stub dynamique pour `acheteur`/`rameneur`/`producteur` afin de fermer la boucle KAN-2 (sinon 404 après `nextOnboardingPath`). Pointe vers les tickets qui porteront le vrai écran : KAN-25 (AC-02), KAN-37 (RM-02), KAN-16 (PR-02).
 
+### Phase 4 — Refonte responsive desktop (2026-05-14)
+
+- [x] Nouveaux composants `AuthSplitLayout` + `AuthHeroPanel` dans `packages/ui-web/src/auth-split-layout.tsx`.
+- [x] `Splash` : layout desktop split 1/1 (photo + carte producteur flottante à gauche, panneau vert avec hero + 2 CTAs + trust strip à droite). Mobile inchangé.
+- [x] `/signup` : passage en `AuthSplitLayout` 5fr/7fr avec hero panel « Rejoignez 1 247 voisins gourmands » + badges « Données en France » / « Sans abonnement ».
+- [x] `/auth/verify-email` : passage en `AuthSplitLayout` 5fr/7fr avec hero panel « Une étape pour vous protéger ».
+- [x] `/onboarding/role` : top bar avec badge « Email vérifié » + email, `RoleSelector` en grille 3 colonnes desktop avec pills bullets par card.
+- [x] `/onboarding/[role]` (stub) : passage en `AuthSplitLayout` avec image dédiée par rôle.
+- [x] `(auth)/layout.tsx` : réduit à un pass-through (chrome géré par chaque page).
+- [x] ARCHITECTURE.md §18 entrée 1.14 + CLAUDE.md convention de nommage de branche.
+
 ### Phase 3 — Reportées (sessions ultérieures)
 
 - [ ] Seeds dev : 3 users (un par rôle) pour tests locaux — conditionné à `apps/mobile`.

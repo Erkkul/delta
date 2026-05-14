@@ -1,3 +1,9 @@
+export { AuthSplitLayout, AuthHeroPanel } from "./auth-split-layout"
+export type {
+  AuthSplitLayoutProps,
+  AuthHeroPanelProps,
+  AuthHeroBadge,
+} from "./auth-split-layout"
 export { SignupForm } from "./signup-form"
 export type { SignupFormProps } from "./signup-form"
 export { Splash } from "./splash"
