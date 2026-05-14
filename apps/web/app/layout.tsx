@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next"
 import { DM_Sans, Lora } from "next/font/google"
 
@@ -26,7 +27,10 @@ type Props = Readonly<{ children: React.ReactNode }>
 export default function RootLayout({ children }: Props) {
   return (
     <html lang="fr" className={`${fontBody.variable} ${fontDisplay.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   )
 }
