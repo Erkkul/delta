@@ -26,6 +26,8 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
   - Auth email/password configuré : confirm email ON, min password length 10, requirements `lower + upper + digits`, secure email change ON, secure password change ON, rotation refresh tokens ON, reuse interval 10 s
   - URL Configuration : Site URL `http://localhost:3000`, Redirect URLs `http://localhost:3000/**` (à élargir au fil des déploiements preview Vercel + prod + deep links mobile)
   - Connection strings copiées (direct + transaction pooler). Note : la connexion directe est IPv6-only — pour tout runtime IPv4-only (Vercel serverless, certains GitHub Actions runners), utiliser le transaction pooler 6543 ; en local depuis un ISP FR moderne, la directe fonctionne.
+- **Fait le 2026-05-14** :
+  - Cron anti-pause Free-tier opérationnel : workflow `.github/workflows/supabase-keepalive.yml` (ping tous les 3 jours) activé une fois le secret `SUPABASE_PUBLISHABLE_KEY` configuré côté repo. Voir § GitHub Actions et ARCHITECTURE.md §13.3.
 - **Fait le 2026-05-10** :
   - Supabase CLI installée via Homebrew (`brew install supabase/tap/supabase`)
   - `supabase init` exécuté à la racine du repo : squelette `supabase/` créé (`config.toml`, `migrations/`, `seeds/`, `policies/`)
@@ -38,7 +40,6 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
     - Config MCP : `npx -y @supabase/mcp-server-supabase@latest --read-only --project-ref=knyfrnxkqyyirnsyijfk`
     - Mode read-only par décision : verrou A7 (interdiction d'`apply_migration` via MCP, toute évolution DB passe par fichier dans `supabase/migrations/`). La CLI Supabase couvre tous les besoins RW légitimes. Escalade RW ad-hoc possible via second profil temporaire si justifié.
 - **À faire** :
-  - Cron GitHub Actions de ping toutes les 6 nuits pour éviter la pause Free 7j (cf. ARCHITECTURE.md §13.3)
   - Brancher Apple Sign In une fois Apple Developer provisionné (Google fait le 2026-05-12, voir § Supabase Auth — activation providers)
   - Bascule Pro au pré-lancement : déverrouille HIBP leaked password protection, time-box sessions, inactivity timeout, PITR, et supprime la pause auto après 7 j
 - **Notes clés API** : nouveau système Supabase (`sb_publishable_...` / `sb_secret_...`) remplaçant les clés JWT legacy `anon` / `service_role`. Cf. discussion supabase/supabase #29260 (depuis nov. 2025, les nouveaux projets n'ont plus accès aux clés legacy). La clé publishable est exposable côté client (web + mobile) ; les clés secrètes bypass RLS, restent côté serveur, et on en crée une par service backend (jobs Inngest, webhook Stripe) pour permettre la révocation indépendante.
@@ -118,12 +119,14 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## Hosting
 
 ### Vercel (web + Analytics)
-- **Statut** : Partiel — projet créé et premier deploy OK (2026-05-11). Reste Analytics, domaine custom, bascule Pro au lancement public.
+- **Statut** : Partiel — projet créé et premier deploy OK (2026-05-11), Web Analytics activé (2026-05-14). Reste domaine custom, bascule Pro au lancement public.
 - **Dashboard** : https://vercel.com/dashboard
 - **Plan** : Hobby (dev) → Pro (lancement public, voir ARCHITECTURE.md §13)
 - **Project slug** : `delta-web-gamma` (auto-généré par Vercel : `delta` + Root Directory `web` + suffixe collision `gamma`)
 - **URL preview** : https://delta-web-gamma.vercel.app
 - **Env vars produites** : configurées dans Vercel UI (miroir de `.env.local`)
+- **Fait le 2026-05-14** :
+  - **Vercel Web Analytics** activé sur le projet (onglet Analytics → Enable). Intégration code : package `@vercel/analytics` ajouté à `apps/web/package.json` et composant `<Analytics />` monté dans `apps/web/app/layout.tsx` (root layout). Les données remontent une fois le prochain deploy en prod.
 - **Fait le 2026-05-12** :
   - 5 env vars miroir ajoutées dans **Project Settings → Environment Variables** sur les 3 scopes (Production + Preview + Development) : `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` (Sensitive), `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (Sensitive)
   - Template versionné côté repo : `apps/web/.env.local.example` (sans secrets, commenté). Convention de naming documentée : préfixe `NEXT_PUBLIC_*` = exposable au browser, sans préfixe = strictement serveur. Traduit le naming abstrait d'ARCHITECTURE.md §2.1 dans l'idiome Next.js. `apps/mobile` aura plus tard ses équivalents `EXPO_PUBLIC_*`.
@@ -134,10 +137,9 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
   - Premier build vert (pnpm 9 détecté via `packageManager` du `package.json` racine, workspaces résolus correctement)
   - Intégration GitHub native active : preview deploy automatique par PR + prod deploy automatique sur push `main` via webhook Vercel. **Pas de deploy orchestré depuis GitHub Actions** (décision technique : moins de credentials, moins de surface — cf. ARCHITECTURE.md §18 entrée 1.7). Conséquence : aucun secret Vercel (`VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) à provisionner côté GitHub.
 - **À faire** :
-  - Activer Vercel Analytics (Project → Analytics)
   - Configurer domaine custom une fois choisi (cf. § Domaine + DNS)
   - Bascule Pro au lancement public (voir ARCHITECTURE.md §13)
-- **Notes** : connecter repo GitHub. Activer Vercel Analytics. Configurer preview deploys.
+- **Notes** : connecter repo GitHub. Configurer preview deploys.
 
 ### Expo + EAS (mobile builds & submit)
 - **Statut** : À faire
@@ -169,13 +171,13 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## CI/CD
 
 ### GitHub Actions
-- **Statut** : Partiel — workflows posés (2026-05-11), secret `SUPABASE_PUBLISHABLE_KEY` à configurer côté repo, premier run en attente.
+- **Statut** : Fait le 2026-05-14 — workflows posés (2026-05-11), secret `SUPABASE_PUBLISHABLE_KEY` configuré côté repo (2026-05-14). Reste les secrets différés liés à d'autres briques (Expo, Sentry).
 - **Dashboard secrets** : https://github.com/Erkkul/delta/settings/secrets/actions
 - **Workflows actifs** :
   - `.github/workflows/ci.yml` — lint + typecheck + build sur push `main` et chaque PR. pnpm détecté via `packageManager`, Node 20, concurrency group par branche, cache pnpm via `actions/setup-node`.
   - `.github/workflows/supabase-keepalive.yml` — cron `14 3 */3 * *` (tous les 3 jours à 03:14 UTC, marge confortable avant la limite 7 j de pause Free-tier). Curl sur `/auth/v1/settings` avec headers `apikey: $SUPABASE_PUBLISHABLE_KEY` + `Authorization: Bearer $SUPABASE_PUBLISHABLE_KEY` (pattern standard du client Supabase JS). Déclenchable manuellement via `workflow_dispatch`. Historique des itérations dans ARCHITECTURE.md §18 entrées 1.7 → 1.10.
-- **Secrets à configurer (maintenant)** :
-  - `SUPABASE_PUBLISHABLE_KEY` — valeur récupérée dans Supabase Dashboard → Project Settings → API Keys → "publishable" (commence par `sb_publishable_...`). Utilisée par le workflow keepalive.
+- **Secrets configurés** :
+  - `SUPABASE_PUBLISHABLE_KEY` — configuré le 2026-05-14 (valeur récupérée dans Supabase Dashboard → Project Settings → API Keys → "publishable", commence par `sb_publishable_...`). Utilisée par le workflow keepalive.
 - **Secrets différés (autres briques)** :
   - `SUPABASE_SECRET_KEY` — quand un workflow Actions aura besoin d'accéder à PostgREST en bypass RLS (ex : monitoring prod, tests d'intégration, jobs Inngest hébergés)
   - `EXPO_TOKEN` — quand Expo/EAS provisionné
