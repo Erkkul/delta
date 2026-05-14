@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — AC-10 Évaluation post-livraison
+  Ticket(s) Jira : KAN-52 (Notation post-livraison)
+
+  Déclenché après scan QR delivery (AC-08b → AC-10). Deux sous-formulaires :
+  1) Note producteur (étoiles + commentaire optionnel)
+  2) Note rameneur (étoiles + commentaire optionnel)
+  CTA "Envoyer" ou "Passer". Rappels à 48h et 7j, silence après 14j.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC-10 · Évaluation — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-100: #F7E8D6;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --gold: #D4A017;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); min-height: 100vh; }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  .top-bar { background: white; border-bottom: 1px solid var(--cream-200); padding: 14px 22px; display: flex; align-items: center; gap: 14px; }
+  .back-btn { background: transparent; border: none; color: var(--cream-700); padding: 4px; text-decoration: none; display: grid; place-items: center; }
+  .back-btn svg { width: 22px; height: 22px; }
+  .top-title { font-family: 'Lora', serif; font-size: 18px; font-weight: 700; color: var(--green-900); }
+
+  /* Success hero */
+  .success-hero { background: linear-gradient(135deg, var(--green-700), var(--green-900)); color: white; padding: 36px 22px; text-align: center; position: relative; overflow: hidden; }
+  .success-hero::before { content: '✓'; position: absolute; right: -20px; top: -30px; font-size: 240px; opacity: 0.08; line-height: 1; }
+  .success-check { width: 56px; height: 56px; border-radius: 50%; background: var(--green-500); display: grid; place-items: center; margin: 0 auto 14px; box-shadow: 0 8px 24px rgba(74,154,88,0.4); }
+  .success-check svg { width: 28px; height: 28px; color: white; }
+  .success-h1 { font-family: 'Lora', serif; font-size: 26px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .success-sub { font-size: 14px; color: rgba(255,255,255,0.82); line-height: 1.5; max-width: 380px; margin: 0 auto; }
+
+  .page { max-width: 600px; margin: -24px auto 0; padding: 0 22px 40px; position: relative; z-index: 2; }
+
+  /* Rating card */
+  .rate-card { background: white; border-radius: 18px; padding: 22px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); margin-bottom: 16px; }
+  .rate-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .rate-av { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; flex-shrink: 0; }
+  .rate-av.prod { background: var(--earth-100); }
+  .rate-av.rm { background: var(--green-100); }
+  .rate-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cream-500); }
+  .rate-name { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; color: var(--green-900); line-height: 1.2; margin-top: 2px; }
+  .rate-meta { font-size: 12px; color: var(--cream-600); margin-top: 2px; }
+
+  /* Stars */
+  .stars-row { display: flex; gap: 8px; justify-content: center; margin: 12px 0; }
+  .star-btn { background: transparent; border: none; cursor: pointer; padding: 6px; }
+  .star-btn svg { width: 36px; height: 36px; transition: all 150ms; color: var(--cream-300); fill: var(--cream-200); }
+  .star-btn.active svg, .star-btn:hover svg, .star-btn:hover ~ .star-btn:not(.active) svg { color: var(--gold); fill: var(--gold); }
+  /* override the hover-cascade for unrelated rows */
+  .stars-row .star-btn.active ~ .star-btn:not(.active) svg { color: var(--cream-300); fill: var(--cream-200); }
+  .stars-label { text-align: center; font-size: 13px; font-weight: 600; color: var(--green-800); margin-bottom: 14px; min-height: 18px; }
+
+  /* Quick tags */
+  .quick-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; }
+  .quick-tag { padding: 6px 12px; background: var(--cream-50); border: 1px solid var(--cream-300); border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--cream-700); cursor: pointer; }
+  .quick-tag:hover { border-color: var(--green-300, #8FCB9C); background: var(--green-50); }
+  .quick-tag.active { background: var(--green-100); border-color: var(--green-600); color: var(--green-800); }
+
+  textarea.rate-text {
+    width: 100%; padding: 12px 14px;
+    background: var(--cream-50); border: 1.5px solid var(--cream-300); border-radius: 12px;
+    font-size: 14px; font-family: inherit; color: var(--cream-950);
+    resize: vertical; min-height: 80px; line-height: 1.5;
+  }
+  textarea.rate-text:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(53,127,67,0.10); }
+  .rate-char { font-size: 11px; color: var(--cream-500); text-align: right; margin-top: 4px; }
+
+  /* Action footer */
+  .action-foot { display: flex; gap: 10px; align-items: center; padding-top: 20px; }
+  .skip-btn { background: transparent; border: none; color: var(--cream-600); font-size: 14px; font-weight: 500; cursor: pointer; padding: 12px 8px; }
+  .submit-btn {
+    flex: 1; padding: 14px 22px; border: none; cursor: pointer;
+    background: var(--green-600); color: white;
+    border-radius: 100px; font-size: 15px; font-weight: 600; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 3px 10px rgba(53,127,67,0.25);
+  }
+  .submit-btn:hover { background: var(--green-700); }
+  .submit-btn svg { width: 16px; height: 16px; }
+
+  /* CO2 impact */
+  .impact { background: var(--green-50); border: 1px solid var(--green-200); border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+  .impact-icon { width: 40px; height: 40px; background: var(--green-100); border-radius: 10px; display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+  .impact-text { font-size: 13px; color: var(--cream-700); line-height: 1.5; }
+  .impact-text strong { color: var(--green-800); }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · ÉVALUATION POST-LIVRAISON</span>
+    <a href="ac-08b-qr-delivery.html" class="demo-nav-link">QR delivery</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">Évaluation</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-03-accueil.html" class="demo-nav-link">Accueil</a>
+  </div>
+</div>
+
+<div class="top-bar">
+  <a href="ac-08-mes-commandes.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></a>
+  <div class="top-title">Comment était votre commande ?</div>
+</div>
+
+<div class="success-hero">
+  <div class="success-check">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h1 class="success-h1">Livraison confirmée !</h1>
+  <p class="success-sub">Pierre et Thomas ont été payés. Aidez la communauté en partageant votre expérience.</p>
+</div>
+
+<main class="page">
+
+  <!-- Impact CO2 -->
+  <div class="impact">
+    <div class="impact-icon">🌍</div>
+    <div class="impact-text">
+      Cette livraison a évité <strong>122 km</strong> de transport dédié. Merci d'avoir choisi Delta.
+    </div>
+  </div>
+
+  <!-- Step 1 : Producer -->
+  <div class="rate-card">
+    <div class="rate-head">
+      <div class="rate-av prod">🍯</div>
+      <div>
+        <div class="rate-eyebrow">Le producteur</div>
+        <div class="rate-name">Pierre Dupont</div>
+        <div class="rate-meta">Miel d'acacia 500g · Rucher du Bocage</div>
+      </div>
+    </div>
+
+    <div class="stars-row" data-rating="5">
+      <button class="star-btn active"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      <button class="star-btn active"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      <button class="star-btn active"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      <button class="star-btn active"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      <button class="star-btn active"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+    </div>
+    <div class="stars-label">Excellent — vous recommandez fortement</div>
+
+    <div class="quick-tags">
+      <button class="quick-tag active">Qualité au top</button>
+      <button class="quick-tag active">Emballage soigné</button>
+      <button class="quick-tag">Bonne quantité</button>
+      <button class="quick-tag">Goût authentique</button>
+      <button class="quick-tag">Conforme à la description</button>
+    </div>
+
+    <textarea class="rate-text" maxlength="300" placeholder="Optionnel — ajoutez un mot pour le producteur…">Miel délicieux, vraiment fluide et parfumé. Pot bien propre. Merci Pierre !</textarea>
+    <div class="rate-char">87 / 300</div>
+  </div>
+
+  <!-- Step 2 : Rameneur -->
+  <div class="rate-card">
+    <div class="rate-head">
+      <div class="rate-av rm">🚐</div>
+      <div>
+        <div class="rate-eyebrow">Le rameneur</div>
+        <div class="rate-name">Thomas Martel</div>
+        <div class="rate-meta">17 missions · note moyenne 4,8</div>
+      </div>
+    </div>
+
+    <div class="stars-row" data-rating="4">
+      <button class="star-btn active"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      <button class="star-btn active"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      <button class="star-btn active"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      <button class="star-btn active"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      <button class="star-btn"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+    </div>
+    <div class="stars-label">Très bien</div>
+
+    <div class="quick-tags">
+      <button class="quick-tag active">Ponctuel</button>
+      <button class="quick-tag">Très sympa</button>
+      <button class="quick-tag">Bonne communication</button>
+      <button class="quick-tag">Produit en bon état</button>
+      <button class="quick-tag">Easy à trouver</button>
+    </div>
+
+    <textarea class="rate-text" maxlength="300" placeholder="Optionnel — ajoutez un mot pour Thomas…"></textarea>
+    <div class="rate-char">0 / 300</div>
+  </div>
+
+  <div class="action-foot">
+    <button class="skip-btn">Passer</button>
+    <button class="submit-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Envoyer mes évaluations
+    </button>
+  </div>
+
+</main>
+
+<script>
+  // simple toggle on stars
+  document.querySelectorAll('.stars-row').forEach(row => {
+    const stars = row.querySelectorAll('.star-btn');
+    stars.forEach((s, i) => {
+      s.addEventListener('click', () => stars.forEach((b, j) => b.classList.toggle('active', j <= i)));
+    });
+  });
+  // tags
+  document.querySelectorAll('.quick-tag').forEach(t => t.addEventListener('click', () => t.classList.toggle('active')));
+</script>
+
+</body>
+</html>

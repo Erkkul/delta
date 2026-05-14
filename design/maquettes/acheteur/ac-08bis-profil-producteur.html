@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — AC-08bis Profil public producteur (vue acheteur)
+  Ticket(s) Jira : KAN-53 (Profils publics & avis)
+
+  Page consultée depuis fiche produit ou wishlist : description, photo, zone,
+  note moyenne, avis, autres produits du producteur. Pas d'infos sensibles
+  (adresse précise) — révélées uniquement après réservation.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC-08bis · Profil producteur — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-200: #EDCFB4;
+    --earth-100: #F7E8D6; --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --gold: #D4A017;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); padding-bottom: 80px; }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  .top-bar {
+    background: rgba(250,247,242,0.96); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200); padding: 12px 22px;
+    display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100;
+  }
+  .back-btn { background: transparent; border: none; color: var(--cream-700); padding: 4px; text-decoration: none; display: grid; place-items: center; }
+  .back-btn svg { width: 22px; height: 22px; }
+  .top-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; color: var(--green-900); }
+
+  .hero {
+    position: relative; height: 220px;
+    background: linear-gradient(135deg, var(--earth-500), var(--earth-800));
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '🌻'; position: absolute; right: -20px; top: -20px; font-size: 280px; opacity: 0.18;
+  }
+  .hero-pattern {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1), transparent 50%);
+  }
+
+  .page { max-width: 920px; margin: -64px auto 0; padding: 0 22px 40px; position: relative; z-index: 2; }
+
+  .producer-card {
+    background: white; border-radius: 18px; padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    margin-bottom: 22px;
+  }
+  .producer-head { display: flex; gap: 16px; align-items: flex-start; }
+  .producer-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--earth-100); border: 4px solid white;
+    display: grid; place-items: center; font-size: 36px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    flex-shrink: 0; margin-top: -50px;
+  }
+  .producer-info { flex: 1; min-width: 0; padding-top: 4px; }
+  .producer-name { font-family: 'Lora', serif; font-size: 24px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; line-height: 1.2; }
+  .producer-zone { font-size: 13px; color: var(--cream-600); display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+  .producer-zone svg { width: 13px; height: 13px; }
+  .producer-stats { display: flex; gap: 18px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--cream-100); }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-val { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-900); display: flex; align-items: center; gap: 4px; }
+  .stat-val svg { width: 14px; height: 14px; color: var(--gold); fill: var(--gold); }
+  .stat-label { font-size: 11px; color: var(--cream-600); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
+  .producer-desc { font-size: 14px; line-height: 1.6; color: var(--cream-700); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--cream-100); }
+  .producer-desc p + p { margin-top: 10px; }
+
+  .labels-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .label-tag { background: var(--green-50); color: var(--green-700); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: flex; align-items: center; gap: 5px; border: 1px solid var(--green-200); }
+  .label-tag.bio { background: var(--green-100); color: var(--green-800); }
+
+  /* Sections */
+  .section { margin-bottom: 28px; }
+  .section-h { font-family: 'Lora', serif; font-size: 18px; font-weight: 700; color: var(--green-900); margin-bottom: 12px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .section-h a { font-family: 'DM Sans'; font-size: 13px; font-weight: 500; color: var(--green-700); text-decoration: none; }
+
+  /* Products grid */
+  .pg-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .pg-card { background: white; border: 1px solid var(--cream-200); border-radius: 14px; overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: all 200ms; cursor: pointer; }
+  .pg-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(53,127,67,0.10); }
+  .pg-img { height: 100px; position: relative; }
+  .pg-img.miel { background: linear-gradient(135deg, #F5C842, #D4901A); }
+  .pg-img.confiture { background: linear-gradient(135deg, #B8344A, #6E1C2A); }
+  .pg-img.pollen { background: linear-gradient(135deg, #E6A532, #A56B17); }
+  .pg-img.propolis { background: linear-gradient(135deg, #8C4D1E, #4F2810); }
+  .pg-img-emoji { position: absolute; inset: 0; display: grid; place-items: center; font-size: 40px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2)); }
+  .pg-body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .pg-name { font-family: 'Lora', serif; font-size: 13px; font-weight: 700; color: var(--cream-950); line-height: 1.3; }
+  .pg-price { font-family: 'Lora', serif; font-size: 14px; font-weight: 700; color: var(--earth-800); margin-top: 2px; }
+  .pg-price small { font-family: 'DM Sans'; font-size: 11px; font-weight: 500; color: var(--cream-500); }
+
+  /* Reviews */
+  .reviews-summary { background: white; border: 1px solid var(--cream-200); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 22px; margin-bottom: 14px; }
+  .rating-big { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+  .rating-big-val { font-family: 'Lora', serif; font-size: 36px; font-weight: 700; color: var(--green-900); line-height: 1; }
+  .rating-big-stars { display: flex; gap: 2px; }
+  .rating-big-stars svg { width: 14px; height: 14px; color: var(--gold); fill: var(--gold); }
+  .rating-big-count { font-size: 11px; color: var(--cream-600); }
+  .rating-bars { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .rating-bar { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--cream-600); }
+  .rating-bar-track { flex: 1; height: 6px; background: var(--cream-100); border-radius: 100px; overflow: hidden; }
+  .rating-bar-fill { height: 100%; background: var(--green-500); border-radius: 100px; }
+
+  .review-list { display: flex; flex-direction: column; gap: 12px; }
+  .review-card { background: white; border: 1px solid var(--cream-200); border-radius: 14px; padding: 14px; }
+  .review-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .review-av { width: 32px; height: 32px; border-radius: 50%; background: var(--green-100); display: grid; place-items: center; font-size: 13px; font-weight: 600; color: var(--green-800); }
+  .review-name { font-size: 13px; font-weight: 600; color: var(--cream-950); }
+  .review-stars { display: flex; gap: 1px; margin-left: auto; }
+  .review-stars svg { width: 11px; height: 11px; color: var(--gold); fill: var(--gold); }
+  .review-stars svg.empty { fill: var(--cream-200); color: var(--cream-200); }
+  .review-date { font-size: 11px; color: var(--cream-500); }
+  .review-text { font-size: 13px; color: var(--cream-700); line-height: 1.55; }
+
+  /* Privacy note */
+  .privacy-note { background: var(--green-50); border: 1px solid var(--green-200); border-radius: 12px; padding: 12px; display: flex; gap: 10px; font-size: 12px; color: var(--cream-700); line-height: 1.5; margin-top: 18px; }
+  .privacy-note svg { width: 16px; height: 16px; color: var(--green-700); flex-shrink: 0; margin-top: 2px; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(250,247,242,0.97); backdrop-filter: blur(12px); border-top: 1px solid var(--cream-200); padding: 8px 12px 12px; display: flex; justify-content: space-around; z-index: 100; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--cream-500); font-size: 10px; font-weight: 500; padding: 6px 10px; border-radius: 10px; flex: 1; }
+  .nav-item svg { width: 22px; height: 22px; }
+
+  @media (min-width: 720px) {
+    .pg-grid { grid-template-columns: repeat(4, 1fr); }
+    .pg-img { height: 130px; }
+    .bottom-nav { display: none; } body { padding-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · PROFIL PUBLIC PRODUCTEUR</span>
+    <a href="ac-05-fiche-produit.html" class="demo-nav-link">Fiche produit</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">Profil producteur</a>
+  </div>
+</div>
+
+<div class="top-bar">
+  <a href="ac-05-fiche-produit.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <div class="top-title">Le producteur</div>
+</div>
+
+<div class="hero"><div class="hero-pattern"></div></div>
+
+<main class="page">
+
+  <div class="producer-card">
+    <div class="producer-head">
+      <div class="producer-avatar">🍯</div>
+      <div class="producer-info">
+        <div class="producer-name">Pierre Dupont · Rucher du Bocage</div>
+        <div class="producer-zone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Évreux · Eure (Normandie)
+        </div>
+        <div class="labels-row">
+          <span class="label-tag bio">🌿 Bio AB</span>
+          <span class="label-tag">SIRET vérifié</span>
+          <span class="label-tag">Apiculteur depuis 2014</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="producer-stats">
+      <div class="stat">
+        <div class="stat-val">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          4.9
+        </div>
+        <div class="stat-label">Note (42 avis)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">86</div>
+        <div class="stat-label">Commandes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">12</div>
+        <div class="stat-label">Produits</div>
+      </div>
+    </div>
+
+    <div class="producer-desc">
+      <p>Apiculteur familial dans le bocage normand depuis trois générations. Nos 80 ruches sont installées en zones rurales préservées, loin des grandes cultures intensives.</p>
+      <p>Nos miels reflètent strictement la flore environnante : acacia au printemps, toutes fleurs en été, châtaignier en bordure de forêt. Aucun ajout, aucune pasteurisation.</p>
+    </div>
+  </div>
+
+  <!-- Other products -->
+  <section class="section">
+    <div class="section-h">
+      Tous les produits
+      <a href="ac-04-catalogue.html">Catalogue complet →</a>
+    </div>
+    <div class="pg-grid">
+      <a href="ac-05-fiche-produit.html" class="pg-card">
+        <div class="pg-img miel"><span class="pg-img-emoji">🍯</span></div>
+        <div class="pg-body">
+          <div class="pg-name">Miel d'acacia 500g</div>
+          <div class="pg-price">8,50 €</div>
+        </div>
+      </a>
+      <a href="ac-05-fiche-produit.html" class="pg-card">
+        <div class="pg-img miel"><span class="pg-img-emoji">🍯</span></div>
+        <div class="pg-body">
+          <div class="pg-name">Miel toutes fleurs 500g</div>
+          <div class="pg-price">7,20 €</div>
+        </div>
+      </a>
+      <a href="ac-05-fiche-produit.html" class="pg-card">
+        <div class="pg-img pollen"><span class="pg-img-emoji">🌾</span></div>
+        <div class="pg-body">
+          <div class="pg-name">Pollen frais 250g</div>
+          <div class="pg-price">12,00 €</div>
+        </div>
+      </a>
+      <a href="ac-05-fiche-produit.html" class="pg-card">
+        <div class="pg-img propolis"><span class="pg-img-emoji">🧴</span></div>
+        <div class="pg-body">
+          <div class="pg-name">Propolis pure 50ml</div>
+          <div class="pg-price">14,50 €</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Reviews -->
+  <section class="section">
+    <div class="section-h">Avis acheteurs</div>
+
+    <div class="reviews-summary">
+      <div class="rating-big">
+        <div class="rating-big-val">4.9</div>
+        <div class="rating-big-stars">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="rating-big-count">42 avis</div>
+      </div>
+      <div class="rating-bars">
+        <div class="rating-bar">5 <div class="rating-bar-track"><div class="rating-bar-fill" style="width:85%"></div></div> 36</div>
+        <div class="rating-bar">4 <div class="rating-bar-track"><div class="rating-bar-fill" style="width:10%"></div></div> 4</div>
+        <div class="rating-bar">3 <div class="rating-bar-track"><div class="rating-bar-fill" style="width:5%"></div></div> 2</div>
+        <div class="rating-bar">2 <div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%"></div></div> 0</div>
+        <div class="rating-bar">1 <div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%"></div></div> 0</div>
+      </div>
+    </div>
+
+    <div class="review-list">
+
+      <div class="review-card">
+        <div class="review-head">
+          <div class="review-av">S</div>
+          <div>
+            <div class="review-name">Sophie L.</div>
+            <div class="review-date">Il y a 3 jours · Miel d'acacia</div>
+          </div>
+          <div class="review-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+        </div>
+        <p class="review-text">Vraiment excellent. Texture parfaite, goût floral très marqué. Emballage propre, livraison nickel via Thomas. Je recommande à 100%.</p>
+      </div>
+
+      <div class="review-card">
+        <div class="review-head">
+          <div class="review-av">F</div>
+          <div>
+            <div class="review-name">Fatima B.</div>
+            <div class="review-date">Il y a 8 jours · Miel toutes fleurs</div>
+          </div>
+          <div class="review-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24" class="empty"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+        </div>
+        <p class="review-text">Très bon miel mais le pot est un peu petit pour le prix. Ceci dit, la qualité est là — mes enfants l'adorent au petit-déj.</p>
+      </div>
+
+      <div class="review-card">
+        <div class="review-head">
+          <div class="review-av">N</div>
+          <div>
+            <div class="review-name">Nadia M.</div>
+            <div class="review-date">Il y a 2 semaines · Pollen frais</div>
+          </div>
+          <div class="review-stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+        </div>
+        <p class="review-text">Producteur sérieux, échanges très sympathiques. Le pollen est super frais, on sent la qualité.</p>
+      </div>
+
+    </div>
+
+    <div class="privacy-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span>L'adresse précise de la ferme n'est révélée qu'aux rameneurs ayant réservé une mission validée par un paiement acheteur.</span>
+    </div>
+  </section>
+
+</main>
+
+<nav class="bottom-nav">
+  <a href="ac-03-accueil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Accueil</a>
+  <a href="ac-04-catalogue.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Catalogue</a>
+  <a href="ac-06-mes-envies.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Envies</a>
+  <a href="ac-08-mes-commandes.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Commandes</a>
+  <a href="ac-11-profil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</a>
+</nav>
+
+</body>
+</html>

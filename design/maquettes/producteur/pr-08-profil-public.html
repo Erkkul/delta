@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — PR-08 Profil public producteur (édition + preview)
+  Ticket(s) Jira : KAN-17 (Infos profil & ferme), KAN-53, KAN-66
+
+  Vue split : édition à gauche, preview "vue acheteur" à droite (cf AC-08bis).
+  Permet de modifier nom ferme, description, photo, zone, labels, adresse ferme.
+  L'adresse exacte reste révélée uniquement aux rameneurs ayant réservé.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PR-08 · Profil public — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-200: #EDCFB4; --earth-100: #F7E8D6; --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --rose: #C75B5B; --gold: #D4A017;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  .app { display: flex; min-height: calc(100vh - 36px); }
+
+  /* Sidebar */
+  .sb { width: 240px; flex-shrink: 0; background: white; border-right: 1px solid var(--cream-200); padding: 18px 14px; display: flex; flex-direction: column; position: sticky; top: 0; align-self: flex-start; height: calc(100vh - 36px); }
+  .sb-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 6px 10px 18px; border-bottom: 1px solid var(--cream-100); margin-bottom: 14px; }
+  .sb-logo-icon { width: 36px; height: 36px; background: var(--green-800); border-radius: 10px; display: grid; place-items: center; font-size: 18px; }
+  .sb-logo-text { font-family: 'Lora', serif; font-size: 18px; font-weight: 700; color: var(--green-800); }
+  .sb-logo-dot { color: var(--earth-500); }
+  .sb-logo-role { font-size: 10px; color: var(--cream-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-top: 1px; }
+  .sb-section { font-size: 10px; font-weight: 700; color: var(--cream-500); text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 12px 8px; }
+  .sb-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--cream-700); text-decoration: none; }
+  .sb-link:hover { background: var(--green-50); color: var(--green-700); }
+  .sb-link.active { background: var(--green-100); color: var(--green-800); font-weight: 600; }
+  .sb-link svg { width: 16px; height: 16px; }
+  .sb-link .badge { margin-left: auto; background: var(--rose); color: white; font-size: 9px; padding: 2px 6px; border-radius: 100px; font-weight: 700; }
+  .sb-user { margin-top: auto; padding: 12px; background: var(--green-50); border-radius: 12px; display: flex; align-items: center; gap: 10px; }
+  .sb-user-av { width: 36px; height: 36px; border-radius: 50%; background: var(--earth-100); display: grid; place-items: center; font-size: 16px; }
+  .sb-user-name { font-size: 13px; font-weight: 600; color: var(--green-900); }
+  .sb-user-status { font-size: 11px; color: var(--cream-600); margin-top: 1px; }
+
+  .main { flex: 1; padding: 26px 32px 40px; }
+  .main-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+  .main-h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; }
+  .main-sub { font-size: 13px; color: var(--cream-600); margin-top: 2px; }
+  .save-btn { padding: 10px 18px; background: var(--green-600); color: white; border: none; border-radius: 100px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .save-btn:hover { background: var(--green-700); }
+  .save-btn svg { width: 14px; height: 14px; }
+
+  /* Two-column edit + preview */
+  .editor { display: grid; grid-template-columns: 1fr 380px; gap: 22px; }
+  @media (max-width: 1080px) { .editor { grid-template-columns: 1fr; } }
+
+  .form-card { background: white; border: 1px solid var(--cream-200); border-radius: 16px; padding: 22px; margin-bottom: 18px; }
+  .form-card-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; color: var(--green-900); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .field { margin-bottom: 16px; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--cream-700); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; display: flex; gap: 6px; align-items: center; }
+  .field-label .required { color: var(--rose); }
+  .field-input, .field-textarea { width: 100%; padding: 12px 14px; background: var(--cream-50); border: 1.5px solid var(--cream-300); border-radius: 10px; font-size: 14px; font-family: inherit; color: var(--cream-950); }
+  .field-input:focus, .field-textarea:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(53,127,67,0.10); }
+  .field-textarea { resize: vertical; min-height: 120px; line-height: 1.55; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-help { font-size: 11px; color: var(--cream-600); margin-top: 4px; line-height: 1.4; }
+  .field-char { font-size: 11px; color: var(--cream-500); text-align: right; margin-top: 4px; }
+
+  /* Photo uploader */
+  .photo-up { display: flex; gap: 14px; align-items: center; padding: 14px; background: var(--cream-50); border: 1.5px dashed var(--cream-300); border-radius: 12px; }
+  .photo-up-preview { width: 72px; height: 72px; border-radius: 50%; background: var(--earth-100); display: grid; place-items: center; font-size: 32px; flex-shrink: 0; }
+  .photo-up-text { flex: 1; }
+  .photo-up-actions { display: flex; gap: 6px; margin-top: 6px; }
+  .photo-up-btn { font-size: 12px; padding: 6px 10px; background: white; border: 1px solid var(--cream-300); border-radius: 100px; cursor: pointer; }
+  .photo-up-btn.danger { color: var(--rose); border-color: var(--rose); }
+
+  /* Labels (chips) */
+  .chips-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { padding: 6px 12px; background: var(--cream-50); border: 1px solid var(--cream-300); border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--cream-700); cursor: pointer; }
+  .chip.active { background: var(--green-100); border-color: var(--green-600); color: var(--green-800); }
+
+  /* Cover gallery */
+  .cover-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cover-thumb { aspect-ratio: 4/3; border-radius: 10px; position: relative; overflow: hidden; cursor: pointer; }
+  .cover-thumb.add { background: var(--cream-100); border: 2px dashed var(--cream-300); display: grid; place-items: center; font-size: 11px; color: var(--cream-700); }
+  .cover-thumb.farm1 { background: linear-gradient(135deg, #B8703F, #5C3214); }
+  .cover-thumb.farm2 { background: linear-gradient(135deg, #8FCB9C, #276634); }
+  .cover-thumb.farm3 { background: linear-gradient(135deg, #F5C842, #B8703F); }
+
+  /* Preview */
+  .preview-col { position: sticky; top: 26px; align-self: flex-start; }
+  .preview-frame {
+    background: var(--cream-950); padding: 8px;
+    border-radius: 28px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  }
+  .preview-frame-inner {
+    background: var(--cream-50);
+    border-radius: 22px;
+    overflow: hidden;
+    height: 580px;
+  }
+  .preview-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cream-500); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .preview-label svg { width: 14px; height: 14px; }
+
+  /* Preview content */
+  .pv-cover { height: 100px; background: linear-gradient(135deg, var(--earth-500), var(--earth-800)); position: relative; }
+  .pv-cover::before { content: '🌻'; position: absolute; right: -10px; top: -10px; font-size: 140px; opacity: 0.18; }
+  .pv-card { background: white; margin: -30px 14px 12px; border-radius: 14px; padding: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); position: relative; }
+  .pv-av { width: 56px; height: 56px; border-radius: 50%; background: var(--earth-100); border: 3px solid white; display: grid; place-items: center; font-size: 26px; margin-top: -42px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .pv-name { font-family: 'Lora', serif; font-size: 16px; font-weight: 700; color: var(--green-900); margin-top: 8px; line-height: 1.2; }
+  .pv-zone { font-size: 11px; color: var(--cream-600); margin-top: 2px; }
+  .pv-stats { display: flex; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--cream-100); font-size: 11px; }
+  .pv-stat { color: var(--cream-700); }
+  .pv-stat strong { color: var(--green-900); font-family: 'Lora', serif; font-size: 15px; font-weight: 700; display: block; }
+  .pv-desc { padding: 0 14px; font-size: 11px; color: var(--cream-700); line-height: 1.5; }
+  .pv-section-h { padding: 14px 14px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--cream-500); letter-spacing: 0.08em; }
+  .pv-prod-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 0 14px 14px; }
+  .pv-prod { background: white; border-radius: 8px; padding: 6px; font-size: 10px; }
+  .pv-prod-img { aspect-ratio: 1; border-radius: 6px; margin-bottom: 4px; display: grid; place-items: center; font-size: 24px; }
+
+  @media (max-width: 880px) {
+    .sb { display: none; }
+    .main { padding: 22px 18px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · ESPACE PRODUCTEUR</span>
+    <a href="pr-03-dashboard.html" class="demo-nav-link">Dashboard</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">PR-08 Profil public</a>
+    <span class="demo-nav-arrow">|</span>
+    <a href="ac-08bis-profil-producteur.html" class="demo-nav-link">Vue acheteur (AC-08bis)</a>
+  </div>
+</div>
+
+<div class="app">
+
+  <aside class="sb">
+    <a href="pr-03-dashboard.html" class="sb-logo">
+      <div class="sb-logo-icon">🐜</div>
+      <div>
+        <div class="sb-logo-text">Delta<span class="sb-logo-dot">.</span></div>
+        <span class="sb-logo-role">Producteur</span>
+      </div>
+    </a>
+    <div class="sb-section">Activité</div>
+    <a href="pr-03-dashboard.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/></svg>Tableau de bord</a>
+    <a href="pr-06-recuperation.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="7" r="4"/></svg>Récupérations<span class="badge">3</span></a>
+    <div class="sb-section">Catalogue</div>
+    <a href="pr-04-catalogue.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4 8 4 8-4z"/></svg>Mes produits</a>
+    <div class="sb-section">Finances</div>
+    <a href="pr-07-historique-ventes.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/></svg>Ventes & virements</a>
+    <div class="sb-section">Profil</div>
+    <a href="#" class="sb-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/></svg>Profil public</a>
+    <a href="pr-09-parametres.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Paramètres</a>
+    <div class="sb-user"><div class="sb-user-av">🌻</div><div><div class="sb-user-name">EARL Dubois</div><div class="sb-user-status">Stripe Connect actif</div></div></div>
+  </aside>
+
+  <main class="main">
+
+    <div class="main-h">
+      <div>
+        <h1 class="main-h1">Profil public</h1>
+        <p class="main-sub">Ce que les acheteurs voient quand ils découvrent votre ferme</p>
+      </div>
+      <button class="save-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Enregistrer
+      </button>
+    </div>
+
+    <div class="editor">
+
+      <!-- Edit forms -->
+      <div>
+
+        <section class="form-card">
+          <div class="form-card-title">Identité de la ferme</div>
+
+          <div class="field">
+            <div class="field-label">Photo / logo</div>
+            <div class="photo-up">
+              <div class="photo-up-preview">🌻</div>
+              <div class="photo-up-text">
+                <div style="font-size:13px; font-weight:600;">Logo de la ferme</div>
+                <div style="font-size:11px; color:var(--cream-600); margin-top:2px;">Carré, ≥ 400×400 px. JPG ou PNG.</div>
+                <div class="photo-up-actions">
+                  <button class="photo-up-btn">Changer</button>
+                  <button class="photo-up-btn danger">Supprimer</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Nom de la ferme <span class="required">*</span></div>
+            <input class="field-input" value="EARL Marie Dubois — Maraîchage du Bocage">
+            <div class="field-help">Apparaît partout sur Delta (catalogue, fiches produit, profil).</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Description publique</div>
+            <textarea class="field-textarea" maxlength="500">Maraîchère bio depuis 12 ans dans le bocage normand. EARL familiale à 15 km de Rouen. Légumes de saison, légumineuses et conserves artisanales, sans intrant chimique.</textarea>
+            <div class="field-char">186 / 500</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Labels & certifications</div>
+            <div class="chips-row">
+              <span class="chip active">🌿 Bio AB</span>
+              <span class="chip active">SIRET vérifié</span>
+              <span class="chip">Demeter</span>
+              <span class="chip">Nature & Progrès</span>
+              <span class="chip">HVE niveau 3</span>
+              <span class="chip">Producteur fermier</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-card">
+          <div class="form-card-title">Photos de la ferme</div>
+          <div class="field-help" style="margin-bottom:10px;">3 photos max — paysage, plantation, atelier ou marché. Donne envie d'acheter.</div>
+          <div class="cover-gallery">
+            <div class="cover-thumb farm1">🌻</div>
+            <div class="cover-thumb farm2">🥬</div>
+            <div class="cover-thumb add">＋<br>Ajouter</div>
+          </div>
+        </section>
+
+        <section class="form-card">
+          <div class="form-card-title">Zone & adresse de récupération</div>
+
+          <div class="field">
+            <div class="field-label">Zone publique (commune)</div>
+            <input class="field-input" value="Bocage normand · Évreux (27)">
+            <div class="field-help">Affiché publiquement. Donne aux acheteurs une idée de la provenance sans révéler l'adresse.</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Adresse exacte du point de récupération <span class="required">*</span></div>
+            <input class="field-input" value="234 Route du Bocage, 27000 Évreux">
+            <div class="field-help" style="color:var(--green-700);">🔒 Privée — révélée uniquement aux rameneurs ayant réservé une mission validée par un paiement acheteur.</div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <div class="field-label">Créneaux de récup. (jours)</div>
+              <input class="field-input" value="Lun, mer, sam">
+            </div>
+            <div class="field">
+              <div class="field-label">Horaires</div>
+              <input class="field-input" value="8h00 — 18h00">
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-col">
+        <div class="preview-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Aperçu vue acheteur
+        </div>
+        <div class="preview-frame">
+          <div class="preview-frame-inner">
+            <div class="pv-cover"></div>
+            <div class="pv-card">
+              <div class="pv-av">🌻</div>
+              <div class="pv-name">EARL Dubois — Maraîchage du Bocage</div>
+              <div class="pv-zone">📍 Bocage normand · Évreux</div>
+              <div class="pv-stats">
+                <div class="pv-stat"><strong>4,8 ★</strong>23 avis</div>
+                <div class="pv-stat"><strong>86</strong>commandes</div>
+                <div class="pv-stat"><strong>8</strong>produits</div>
+              </div>
+            </div>
+            <div class="pv-desc">Maraîchère bio depuis 12 ans dans le bocage normand. Légumes de saison, légumineuses et conserves artisanales, sans intrant chimique.</div>
+            <div class="pv-section-h">Produits</div>
+            <div class="pv-prod-grid">
+              <div class="pv-prod"><div class="pv-prod-img" style="background:linear-gradient(135deg,#E55B4F,#A03028);">🍅</div>Tomates · 6,20 €</div>
+              <div class="pv-prod"><div class="pv-prod-img" style="background:linear-gradient(135deg,#6DB87A,#357F43);">🌾</div>Lentilles · 5,80 €</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:11px; color:var(--cream-600); text-align:center; margin-top:10px; line-height:1.5;">L'adresse exacte de la ferme n'apparaît jamais ici.</p>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>

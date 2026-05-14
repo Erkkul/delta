@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — AC-04 Catalogue parcourable
+  Ticket(s) Jira : KAN-28 (Catalogue filtré), KAN-29 (Zone non couverte)
+
+  Règle métier (PRD §12, H3) : un produit n'apparaît que si ≥ 2 trajets compatibles sur 30 jours
+  OU ≥ 1 trajet actif. État vide → bascule AC-12.
+  Filtres chips : Catégorie · Zone d'origine · Producteur · Disponibilité.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC-04 · Catalogue — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-200: #EDCFB4;
+    --earth-100: #F7E8D6; --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --gold: #D4A017; --rose: #C75B5B;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); padding-bottom: 80px; }
+
+  /* Demo nav */
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; font-weight: 500; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* Header */
+  .header {
+    background: rgba(250,247,242,0.96); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cream-200);
+    padding: 0 24px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-icon { width: 32px; height: 32px; background: var(--green-800); border-radius: 9px; display: grid; place-items: center; font-size: 16px; }
+  .logo-text { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; color: var(--green-800); }
+  .logo-dot { color: var(--earth-500); }
+  .desktop-nav { display: flex; gap: 4px; }
+  .nav-link { font-size: 14px; font-weight: 500; color: var(--cream-700); text-decoration: none; padding: 6px 12px; border-radius: 8px; }
+  .nav-link:hover { color: var(--green-700); background: var(--green-50); }
+  .nav-link.active { color: var(--green-700); font-weight: 600; background: var(--green-50); }
+  .header-actions { display: flex; gap: 6px; align-items: center; }
+  .icon-btn { width: 38px; height: 38px; border-radius: 10px; background: transparent; border: none; color: var(--cream-700); display: grid; place-items: center; cursor: pointer; }
+  .icon-btn svg { width: 20px; height: 20px; }
+  .avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--green-100); border: 2px solid var(--green-200); display: grid; place-items: center; font-size: 14px; font-weight: 600; color: var(--green-800); }
+
+  /* Page */
+  .page { max-width: 1100px; margin: 0 auto; padding: 22px 22px 40px; }
+  .page-h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: var(--cream-600); margin-bottom: 18px; }
+
+  /* Search bar */
+  .search-bar {
+    background: white; border: 1px solid var(--cream-200); border-radius: 14px;
+    padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px; box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+  }
+  .search-bar svg { width: 18px; height: 18px; color: var(--cream-500); }
+  .search-bar input { flex: 1; border: none; outline: none; font-size: 15px; font-family: inherit; background: transparent; color: var(--cream-950); }
+  .search-bar input::placeholder { color: var(--cream-500); }
+  .search-bar-btn { font-size: 13px; font-weight: 600; padding: 6px 12px; background: var(--green-50); color: var(--green-700); border-radius: 100px; border: none; cursor: pointer; }
+
+  /* Filters */
+  .filters-row {
+    display: flex; gap: 8px; overflow-x: auto; margin: 0 -22px; padding: 4px 22px 14px;
+    scrollbar-width: none;
+  }
+  .filters-row::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    flex-shrink: 0; padding: 8px 14px; background: white; border: 1px solid var(--cream-300);
+    border-radius: 100px; font-size: 13px; font-weight: 500; color: var(--cream-700);
+    display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;
+  }
+  .filter-chip:hover { border-color: var(--green-300, #8FCB9C); }
+  .filter-chip.active { background: var(--green-700); color: white; border-color: var(--green-700); }
+  .filter-chip svg { width: 12px; height: 12px; }
+
+  /* Result row */
+  .result-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; padding-top: 4px; }
+  .result-count { font-size: 13px; color: var(--cream-600); }
+  .result-count strong { color: var(--cream-950); font-weight: 700; }
+  .sort-btn { font-size: 13px; font-weight: 500; color: var(--cream-700); background: transparent; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .sort-btn svg { width: 14px; height: 14px; }
+
+  /* Grid */
+  .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .product-card {
+    background: white; border: 1px solid var(--cream-200); border-radius: 16px;
+    overflow: hidden; display: flex; flex-direction: column;
+    cursor: pointer; transition: all 200ms; text-decoration: none; color: inherit;
+  }
+  .product-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(53,127,67,0.10); }
+  .product-img { height: 130px; position: relative; }
+  .product-img.miel { background: linear-gradient(135deg, #F5C842, #D4901A); }
+  .product-img.tomate { background: linear-gradient(135deg, #E55B4F, #A03028); }
+  .product-img.lentilles { background: linear-gradient(135deg, #6DB87A, #357F43); }
+  .product-img.fromage { background: linear-gradient(135deg, #F7E8D6, #D4A063); }
+  .product-img.farine { background: linear-gradient(135deg, #EFE4D2, #C7A87A); }
+  .product-img.confiture { background: linear-gradient(135deg, #B8344A, #6E1C2A); }
+  .product-img.oeufs { background: linear-gradient(135deg, #F5E6CB, #C9A471); }
+  .product-img.haricots { background: linear-gradient(135deg, #8BAA5F, #4F6638); }
+  .product-img-emoji { position: absolute; inset: 0; display: grid; place-items: center; font-size: 50px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2)); }
+  .product-match { position: absolute; top: 8px; left: 8px; background: rgba(255,255,255,0.95); backdrop-filter: blur(6px); padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; color: var(--green-800); letter-spacing: 0.04em; }
+  .product-match.urgent { background: var(--rose); color: white; }
+  .product-wish-btn {
+    position: absolute; top: 8px; right: 8px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(6px);
+    display: grid; place-items: center; cursor: pointer; border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .product-wish-btn svg { width: 16px; height: 16px; color: var(--cream-700); }
+  .product-wish-btn.active svg { color: var(--rose); fill: var(--rose); }
+  .product-body { padding: 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .product-name { font-family: 'Lora', serif; font-size: 15px; font-weight: 700; color: var(--cream-950); line-height: 1.25; }
+  .product-producer { font-size: 12px; color: var(--cream-600); }
+  .product-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 8px; }
+  .product-price { font-family: 'Lora', serif; font-size: 15px; font-weight: 700; color: var(--earth-800); }
+  .product-price small { font-family: 'DM Sans'; font-size: 11px; font-weight: 500; color: var(--cream-500); }
+  .product-rating { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--cream-700); font-weight: 600; }
+  .product-rating svg { width: 11px; height: 11px; color: var(--gold); fill: var(--gold); }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(250,247,242,0.97); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--cream-200); padding: 8px 12px 12px;
+    display: flex; justify-content: space-around; z-index: 100;
+  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--cream-500); font-size: 10px; font-weight: 500; padding: 6px 10px; border-radius: 10px; flex: 1; }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-item.active { color: var(--green-700); font-weight: 600; }
+  .nav-item.active svg { color: var(--green-600); }
+  .nav-item .badge { position: absolute; background: var(--rose); color: white; font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 100px; display: grid; place-items: center; border: 2px solid var(--cream-50); transform: translate(14px, -10px); }
+
+  @media (min-width: 720px) {
+    .product-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .product-img { height: 160px; }
+    .bottom-nav { display: none; }
+    body { padding-bottom: 0; }
+  }
+  @media (min-width: 1000px) {
+    .product-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 719px) {
+    .desktop-nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · CATALOGUE ACHETEUR</span>
+    <a href="ac-03-accueil.html" class="demo-nav-link">Accueil</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">Catalogue</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-05-fiche-produit.html" class="demo-nav-link">Fiche produit</a>
+    <span class="demo-nav-arrow">|</span>
+    <a href="ac-12-zone-non-couverte.html" class="demo-nav-link">État vide → AC-12</a>
+  </div>
+</div>
+
+<header class="header">
+  <a href="#" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+  <nav class="desktop-nav">
+    <a href="ac-03-accueil.html" class="nav-link">Accueil</a>
+    <a href="#" class="nav-link active">Catalogue</a>
+    <a href="ac-06-mes-envies.html" class="nav-link">Mes envies</a>
+    <a href="ac-08-mes-commandes.html" class="nav-link">Commandes</a>
+  </nav>
+  <div class="header-actions">
+    <button class="icon-btn" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    <div class="avatar-btn">M</div>
+  </div>
+</header>
+
+<main class="page">
+
+  <h1 class="page-h1">Catalogue</h1>
+  <p class="page-sub">Produits matchables sur votre zone — Paris 17ᵉ.</p>
+
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Rechercher un produit ou un producteur…">
+    <button class="search-bar-btn">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:-2px;"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
+      Filtres
+    </button>
+  </div>
+
+  <div class="filters-row">
+    <button class="filter-chip active">Toutes catégories
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <button class="filter-chip">Miel & confitures</button>
+    <button class="filter-chip">Légumes robustes</button>
+    <button class="filter-chip">Farines & céréales</button>
+    <button class="filter-chip">Conserves</button>
+    <button class="filter-chip">Légumineuses</button>
+    <button class="filter-chip">Œufs</button>
+  </div>
+
+  <div class="filters-row" style="margin-top:-4px;">
+    <button class="filter-chip">📍 Zone d'origine
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <button class="filter-chip">🚜 Producteur
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <button class="filter-chip">📅 Cette semaine
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <button class="filter-chip active">🚐 Trajet actif
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+    </button>
+  </div>
+
+  <div class="result-row">
+    <span class="result-count"><strong>18 produits</strong> matchables · 7 producteurs</span>
+    <button class="sort-btn">
+      Plus pertinents
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </div>
+
+  <div class="product-grid">
+
+    <a href="ac-05-fiche-produit.html" class="product-card">
+      <div class="product-img miel">
+        <span class="product-match">3 trajets</span>
+        <button class="product-wish-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <span class="product-img-emoji">🍯</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">Miel toutes fleurs 500g</div>
+        <div class="product-producer">Pierre Dupont · Évreux</div>
+        <div class="product-bottom">
+          <div class="product-price">8,50 €</div>
+          <div class="product-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            4.9
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="ac-05-fiche-produit.html" class="product-card">
+      <div class="product-img tomate">
+        <span class="product-match urgent">Demain</span>
+        <button class="product-wish-btn active"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <span class="product-img-emoji">🍅</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">Tomates anciennes</div>
+        <div class="product-producer">Ferme du Bocage · Lisieux</div>
+        <div class="product-bottom">
+          <div class="product-price">6,20 € <small>/ kg</small></div>
+          <div class="product-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            4.7
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="ac-05-fiche-produit.html" class="product-card">
+      <div class="product-img lentilles">
+        <span class="product-match">Cette semaine</span>
+        <button class="product-wish-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <span class="product-img-emoji">🌾</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">Lentilles vertes du Perche</div>
+        <div class="product-producer">Les Champs d'Élise</div>
+        <div class="product-bottom">
+          <div class="product-price">5,80 € <small>/ 500g</small></div>
+          <div class="product-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            4.8
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="ac-05-fiche-produit.html" class="product-card">
+      <div class="product-img fromage">
+        <span class="product-match">2 trajets</span>
+        <button class="product-wish-btn active"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <span class="product-img-emoji">🧀</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">Camembert AOP</div>
+        <div class="product-producer">Fromagerie Lefèvre</div>
+        <div class="product-bottom">
+          <div class="product-price">7,40 € <small>/ pièce</small></div>
+          <div class="product-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            4.8
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="ac-05-fiche-produit.html" class="product-card">
+      <div class="product-img farine">
+        <span class="product-match">4 trajets</span>
+        <button class="product-wish-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <span class="product-img-emoji">🌾</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">Farine T80 bio</div>
+        <div class="product-producer">Moulin de Vimoutiers</div>
+        <div class="product-bottom">
+          <div class="product-price">4,20 € <small>/ kg</small></div>
+          <div class="product-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            4.6
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="ac-05-fiche-produit.html" class="product-card">
+      <div class="product-img confiture">
+        <span class="product-match">2 trajets</span>
+        <button class="product-wish-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <span class="product-img-emoji">🍇</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">Confiture mûre sauvage</div>
+        <div class="product-producer">Le Verger du Perche</div>
+        <div class="product-bottom">
+          <div class="product-price">5,90 € <small>/ pot 350g</small></div>
+          <div class="product-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            4.9
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="ac-05-fiche-produit.html" class="product-card">
+      <div class="product-img oeufs">
+        <span class="product-match">3 trajets</span>
+        <button class="product-wish-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <span class="product-img-emoji">🥚</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">Œufs plein air bio</div>
+        <div class="product-producer">Poulailler Rouvres</div>
+        <div class="product-bottom">
+          <div class="product-price">4,80 € <small>/ douz.</small></div>
+          <div class="product-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            4.7
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="ac-05-fiche-produit.html" class="product-card">
+      <div class="product-img haricots">
+        <span class="product-match">1 trajet</span>
+        <button class="product-wish-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        <span class="product-img-emoji">🫘</span>
+      </div>
+      <div class="product-body">
+        <div class="product-name">Haricots Tarbais</div>
+        <div class="product-producer">Les Champs d'Élise</div>
+        <div class="product-bottom">
+          <div class="product-price">9,20 € <small>/ 500g</small></div>
+          <div class="product-rating">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            4.8
+          </div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+</main>
+
+<nav class="bottom-nav">
+  <a href="ac-03-accueil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Accueil</a>
+  <a href="#" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Catalogue</a>
+  <a href="ac-06-mes-envies.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Envies<span class="badge">5</span></a>
+  <a href="ac-08-mes-commandes.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg>Commandes</a>
+  <a href="ac-11-profil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</a>
+</nav>
+
+</body>
+</html>

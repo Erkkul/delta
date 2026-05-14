@@ -33,7 +33,7 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 | Backlog MVP (épics, features, subtasks) | Jira KAN — erkulaws.atlassian.net |
 | Mapping ticket Jira ↔ écran ↔ maquette | `produit/jira_mapping.md` |
 | Journal des arbitrages produit (avec dates) | `produit/decisions/decisions_produit.md` |
-| Maquettes HTML cliquables | `design/maquettes/[persona]/` (sous-dossiers `acheteur/`, `producteur/`, `rameneur/`) |
+| Maquettes HTML cliquables | `design/maquettes/` — index navigable : `design/maquettes/index.html` |
 | Stack technique, structure du monorepo, conventions de code | `ARCHITECTURE.md` — sections 2 à 4 |
 | Modélisation DB, RLS, migrations | `ARCHITECTURE.md` — section 5 |
 | Implémentation machine à états mission, pipeline matching, flow Stripe | `ARCHITECTURE.md` — sections 6 à 8 |

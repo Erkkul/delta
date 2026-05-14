@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — RM-11 Profil rameneur public
+  Ticket(s) Jira : KAN-53 (Profils publics & avis)
+
+  Vue split : édition propre + preview "vue producteur / acheteur".
+  Affiche note, nombre de missions, ancienneté, taux de complétion,
+  zones desservies, véhicule. Pas d'info personnelle sensible (nom complet, email).
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM-11 · Profil rameneur public — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-100: #F7E8D6;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --gold: #D4A017; --rose: #C75B5B;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); padding-bottom: 80px; }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  .header { background: rgba(250,247,242,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cream-200); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-icon { width: 32px; height: 32px; background: var(--green-800); border-radius: 9px; display: grid; place-items: center; font-size: 16px; }
+  .logo-text { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; color: var(--green-800); }
+  .logo-dot { color: var(--earth-500); }
+  .desktop-nav { display: flex; gap: 4px; }
+  .nav-link { font-size: 14px; font-weight: 500; color: var(--cream-700); text-decoration: none; padding: 6px 12px; border-radius: 8px; }
+  .nav-link.active { color: var(--green-700); background: var(--green-50); font-weight: 600; }
+  .avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--green-100); border: 2px solid var(--green-200); display: grid; place-items: center; font-size: 14px; font-weight: 600; color: var(--green-800); }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 22px 22px 40px; }
+  .page-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+  .page-h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; }
+  .page-sub { font-size: 13px; color: var(--cream-600); margin-top: 2px; }
+  .save-btn { padding: 10px 18px; background: var(--green-600); color: white; border: none; border-radius: 100px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .save-btn svg { width: 14px; height: 14px; }
+
+  /* Two-col edit + preview */
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 22px; align-items: start; }
+  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+
+  .form-card { background: white; border: 1px solid var(--cream-200); border-radius: 16px; padding: 22px; margin-bottom: 18px; }
+  .form-card-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; color: var(--green-900); margin-bottom: 4px; }
+  .form-card-sub { font-size: 12px; color: var(--cream-600); margin-bottom: 14px; }
+  .field { margin-bottom: 16px; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--cream-700); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .field-input, .field-textarea { width: 100%; padding: 12px 14px; background: var(--cream-50); border: 1.5px solid var(--cream-300); border-radius: 10px; font-size: 14px; font-family: inherit; color: var(--cream-950); }
+  .field-input:focus, .field-textarea:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(53,127,67,0.10); }
+  .field-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  /* Read-only stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stat { background: var(--cream-50); border: 1px solid var(--cream-200); border-radius: 12px; padding: 12px 14px; }
+  .stat-label { font-size: 10px; color: var(--cream-600); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 4px; }
+  .stat-val { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--green-900); display: flex; align-items: center; gap: 4px; }
+  .stat-val svg { width: 14px; height: 14px; color: var(--gold); fill: var(--gold); }
+  .stat-meta { font-size: 11px; color: var(--cream-600); margin-top: 2px; }
+
+  /* Vehicle radio */
+  .veh-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .veh-opt { background: white; border: 1.5px solid var(--cream-300); border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; }
+  .veh-opt.selected { border-color: var(--green-600); background: var(--green-50); }
+  .veh-opt-icon { font-size: 24px; margin-bottom: 4px; }
+  .veh-opt-label { font-size: 12px; font-weight: 600; color: var(--cream-950); }
+  .veh-opt-meta { font-size: 10px; color: var(--cream-600); margin-top: 2px; }
+
+  /* Zones chips */
+  .zones-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .zone-tag { padding: 6px 10px; background: var(--green-50); border: 1px solid var(--green-200); border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--green-800); display: flex; align-items: center; gap: 6px; }
+  .zone-tag button { background: transparent; border: none; cursor: pointer; color: var(--green-700); padding: 0; font-size: 14px; line-height: 1; }
+  .zone-add { padding: 6px 10px; background: transparent; border: 1.5px dashed var(--cream-300); border-radius: 100px; font-size: 12px; color: var(--cream-700); cursor: pointer; }
+
+  /* Verification badges */
+  .verif-row { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--green-50); border: 1px solid var(--green-200); border-radius: 10px; margin-bottom: 8px; }
+  .verif-row:last-child { margin-bottom: 0; }
+  .verif-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--green-600); color: white; display: grid; place-items: center; flex-shrink: 0; }
+  .verif-icon svg { width: 16px; height: 16px; }
+  .verif-name { font-size: 13px; font-weight: 600; color: var(--green-800); }
+  .verif-meta { font-size: 11px; color: var(--cream-600); }
+
+  /* Preview phone */
+  .preview-col { position: sticky; top: 80px; }
+  .preview-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cream-500); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .preview-frame { background: var(--cream-950); padding: 8px; border-radius: 28px; box-shadow: 0 8px 28px rgba(0,0,0,0.18); }
+  .preview-inner { background: var(--cream-50); border-radius: 22px; overflow: hidden; }
+
+  .pv-hero { background: linear-gradient(135deg, var(--green-700), var(--green-900)); padding: 22px 18px 38px; color: white; text-align: center; position: relative; overflow: hidden; }
+  .pv-hero::before { content: '🚐'; position: absolute; right: -10px; top: -10px; font-size: 110px; opacity: 0.18; transform: rotate(-8deg); }
+  .pv-av { width: 76px; height: 76px; border-radius: 50%; background: var(--green-100); color: var(--green-800); display: grid; place-items: center; font-size: 30px; font-weight: 700; font-family: 'Lora', serif; margin: 0 auto 10px; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.18); position: relative; }
+  .pv-name { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; position: relative; }
+  .pv-since { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; position: relative; }
+  .pv-rating-row { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px; position: relative; }
+  .pv-rating-row span { background: rgba(255,255,255,0.12); padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .pv-rating-row svg { width: 11px; height: 11px; }
+  .pv-rating-row svg.star { color: var(--gold); fill: var(--gold); }
+
+  .pv-card { background: white; margin: -20px 14px 12px; border-radius: 14px; padding: 14px; box-shadow: 0 6px 16px rgba(0,0,0,0.06); position: relative; }
+  .pv-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
+  .pv-stats-stat { padding: 4px; }
+  .pv-stats-val { font-family: 'Lora', serif; font-size: 16px; font-weight: 700; color: var(--green-900); }
+  .pv-stats-label { font-size: 9px; color: var(--cream-600); text-transform: uppercase; letter-spacing: 0.04em; }
+  .pv-verifs { padding: 12px 14px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .pv-verif { font-size: 10px; padding: 3px 8px; border-radius: 100px; background: var(--green-100); color: var(--green-700); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .pv-verif svg { width: 9px; height: 9px; }
+
+  .pv-section { padding: 0 14px 14px; }
+  .pv-section-h { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--cream-500); letter-spacing: 0.06em; margin-bottom: 6px; }
+  .pv-bio { font-size: 12px; color: var(--cream-700); line-height: 1.5; }
+  .pv-zone-tag { display: inline-flex; padding: 3px 8px; background: var(--green-50); border-radius: 100px; font-size: 10px; color: var(--green-700); font-weight: 500; margin: 2px 2px 0 0; }
+
+  .pv-reviews { background: var(--cream-100); padding: 12px 14px; }
+  .pv-review { background: white; border-radius: 10px; padding: 10px; margin-bottom: 6px; }
+  .pv-review-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .pv-review-av { width: 20px; height: 20px; border-radius: 50%; background: var(--earth-100); display: grid; place-items: center; font-size: 9px; font-weight: 700; color: var(--earth-800); }
+  .pv-review-name { font-size: 11px; font-weight: 600; color: var(--cream-950); }
+  .pv-review-stars { margin-left: auto; display: flex; gap: 1px; }
+  .pv-review-stars svg { width: 8px; height: 8px; color: var(--gold); fill: var(--gold); }
+  .pv-review-text { font-size: 10px; color: var(--cream-700); line-height: 1.4; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(250,247,242,0.97); backdrop-filter: blur(12px); border-top: 1px solid var(--cream-200); padding: 8px 12px 12px; display: flex; justify-content: space-around; z-index: 100; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--cream-500); font-size: 10px; font-weight: 500; padding: 6px 10px; border-radius: 10px; flex: 1; }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-item.active { color: var(--green-700); font-weight: 600; }
+
+  @media (min-width: 720px) { .bottom-nav { display: none; } body { padding-bottom: 0; } }
+  @media (max-width: 719px) { .desktop-nav { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · ESPACE RAMENEUR</span>
+    <a href="rm-03-accueil.html" class="demo-nav-link">Accueil</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">RM-11 Profil public</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="rm-12-pause.html" class="demo-nav-link">RM-12 Pause</a>
+  </div>
+</div>
+
+<header class="header">
+  <a href="#" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+  <nav class="desktop-nav">
+    <a href="rm-03-accueil.html" class="nav-link">Accueil</a>
+    <a href="rm-05-liste-opportunites.html" class="nav-link">Opportunités</a>
+    <a href="rm-07-mes-missions.html" class="nav-link">Missions</a>
+    <a href="rm-10-historique-revenus.html" class="nav-link">Revenus</a>
+    <a href="#" class="nav-link active">Profil</a>
+  </nav>
+  <div class="avatar-btn">T</div>
+</header>
+
+<main class="page">
+
+  <div class="page-head">
+    <div>
+      <h1 class="page-h1">Profil public</h1>
+      <p class="page-sub">Ce que les producteurs et acheteurs voient avant de vous confier une mission</p>
+    </div>
+    <button class="save-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Enregistrer
+    </button>
+  </div>
+
+  <div class="layout">
+
+    <!-- Edit -->
+    <div>
+
+      <section class="form-card">
+        <div class="form-card-title">Identité affichée</div>
+        <p class="form-card-sub">Conformément à notre politique de minimisation, seul le prénom + initiale du nom est affiché publiquement.</p>
+
+        <div class="field">
+          <div class="field-label">Prénom + initiale</div>
+          <input class="field-input" value="Thomas M.">
+        </div>
+
+        <div class="field">
+          <div class="field-label">Bio courte (optionnelle)</div>
+          <textarea class="field-textarea" maxlength="200">Navetteur Rouen-Paris 3 fois par semaine. Toujours dispo pour rendre service, et fan de produits locaux !</textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Photo</div>
+          <div style="display:flex; gap:14px; align-items:center; padding:12px; background:var(--cream-50); border:1.5px dashed var(--cream-300); border-radius:12px;">
+            <div style="width:56px; height:56px; border-radius:50%; background:var(--green-100); color:var(--green-800); display:grid; place-items:center; font-size:24px; font-weight:700; font-family:'Lora', serif;">T</div>
+            <div style="flex:1;">
+              <div style="font-size:13px; font-weight:600;">Photo de profil</div>
+              <div style="font-size:11px; color:var(--cream-600);">Recommandée — instaure la confiance avec les producteurs</div>
+            </div>
+            <button style="font-size:12px; padding:6px 10px; background:white; border:1px solid var(--cream-300); border-radius:100px; cursor:pointer;">Ajouter</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="form-card-title">Statistiques de réputation</div>
+        <p class="form-card-sub">Calculées automatiquement. Non éditables — c'est ce qui fait votre crédibilité.</p>
+
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-label">Note moyenne</div>
+            <div class="stat-val">4,8 <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            <div class="stat-meta">Sur 24 évaluations</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Missions livrées</div>
+            <div class="stat-val">17</div>
+            <div class="stat-meta">+3 ce mois-ci</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Taux de complétion</div>
+            <div class="stat-val">94%</div>
+            <div class="stat-meta">Cible &gt; 90%</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Ancienneté</div>
+            <div class="stat-val">7 mois</div>
+            <div class="stat-meta">Depuis octobre 2025</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="form-card-title">Véhicule & capacité</div>
+        <p class="form-card-sub">Information qualitative — détermine les missions que vous pouvez prendre.</p>
+
+        <div class="veh-row">
+          <div class="veh-opt"><div class="veh-opt-icon">🎒</div><div class="veh-opt-label">Sac</div><div class="veh-opt-meta">≤ 3 kg</div></div>
+          <div class="veh-opt selected"><div class="veh-opt-icon">🚗</div><div class="veh-opt-label">Coffre</div><div class="veh-opt-meta">≤ 15 kg</div></div>
+          <div class="veh-opt"><div class="veh-opt-icon">🚐</div><div class="veh-opt-label">Break / utilitaire</div><div class="veh-opt-meta">≤ 40 kg</div></div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="form-card-title">Zones que je couvre régulièrement</div>
+        <p class="form-card-sub">Indication aux producteurs de votre rayon habituel.</p>
+
+        <div class="zones-row">
+          <span class="zone-tag">Rouen ↔ Paris <button>×</button></span>
+          <span class="zone-tag">Évreux ↔ Paris <button>×</button></span>
+          <span class="zone-tag">Le Havre ↔ Rouen <button>×</button></span>
+          <button class="zone-add">+ Ajouter une zone</button>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="form-card-title">Vérifications</div>
+        <p class="form-card-sub">Badges visibles sur votre profil public.</p>
+
+        <div class="verif-row">
+          <div class="verif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div style="flex:1;">
+            <div class="verif-name">Identité Stripe Identity</div>
+            <div class="verif-meta">Vérifiée le 12/10/2025 · CNI valide</div>
+          </div>
+        </div>
+        <div class="verif-row">
+          <div class="verif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div style="flex:1;">
+            <div class="verif-name">Compte Stripe Connect</div>
+            <div class="verif-meta">IBAN FR76 •••• 5544 · KYC complet</div>
+          </div>
+        </div>
+        <div class="verif-row">
+          <div class="verif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div style="flex:1;">
+            <div class="verif-name">Email vérifié</div>
+            <div class="verif-meta">thomas.martel@gmail.com</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-col">
+      <div class="preview-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Aperçu vue producteur / acheteur
+      </div>
+      <div class="preview-frame">
+        <div class="preview-inner">
+
+          <div class="pv-hero">
+            <div class="pv-av">T</div>
+            <div class="pv-name">Thomas M.</div>
+            <div class="pv-since">Rameneur depuis octobre 2025</div>
+            <div class="pv-rating-row">
+              <span><svg class="star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>4,8</span>
+              <span>17 missions</span>
+              <span>94% complétion</span>
+            </div>
+          </div>
+
+          <div class="pv-card">
+            <div class="pv-verifs">
+              <span class="pv-verif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Identité</span>
+              <span class="pv-verif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>IBAN</span>
+              <span class="pv-verif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Email</span>
+            </div>
+          </div>
+
+          <div class="pv-section">
+            <div class="pv-section-h">Bio</div>
+            <p class="pv-bio">Navetteur Rouen-Paris 3 fois par semaine. Toujours dispo pour rendre service, et fan de produits locaux !</p>
+          </div>
+
+          <div class="pv-section">
+            <div class="pv-section-h">Véhicule</div>
+            <span class="pv-zone-tag">🚗 Coffre · ≤ 15 kg</span>
+          </div>
+
+          <div class="pv-section">
+            <div class="pv-section-h">Zones couvertes</div>
+            <span class="pv-zone-tag">Rouen ↔ Paris</span>
+            <span class="pv-zone-tag">Évreux ↔ Paris</span>
+            <span class="pv-zone-tag">Le Havre ↔ Rouen</span>
+          </div>
+
+          <div class="pv-reviews">
+            <div class="pv-section-h" style="margin-bottom:6px;">Avis récents</div>
+            <div class="pv-review">
+              <div class="pv-review-head">
+                <div class="pv-review-av">M</div>
+                <span class="pv-review-name">Marie · acheteuse</span>
+                <span class="pv-review-stars">
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </span>
+              </div>
+              <p class="pv-review-text">Très ponctuel et sympa. Le miel était impeccable.</p>
+            </div>
+            <div class="pv-review">
+              <div class="pv-review-head">
+                <div class="pv-review-av" style="background:var(--green-100); color:var(--green-800);">P</div>
+                <span class="pv-review-name">Pierre · producteur</span>
+                <span class="pv-review-stars">
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </span>
+              </div>
+              <p class="pv-review-text">Pickup nickel, mec sympa. Reviendra avec plaisir.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<nav class="bottom-nav">
+  <a href="rm-03-accueil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Accueil</a>
+  <a href="rm-05-liste-opportunites.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Opportunités</a>
+  <a href="rm-07-mes-missions.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Missions</a>
+  <a href="#" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/></svg>Profil</a>
+</nav>
+
+</body>
+</html>

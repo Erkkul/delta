@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — PR-09 Paramètres compte producteur
+  Ticket(s) Jira : KAN-17 (Informations profil & ferme)
+
+  Sections : Compte (email, mdp) · Stripe Connect (IBAN, KYC) · SIRET · Notifications ·
+  Multi-rôle (devenir rameneur/acheteur) · RGPD (export, suppression).
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PR-09 · Paramètres — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --rose: #C75B5B; --rose-bg: #FDEDEC;
+    --stripe-purple: #635BFF; --gold: #D4A017;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  .app { display: flex; min-height: calc(100vh - 36px); }
+
+  .sb { width: 240px; flex-shrink: 0; background: white; border-right: 1px solid var(--cream-200); padding: 18px 14px; display: flex; flex-direction: column; position: sticky; top: 0; align-self: flex-start; height: calc(100vh - 36px); }
+  .sb-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 6px 10px 18px; border-bottom: 1px solid var(--cream-100); margin-bottom: 14px; }
+  .sb-logo-icon { width: 36px; height: 36px; background: var(--green-800); border-radius: 10px; display: grid; place-items: center; font-size: 18px; }
+  .sb-logo-text { font-family: 'Lora', serif; font-size: 18px; font-weight: 700; color: var(--green-800); }
+  .sb-logo-dot { color: var(--earth-500); }
+  .sb-logo-role { font-size: 10px; color: var(--cream-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-top: 1px; }
+  .sb-section { font-size: 10px; font-weight: 700; color: var(--cream-500); text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 12px 8px; }
+  .sb-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--cream-700); text-decoration: none; }
+  .sb-link:hover { background: var(--green-50); color: var(--green-700); }
+  .sb-link.active { background: var(--green-100); color: var(--green-800); font-weight: 600; }
+  .sb-link svg { width: 16px; height: 16px; }
+  .sb-link .badge { margin-left: auto; background: var(--rose); color: white; font-size: 9px; padding: 2px 6px; border-radius: 100px; font-weight: 700; }
+  .sb-user { margin-top: auto; padding: 12px; background: var(--green-50); border-radius: 12px; display: flex; align-items: center; gap: 10px; }
+  .sb-user-av { width: 36px; height: 36px; border-radius: 50%; background: var(--earth-100); display: grid; place-items: center; font-size: 16px; }
+  .sb-user-name { font-size: 13px; font-weight: 600; color: var(--green-900); }
+  .sb-user-status { font-size: 11px; color: var(--cream-600); margin-top: 1px; }
+
+  .main { flex: 1; padding: 26px 32px 40px; max-width: 880px; }
+  .main-h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; margin-bottom: 4px; }
+  .main-sub { font-size: 13px; color: var(--cream-600); margin-bottom: 26px; }
+
+  .settings-section { margin-bottom: 22px; }
+  .settings-h { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cream-500); margin-bottom: 10px; padding-left: 4px; }
+  .settings-card { background: white; border: 1px solid var(--cream-200); border-radius: 14px; overflow: hidden; }
+
+  .row { padding: 14px 18px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--cream-100); }
+  .row:last-child { border-bottom: none; }
+  .row-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--green-50); color: var(--green-700); display: grid; place-items: center; flex-shrink: 0; }
+  .row-icon.stripe { background: rgba(99,91,255,0.1); color: var(--stripe-purple); }
+  .row-icon.warn { background: var(--rose-bg); color: var(--rose); }
+  .row-icon.earth { background: var(--earth-100); color: var(--earth-800); }
+  .row-icon svg { width: 18px; height: 18px; }
+  .row-content { flex: 1; min-width: 0; }
+  .row-title { font-size: 14px; font-weight: 600; color: var(--cream-950); line-height: 1.3; display: flex; align-items: center; gap: 8px; }
+  .row-tag { font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .row-tag.ok { background: var(--green-100); color: var(--green-700); }
+  .row-tag.pending { background: var(--earth-100); color: var(--earth-800); }
+  .row-sub { font-size: 12px; color: var(--cream-600); margin-top: 2px; }
+  .row-action { font-size: 13px; font-weight: 500; color: var(--green-700); display: flex; align-items: center; gap: 4px; flex-shrink: 0; cursor: pointer; padding: 6px 10px; border-radius: 8px; }
+  .row-action:hover { background: var(--green-50); }
+  .row-action svg { width: 14px; height: 14px; }
+  .row-toggle { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+  .row-toggle input { opacity: 0; width: 0; height: 0; }
+  .row-toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--cream-300); border-radius: 24px; transition: .2s; }
+  .row-toggle-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; }
+  .row-toggle input:checked + .row-toggle-slider { background: var(--green-600); }
+  .row-toggle input:checked + .row-toggle-slider::before { transform: translateX(18px); }
+
+  /* Multi-role upsell */
+  .upsell { background: linear-gradient(135deg, var(--earth-500), var(--earth-800)); color: white; border-radius: 14px; padding: 18px; margin-bottom: 22px; position: relative; overflow: hidden; }
+  .upsell::before { content: '🚐'; position: absolute; right: -10px; bottom: -16px; font-size: 90px; opacity: 0.18; transform: rotate(-8deg); }
+  .upsell-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--earth-200); margin-bottom: 4px; }
+  .upsell-title { font-family: 'Lora', serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; line-height: 1.3; }
+  .upsell-text { font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.5; margin-bottom: 10px; }
+  .upsell-cta { display: inline-flex; align-items: center; gap: 6px; background: white; color: var(--earth-800); font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 100px; text-decoration: none; position: relative; }
+
+  /* Danger */
+  .danger-zone { padding: 18px; }
+  .danger-btn { background: var(--rose-bg); color: var(--rose); border: 1px solid var(--rose); border-radius: 10px; padding: 12px 14px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; }
+  .danger-btn:hover { background: var(--rose); color: white; }
+  .danger-btn svg { width: 14px; height: 14px; }
+
+  @media (max-width: 880px) {
+    .sb { display: none; }
+    .main { padding: 22px 18px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · ESPACE PRODUCTEUR</span>
+    <a href="pr-03-dashboard.html" class="demo-nav-link">Dashboard</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">PR-09 Paramètres</a>
+  </div>
+</div>
+
+<div class="app">
+
+  <aside class="sb">
+    <a href="pr-03-dashboard.html" class="sb-logo">
+      <div class="sb-logo-icon">🐜</div>
+      <div>
+        <div class="sb-logo-text">Delta<span class="sb-logo-dot">.</span></div>
+        <span class="sb-logo-role">Producteur</span>
+      </div>
+    </a>
+    <div class="sb-section">Activité</div>
+    <a href="pr-03-dashboard.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/></svg>Tableau de bord</a>
+    <a href="pr-06-recuperation.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="7" r="4"/></svg>Récupérations<span class="badge">3</span></a>
+    <div class="sb-section">Catalogue</div>
+    <a href="pr-04-catalogue.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4 8 4 8-4z"/></svg>Mes produits</a>
+    <div class="sb-section">Finances</div>
+    <a href="pr-07-historique-ventes.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/></svg>Ventes & virements</a>
+    <div class="sb-section">Profil</div>
+    <a href="pr-08-profil-public.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Profil public</a>
+    <a href="#" class="sb-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Paramètres</a>
+    <div class="sb-user"><div class="sb-user-av">🌻</div><div><div class="sb-user-name">EARL Dubois</div><div class="sb-user-status">Stripe Connect actif</div></div></div>
+  </aside>
+
+  <main class="main">
+
+    <h1 class="main-h1">Paramètres compte</h1>
+    <p class="main-sub">Compte, paiement, vérifications et conformité</p>
+
+    <!-- Compte -->
+    <section class="settings-section">
+      <div class="settings-h">Compte</div>
+      <div class="settings-card">
+        <div class="row">
+          <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">Email <span class="row-tag ok">Vérifié</span></div>
+            <div class="row-sub">marie.dubois@ferme-bocage.fr</div>
+          </div>
+          <button class="row-action">Modifier <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="row">
+          <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">Mot de passe</div>
+            <div class="row-sub">Modifié il y a 2 mois · 10 caractères min, 1 maj. 1 chiffre</div>
+          </div>
+          <button class="row-action">Modifier <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="row">
+          <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">Mettre la boutique en pause</div>
+            <div class="row-sub">Vacances, maladie — vos produits ne sont plus visibles</div>
+          </div>
+          <label class="row-toggle"><input type="checkbox"><span class="row-toggle-slider"></span></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vérifications -->
+    <section class="settings-section">
+      <div class="settings-h">Vérifications</div>
+      <div class="settings-card">
+        <div class="row">
+          <div class="row-icon stripe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">Compte Stripe Connect <span class="row-tag ok">Actif</span></div>
+            <div class="row-sub">KYC validé · IBAN FR76 •••• 2891 · virements quotidiens</div>
+          </div>
+          <button class="row-action">Gérer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="row">
+          <div class="row-icon earth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">SIRET <span class="row-tag pending">En vérification</span></div>
+            <div class="row-sub">789 456 123 00012 · soumis il y a 18h (≤ 48h)</div>
+          </div>
+          <button class="row-action">Voir l'état <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Multi-rôle -->
+    <div class="upsell">
+      <div class="upsell-eyebrow">Multi-rôle</div>
+      <div class="upsell-title">Activez votre compte acheteur ou rameneur</div>
+      <div class="upsell-text">Avec le même compte. En rameneur, vous pouvez rentabiliser vos déplacements en livrant des produits d'autres producteurs.</div>
+      <a href="#" class="upsell-cta">
+        Voir les options
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <!-- Notifications -->
+    <section class="settings-section">
+      <div class="settings-h">Notifications</div>
+      <div class="settings-card">
+        <div class="row">
+          <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">Réservation rameneur</div>
+            <div class="row-sub">Push + email à chaque nouvelle mission</div>
+          </div>
+          <label class="row-toggle"><input type="checkbox" checked><span class="row-toggle-slider"></span></label>
+        </div>
+        <div class="row">
+          <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">Alerte stock bas</div>
+            <div class="row-sub">Notifier quand un produit ≤ 3 unités</div>
+          </div>
+          <label class="row-toggle"><input type="checkbox" checked><span class="row-toggle-slider"></span></label>
+        </div>
+        <div class="row">
+          <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">Nouvelle évaluation</div>
+            <div class="row-sub">Email quand un acheteur ou rameneur vous note</div>
+          </div>
+          <label class="row-toggle"><input type="checkbox" checked><span class="row-toggle-slider"></span></label>
+        </div>
+        <div class="row">
+          <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">Récap hebdomadaire</div>
+            <div class="row-sub">Lundi matin : ventes de la semaine, KPIs</div>
+          </div>
+          <label class="row-toggle"><input type="checkbox"><span class="row-toggle-slider"></span></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- RGPD -->
+    <section class="settings-section">
+      <div class="settings-h">Données & RGPD</div>
+      <div class="settings-card">
+        <div class="row">
+          <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">Exporter mes données</div>
+            <div class="row-sub">Profil, produits, ventes, conversations (JSON + CSV)</div>
+          </div>
+          <button class="row-action">Demander <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="row">
+          <div class="row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+          <div class="row-content">
+            <div class="row-title">CGU · CGV · Mentions légales</div>
+            <div class="row-sub">Version acquittée le 04/04/2026</div>
+          </div>
+          <button class="row-action">Lire <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="danger-zone">
+          <button class="danger-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14H7L5 6"/></svg>
+            Supprimer mon compte producteur
+          </button>
+          <p style="font-size:11px; color:var(--cream-500); text-align:center; margin-top:10px; line-height:1.5;">Anonymisation sous 30 jours. Transactions et factures conservées 5 ans (obligation légale). Missions en cours doivent être terminées avant la suppression.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — PR-02 Onboarding Stripe Connect
+  Ticket(s) Jira : KAN-16 (Onboarding Stripe Connect), KAN-62
+
+  Onboarding producteur après PR-01 :
+  1) Infos profil (nom ferme, photo, description, zone)  → KAN-17
+  2) SIRET (vérification asynchrone — produits restent invisibles tant que non validé)
+  3) Stripe Connect (KYC + IBAN) → KAN-62
+  4) Atterrissage PR-03 dashboard
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PR-02 · Onboarding producteur — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-100: #F7E8D6; --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --stripe-purple: #635BFF; --gold: #D4A017;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); min-height: 100vh; }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  /* Two-column layout (left timeline + right form) on desktop */
+  .layout { max-width: 1100px; margin: 0 auto; display: grid; min-height: calc(100vh - 36px); }
+  @media (min-width: 920px) {
+    .layout { grid-template-columns: 320px 1fr; }
+  }
+
+  /* Left timeline */
+  .timeline {
+    background: linear-gradient(180deg, var(--green-800), var(--green-900));
+    color: white; padding: 30px 24px; position: sticky; top: 0; align-self: flex-start;
+  }
+  .tl-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; text-decoration: none; }
+  .tl-logo-icon { width: 36px; height: 36px; background: rgba(255,255,255,0.12); border-radius: 10px; display: grid; place-items: center; font-size: 18px; }
+  .tl-logo-text { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; }
+  .tl-logo-role { font-size: 10px; color: var(--green-200); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .tl-h1 { font-family: 'Lora', serif; font-size: 24px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .tl-sub { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.55; margin-bottom: 32px; }
+
+  .tl-steps { display: flex; flex-direction: column; gap: 4px; }
+  .tl-step { padding: 14px 16px; border-radius: 12px; display: flex; gap: 12px; align-items: center; transition: all 200ms; }
+  .tl-step.done { color: rgba(255,255,255,0.7); }
+  .tl-step.current { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); }
+  .tl-step.pending { color: rgba(255,255,255,0.4); }
+  .tl-step-num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .tl-step.done .tl-step-num { background: var(--green-500); color: white; }
+  .tl-step.current .tl-step-num { background: white; color: var(--green-800); }
+  .tl-step.pending .tl-step-num { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); }
+  .tl-step-title { font-size: 14px; font-weight: 600; line-height: 1.3; }
+  .tl-step-meta { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+  /* Right form */
+  .form-shell { padding: 36px 30px 60px; max-width: 640px; }
+  .form-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green-700); margin-bottom: 6px; }
+  .form-h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; margin-bottom: 8px; line-height: 1.2; }
+  .form-sub { font-size: 14px; color: var(--cream-600); line-height: 1.55; margin-bottom: 28px; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--cream-700); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 14px 16px; background: var(--cream-50);
+    border: 1.5px solid var(--cream-300); border-radius: 12px;
+    font-size: 14px; font-family: inherit; color: var(--cream-950);
+  }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(53,127,67,0.10); }
+  .field textarea { resize: vertical; min-height: 88px; line-height: 1.5; }
+  .field-help { font-size: 12px; color: var(--cream-600); margin-top: 6px; display: flex; gap: 6px; align-items: flex-start; line-height: 1.5; }
+  .field-help svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 2px; color: var(--green-700); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* SIRET verification status */
+  .siret-status {
+    background: var(--earth-50); border: 1px solid var(--earth-200); border-radius: 12px;
+    padding: 12px 14px; display: flex; gap: 10px; align-items: center; margin-bottom: 18px;
+  }
+  .siret-status-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--earth-100); display: grid; place-items: center; color: var(--earth-800); flex-shrink: 0; }
+  .siret-status-icon svg { width: 16px; height: 16px; }
+  .siret-status-text { font-size: 13px; color: var(--cream-700); line-height: 1.5; }
+  .siret-status-text strong { color: var(--earth-800); font-weight: 700; }
+
+  /* Stripe card */
+  .stripe-card {
+    background: white; border: 2px solid var(--cream-200); border-radius: 18px;
+    padding: 22px; margin-bottom: 22px; position: relative; overflow: hidden;
+  }
+  .stripe-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .stripe-logo { width: 48px; height: 48px; background: var(--stripe-purple); color: white; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 20px; font-family: 'DM Sans'; box-shadow: 0 4px 12px rgba(99,91,255,0.3); }
+  .stripe-card-title { font-family: 'Lora', serif; font-size: 18px; font-weight: 700; color: var(--green-900); }
+  .stripe-card-sub { font-size: 12px; color: var(--cream-600); margin-top: 2px; }
+  .stripe-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .stripe-feat { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--cream-700); line-height: 1.5; }
+  .stripe-feat svg { width: 16px; height: 16px; color: var(--green-600); flex-shrink: 0; margin-top: 2px; }
+
+  .cta-row { display: flex; gap: 10px; align-items: center; margin-top: 22px; }
+  .btn-back { background: transparent; border: none; color: var(--cream-600); font-size: 14px; font-weight: 500; cursor: pointer; padding: 12px 8px; }
+  .btn-primary {
+    flex: 1; padding: 14px 22px; border: none; cursor: pointer;
+    background: var(--green-600); color: white;
+    border-radius: 100px; font-size: 15px; font-weight: 600; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 3px 10px rgba(53,127,67,0.25); text-decoration: none;
+  }
+  .btn-primary:hover { background: var(--green-700); }
+  .btn-primary svg { width: 16px; height: 16px; }
+  .btn-stripe { background: var(--stripe-purple); }
+  .btn-stripe:hover { background: #4F47CC; }
+
+  .photo-up { display: flex; gap: 14px; align-items: center; padding: 14px; background: var(--cream-50); border: 1.5px dashed var(--cream-300); border-radius: 12px; cursor: pointer; }
+  .photo-up:hover { border-color: var(--green-600); background: var(--green-50); }
+  .photo-up-preview { width: 56px; height: 56px; border-radius: 50%; background: var(--earth-100); display: grid; place-items: center; font-size: 26px; flex-shrink: 0; }
+  .photo-up-text { flex: 1; }
+  .photo-up-title { font-size: 13px; font-weight: 600; color: var(--cream-950); }
+  .photo-up-meta { font-size: 11px; color: var(--cream-600); margin-top: 2px; }
+
+  /* Mobile : timeline becomes top bar */
+  @media (max-width: 919px) {
+    .timeline { padding: 18px 20px; position: relative; }
+    .tl-h1 { font-size: 20px; margin-bottom: 4px; }
+    .tl-sub { display: none; }
+    .tl-steps { flex-direction: row; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .tl-steps::-webkit-scrollbar { display: none; }
+    .tl-step { flex-shrink: 0; padding: 8px 12px; }
+    .tl-step-title { font-size: 12px; }
+    .tl-step-meta { display: none; }
+    .form-shell { padding: 28px 22px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · ONBOARDING PRODUCTEUR</span>
+    <a href="pr-01-authentication.html" class="demo-nav-link">PR-01 Inscription</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">PR-02 Onboarding</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="pr-03-dashboard.html" class="demo-nav-link">PR-03 Dashboard</a>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- Timeline -->
+  <aside class="timeline">
+    <a href="#" class="tl-logo">
+      <div class="tl-logo-icon">🐜</div>
+      <div>
+        <div class="tl-logo-text">Delta</div>
+        <div class="tl-logo-role">Espace producteur</div>
+      </div>
+    </a>
+    <div class="tl-h1">Bienvenue, Marie</div>
+    <p class="tl-sub">3 étapes pour activer votre ferme. Vous pourrez créer vos produits dès l'étape 2 — ils deviendront visibles dès la validation SIRET.</p>
+
+    <div class="tl-steps">
+      <div class="tl-step done">
+        <div class="tl-step-num"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="tl-step-title">Profil de la ferme</div>
+          <div class="tl-step-meta">Nom, photo, description</div>
+        </div>
+      </div>
+      <div class="tl-step current">
+        <div class="tl-step-num">2</div>
+        <div>
+          <div class="tl-step-title">Vérification SIRET</div>
+          <div class="tl-step-meta">Vérification asynchrone</div>
+        </div>
+      </div>
+      <div class="tl-step pending">
+        <div class="tl-step-num">3</div>
+        <div>
+          <div class="tl-step-title">Compte Stripe Connect</div>
+          <div class="tl-step-meta">KYC + IBAN pour être payée</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Form -->
+  <main class="form-shell">
+
+    <div class="form-eyebrow">Étape 2 sur 3</div>
+    <h1 class="form-h1">Vérification SIRET</h1>
+    <p class="form-sub">Renseignez votre numéro de SIRET. La vérification est asynchrone — vous pouvez continuer à configurer votre catalogue pendant ce temps, mais vos produits resteront invisibles aux acheteurs jusqu'à validation (≤ 48h).</p>
+
+    <div class="siret-status">
+      <div class="siret-status-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="siret-status-text">
+        <strong>Vérification asynchrone</strong> — Vos produits seront publiables mais cachés du catalogue acheteur tant que le SIRET n'est pas validé.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Numéro SIRET (14 chiffres)</label>
+      <input type="text" value="789 456 123 00012" inputmode="numeric" maxlength="17">
+      <div class="field-help">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Le SIRET est vérifié en cohérence avec la dénomination de votre ferme via la base INSEE.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Raison sociale (telle que déclarée)</label>
+      <input type="text" value="EARL Marie Dubois — Maraîchage du Bocage">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Forme juridique</label>
+        <select>
+          <option>EARL</option><option>SCEA</option><option>SARL</option><option>Auto-entrepreneur</option><option>SAS</option><option>GAEC</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Activité principale (NAF)</label>
+        <input type="text" value="01.13Z · Culture de légumes">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Photo de la ferme (optionnel)</label>
+      <div class="photo-up">
+        <div class="photo-up-preview">🌻</div>
+        <div class="photo-up-text">
+          <div class="photo-up-title">Téléverser une photo de votre ferme</div>
+          <div class="photo-up-meta">JPG ou PNG · max 5 Mo · format 4:3 recommandé</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stripe Connect anchor -->
+    <h2 style="font-family:'Lora', serif; font-size:18px; font-weight:700; color:var(--green-900); margin:32px 0 12px;">Suivant : compte bancaire Stripe</h2>
+
+    <div class="stripe-card">
+      <div class="stripe-card-head">
+        <div class="stripe-logo">S</div>
+        <div>
+          <div class="stripe-card-title">Recevoir vos paiements via Stripe Connect</div>
+          <div class="stripe-card-sub">Compte bancaire vérifié, sans frais cachés</div>
+        </div>
+      </div>
+
+      <div class="stripe-features">
+        <div class="stripe-feat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span><strong>85% du montant</strong> versé après chaque mission livrée (capture automatique au scan QR delivery).</span>
+        </div>
+        <div class="stripe-feat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>KYC léger (pièce d'identité) + IBAN — vérification en ≤ 24h pour la France.</span>
+        </div>
+        <div class="stripe-feat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Virements automatiques sur votre IBAN à fréquence quotidienne, hebdo ou mensuelle (au choix).</span>
+        </div>
+      </div>
+
+      <a href="pr-03-dashboard.html" class="btn-primary btn-stripe">
+        <span style="background:white;color:var(--stripe-purple);font-weight:800;width:22px;height:22px;border-radius:5px;display:grid;place-items:center;font-size:13px;">S</span>
+        Configurer Stripe Connect
+      </a>
+      <div class="field-help" style="margin-top:10px; justify-content:center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Redirection sécurisée vers Stripe · vous reviendrez ensuite sur Delta
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <button class="btn-back">← Étape précédente</button>
+      <a href="pr-03-dashboard.html" class="btn-primary">
+        Valider & continuer
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>

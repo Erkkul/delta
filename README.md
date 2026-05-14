@@ -44,7 +44,7 @@ Delta/
 1. `PRD.md` — la vision et le périmètre fonctionnel
 2. `PRD.md` §10 — la carte des écrans (sitemap)
 3. `PRD.md` §11 — le cycle de vie d'une mission
-4. `design/maquettes/rameneur/` — ouvrir les fichiers HTML pour voir le parcours
+4. `design/maquettes/index.html` — index navigable de toutes les maquettes (35 écrans, 3 parcours)
 5. `produit/decisions/decisions_produit.md` — historique des arbitrages produit
 
 **Pour démarrer le développement (dev humain ou agent) :**

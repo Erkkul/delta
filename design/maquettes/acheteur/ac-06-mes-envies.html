@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — AC-06 Mes envies (wishlist privée)
+  Ticket(s) Jira : KAN-30 (Wishlist privée)
+
+  Statuts d'envie (PRD §12) :
+    - pending      → En attente d'un rameneur (aucun trajet compatible)
+    - matchable    → Match probable cette semaine
+    - matched      → Confirmation requise (lien vers AC-07)
+    - confirmed    → Passé en AC-08
+  Plafond 20 envies actives (D5).
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC-06 · Mes envies — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-100: #F7E8D6;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --rose: #C75B5B;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); padding-bottom: 80px; }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  .header { background: rgba(250,247,242,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cream-200); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-icon { width: 32px; height: 32px; background: var(--green-800); border-radius: 9px; display: grid; place-items: center; font-size: 16px; }
+  .logo-text { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; color: var(--green-800); }
+  .logo-dot { color: var(--earth-500); }
+  .desktop-nav { display: flex; gap: 4px; }
+  .nav-link { font-size: 14px; font-weight: 500; color: var(--cream-700); text-decoration: none; padding: 6px 12px; border-radius: 8px; }
+  .nav-link.active { color: var(--green-700); font-weight: 600; background: var(--green-50); }
+  .header-actions { display: flex; gap: 6px; align-items: center; }
+  .icon-btn { width: 38px; height: 38px; border-radius: 10px; background: transparent; border: none; color: var(--cream-700); display: grid; place-items: center; cursor: pointer; }
+  .icon-btn svg { width: 20px; height: 20px; }
+  .avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--green-100); border: 2px solid var(--green-200); display: grid; place-items: center; font-size: 14px; font-weight: 600; color: var(--green-800); }
+
+  .page { max-width: 760px; margin: 0 auto; padding: 22px 22px 40px; }
+  .page-h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; }
+  .page-sub { font-size: 14px; color: var(--cream-600); margin-top: 4px; margin-bottom: 18px; }
+
+  .counter-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: white; border: 1px solid var(--cream-200); border-radius: 12px; margin-bottom: 18px; }
+  .counter-progress { flex: 1; height: 8px; background: var(--cream-100); border-radius: 100px; overflow: hidden; }
+  .counter-bar { height: 100%; width: 25%; background: linear-gradient(90deg, var(--green-500), var(--green-700)); border-radius: 100px; }
+  .counter-text { font-size: 13px; color: var(--cream-700); font-weight: 500; }
+  .counter-text strong { color: var(--cream-950); font-weight: 700; }
+
+  .tabs-row { display: flex; gap: 6px; margin-bottom: 18px; overflow-x: auto; scrollbar-width: none; }
+  .tabs-row::-webkit-scrollbar { display: none; }
+  .tab { padding: 8px 14px; background: white; border: 1px solid var(--cream-300); border-radius: 100px; font-size: 13px; font-weight: 500; color: var(--cream-700); cursor: pointer; white-space: nowrap; }
+  .tab.active { background: var(--green-700); color: white; border-color: var(--green-700); }
+  .tab-count { opacity: 0.7; margin-left: 4px; font-weight: 400; }
+
+  .wish-section { margin-bottom: 26px; }
+  .wish-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cream-500); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .wish-section-title .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .wish-section-title .dot.urgent { background: var(--rose); }
+  .wish-section-title .dot.match { background: var(--earth-500); }
+  .wish-section-title .dot.pending { background: var(--cream-400); }
+
+  .wish-list { display: flex; flex-direction: column; gap: 10px; }
+  .wish-card {
+    background: white; border: 1px solid var(--cream-200); border-radius: 14px;
+    padding: 14px; display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: all 150ms; position: relative;
+  }
+  .wish-card:hover { border-color: var(--green-300, #8FCB9C); box-shadow: 0 4px 14px rgba(53,127,67,0.06); }
+  .wish-card.matched { border-color: var(--green-600); background: linear-gradient(to right, var(--green-50), white 50%); }
+  .wish-card.matched::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--green-600); border-radius: 14px 0 0 14px;
+  }
+  .wish-img { width: 60px; height: 60px; border-radius: 12px; display: grid; place-items: center; font-size: 30px; flex-shrink: 0; }
+  .wish-img.miel { background: linear-gradient(135deg, #F5C842, #D4901A); }
+  .wish-img.fromage { background: linear-gradient(135deg, #F7E8D6, #D4A063); }
+  .wish-img.farine { background: linear-gradient(135deg, #EFE4D2, #C7A87A); }
+  .wish-img.tomate { background: linear-gradient(135deg, #E55B4F, #A03028); }
+  .wish-img.oeufs { background: linear-gradient(135deg, #F5E6CB, #C9A471); }
+  .wish-content { flex: 1; min-width: 0; }
+  .wish-name { font-family: 'Lora', serif; font-size: 15px; font-weight: 700; color: var(--cream-950); line-height: 1.3; }
+  .wish-producer { font-size: 12px; color: var(--cream-600); margin-top: 2px; }
+  .wish-meta { font-size: 11px; color: var(--cream-500); margin-top: 4px; }
+  .wish-status { flex-shrink: 0; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .status-pill { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 100px; display: inline-flex; align-items: center; gap: 5px; line-height: 1; white-space: nowrap; }
+  .status-pill.pending { background: var(--cream-100); color: var(--cream-700); }
+  .status-pill.matchable { background: var(--earth-100); color: var(--earth-800); }
+  .status-pill.matched { background: var(--green-600); color: white; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+  .status-cta {
+    font-size: 11px; font-weight: 600; color: var(--green-700);
+    display: flex; align-items: center; gap: 3px;
+  }
+  .status-cta svg { width: 11px; height: 11px; }
+  .wish-actions { display: flex; gap: 6px; align-items: center; }
+  .wish-rm-btn { background: transparent; border: none; color: var(--cream-500); cursor: pointer; padding: 4px; }
+  .wish-rm-btn:hover { color: var(--rose); }
+  .wish-rm-btn svg { width: 16px; height: 16px; }
+
+  .empty-cta {
+    background: linear-gradient(135deg, var(--green-700), var(--green-900));
+    color: white; padding: 22px; border-radius: 18px; margin-top: 26px;
+    position: relative; overflow: hidden;
+  }
+  .empty-cta::before { content: '🛒'; position: absolute; right: -10px; bottom: -16px; font-size: 110px; opacity: 0.14; }
+  .empty-cta-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-200); margin-bottom: 6px; position: relative; }
+  .empty-cta-title { font-family: 'Lora', serif; font-size: 18px; font-weight: 700; margin-bottom: 6px; position: relative; }
+  .empty-cta-text { font-size: 13px; color: rgba(255,255,255,0.82); line-height: 1.5; margin-bottom: 12px; position: relative; }
+  .empty-cta-btn { display: inline-flex; align-items: center; gap: 6px; background: white; color: var(--green-800); font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 100px; text-decoration: none; position: relative; }
+  .empty-cta-btn svg { width: 14px; height: 14px; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(250,247,242,0.97); backdrop-filter: blur(12px); border-top: 1px solid var(--cream-200); padding: 8px 12px 12px; display: flex; justify-content: space-around; z-index: 100; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--cream-500); font-size: 10px; font-weight: 500; padding: 6px 10px; border-radius: 10px; flex: 1; position: relative; }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-item.active { color: var(--green-700); font-weight: 600; }
+  .nav-item.active svg { color: var(--green-600); }
+  .nav-item .badge { position: absolute; background: var(--rose); color: white; font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 100px; display: grid; place-items: center; border: 2px solid var(--cream-50); transform: translate(14px, -10px); }
+
+  @media (min-width: 720px) {
+    .bottom-nav { display: none; } body { padding-bottom: 0; }
+  }
+  @media (max-width: 719px) {
+    .desktop-nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · WISHLIST</span>
+    <a href="ac-04-catalogue.html" class="demo-nav-link">Catalogue</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">Mes envies</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="ac-07-notification-match.html" class="demo-nav-link">Match → Confirmation</a>
+  </div>
+</div>
+
+<header class="header">
+  <a href="#" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+  <nav class="desktop-nav">
+    <a href="ac-03-accueil.html" class="nav-link">Accueil</a>
+    <a href="ac-04-catalogue.html" class="nav-link">Catalogue</a>
+    <a href="#" class="nav-link active">Mes envies</a>
+    <a href="ac-08-mes-commandes.html" class="nav-link">Commandes</a>
+  </nav>
+  <div class="header-actions">
+    <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    <div class="avatar-btn">M</div>
+  </div>
+</header>
+
+<main class="page">
+
+  <h1 class="page-h1">Mes envies</h1>
+  <p class="page-sub">Vos envies restent privées. Vous serez notifié dès qu'un rameneur peut en ramener une.</p>
+
+  <div class="counter-row">
+    <div class="counter-progress"><div class="counter-bar"></div></div>
+    <div class="counter-text"><strong>5 envies</strong> sur 20 max</div>
+  </div>
+
+  <div class="tabs-row">
+    <button class="tab active">Toutes <span class="tab-count">(5)</span></button>
+    <button class="tab">À confirmer <span class="tab-count">(1)</span></button>
+    <button class="tab">Probable <span class="tab-count">(2)</span></button>
+    <button class="tab">En attente <span class="tab-count">(2)</span></button>
+  </div>
+
+  <!-- Section : Action requise -->
+  <section class="wish-section">
+    <div class="wish-section-title"><span class="dot urgent"></span>Confirmation requise</div>
+    <div class="wish-list">
+
+      <a href="ac-07-notification-match.html" class="wish-card matched">
+        <div class="wish-img miel">🍯</div>
+        <div class="wish-content">
+          <div class="wish-name">Miel d'acacia 500g</div>
+          <div class="wish-producer">Pierre Dupont · Évreux</div>
+          <div class="wish-meta">Pierre M. propose de vous le ramener jeudi 16/05</div>
+        </div>
+        <div class="wish-status">
+          <span class="status-pill matched">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            Match !
+          </span>
+          <span class="status-cta">
+            Confirmer sous 23h
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Section : Probable -->
+  <section class="wish-section">
+    <div class="wish-section-title"><span class="dot match"></span>Match probable cette semaine</div>
+    <div class="wish-list">
+
+      <div class="wish-card">
+        <div class="wish-img fromage">🧀</div>
+        <div class="wish-content">
+          <div class="wish-name">Camembert AOP</div>
+          <div class="wish-producer">Fromagerie Lefèvre · Camembert</div>
+          <div class="wish-meta">2 rameneurs ont déclaré un trajet</div>
+        </div>
+        <div class="wish-status">
+          <span class="status-pill matchable">Probable</span>
+          <div class="wish-actions">
+            <button class="wish-rm-btn" aria-label="Retirer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14H7L5 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wish-card">
+        <div class="wish-img tomate">🍅</div>
+        <div class="wish-content">
+          <div class="wish-name">Tomates anciennes 1kg</div>
+          <div class="wish-producer">Ferme du Bocage · Lisieux</div>
+          <div class="wish-meta">1 trajet actif jeudi</div>
+        </div>
+        <div class="wish-status">
+          <span class="status-pill matchable">Probable</span>
+          <div class="wish-actions">
+            <button class="wish-rm-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14H7L5 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Section : En attente -->
+  <section class="wish-section">
+    <div class="wish-section-title"><span class="dot pending"></span>En attente d'un rameneur</div>
+    <div class="wish-list">
+
+      <div class="wish-card">
+        <div class="wish-img farine">🌾</div>
+        <div class="wish-content">
+          <div class="wish-name">Farine T80 1kg</div>
+          <div class="wish-producer">Moulin de Vimoutiers</div>
+          <div class="wish-meta">Ajouté il y a 4 jours · aucun trajet compatible</div>
+        </div>
+        <div class="wish-status">
+          <span class="status-pill pending">En attente</span>
+          <div class="wish-actions">
+            <button class="wish-rm-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14H7L5 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wish-card">
+        <div class="wish-img oeufs">🥚</div>
+        <div class="wish-content">
+          <div class="wish-name">Œufs plein air bio (douzaine)</div>
+          <div class="wish-producer">Poulailler Rouvres · Bernay</div>
+          <div class="wish-meta">Ajouté hier · aucun trajet compatible</div>
+        </div>
+        <div class="wish-status">
+          <span class="status-pill pending">En attente</span>
+          <div class="wish-actions">
+            <button class="wish-rm-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14H7L5 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Invite to discover more -->
+  <div class="empty-cta">
+    <div class="empty-cta-eyebrow">Vous avez de la place</div>
+    <div class="empty-cta-title">Ajoutez d'autres envies pour augmenter vos chances de match</div>
+    <div class="empty-cta-text">Plus vous avez d'envies, plus un rameneur a de raisons de réserver une mission qui passe chez vos producteurs.</div>
+    <a href="ac-04-catalogue.html" class="empty-cta-btn">
+      Parcourir le catalogue
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+  </div>
+
+</main>
+
+<nav class="bottom-nav">
+  <a href="ac-03-accueil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Accueil</a>
+  <a href="ac-04-catalogue.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Catalogue</a>
+  <a href="#" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Envies<span class="badge">1</span></a>
+  <a href="ac-08-mes-commandes.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg>Commandes</a>
+  <a href="ac-11-profil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil</a>
+</nav>
+
+</body>
+</html>

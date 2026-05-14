@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<!--
+  Index des maquettes Delta — point d'entrée navigable pour Claude Code.
+  Liste les 19 maquettes créées dans cette session, avec leurs tickets Jira.
+  Les maquettes existantes (déjà dans le repo) sont également listées en grisé.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Index maquettes — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-200: #EDCFB4; --earth-100: #F7E8D6; --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); }
+
+  .top { background: linear-gradient(135deg, var(--green-700), var(--green-900)); color: white; padding: 32px 24px; position: relative; overflow: hidden; }
+  .top::before { content: '🐜'; position: absolute; right: -10px; top: -10px; font-size: 160px; opacity: 0.12; transform: rotate(-12deg); }
+  .top-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+  .top-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green-200); margin-bottom: 6px; }
+  .top-h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+  .top-sub { font-size: 14px; color: rgba(255,255,255,0.78); margin-top: 6px; max-width: 600px; line-height: 1.55; }
+  .top-stats { display: flex; gap: 22px; margin-top: 18px; flex-wrap: wrap; }
+  .top-stat { display: flex; flex-direction: column; gap: 2px; }
+  .top-stat-val { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; line-height: 1; }
+  .top-stat-lbl { font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
+
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; font-size: 12px; color: var(--cream-600); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.new { background: var(--green-600); }
+  .legend-dot.existing { background: var(--cream-400); }
+
+  .persona-section { margin-bottom: 36px; }
+  .persona-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .persona-h { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; }
+  .persona-count { font-size: 13px; color: var(--cream-600); }
+  .persona-desc { font-size: 13px; color: var(--cream-600); margin-bottom: 14px; line-height: 1.5; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+
+  .mq-card {
+    background: white; border: 1px solid var(--cream-200); border-radius: 14px; padding: 14px;
+    text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 8px;
+    transition: all 200ms; position: relative;
+  }
+  .mq-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(53,127,67,0.08); border-color: var(--green-300, #8FCB9C); }
+  .mq-card.new { border-left: 3px solid var(--green-600); }
+  .mq-card.existing { opacity: 0.7; }
+  .mq-card.existing:hover { opacity: 1; }
+  .mq-head { display: flex; align-items: center; gap: 10px; }
+  .mq-id { font-family: 'Lora', serif; font-size: 13px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: var(--green-100); color: var(--green-800); }
+  .mq-card.existing .mq-id { background: var(--cream-100); color: var(--cream-700); }
+  .mq-new-tag { font-size: 9px; padding: 3px 7px; background: var(--green-600); color: white; border-radius: 100px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-left: auto; }
+  .mq-name { font-family: 'Lora', serif; font-size: 15px; font-weight: 700; color: var(--green-900); line-height: 1.3; }
+  .mq-desc { font-size: 12px; color: var(--cream-600); line-height: 1.5; flex: 1; }
+  .mq-foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 8px; border-top: 1px solid var(--cream-100); margin-top: 4px; }
+  .mq-jira { font-size: 11px; color: var(--cream-700); font-family: monospace; }
+  .mq-arrow { color: var(--green-700); font-size: 13px; font-weight: 600; }
+
+  .footer-note { background: white; border: 1px solid var(--cream-200); border-radius: 14px; padding: 18px; margin-top: 30px; font-size: 13px; color: var(--cream-700); line-height: 1.6; }
+  .footer-note strong { color: var(--green-900); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="top-eyebrow">Design · livrables maquettes</div>
+    <h1 class="top-h1">Maquettes Delta — vue d'ensemble</h1>
+    <p class="top-sub">Tous les écrans MVP couverts par le sitemap PRD §10. Ces maquettes alimentent Claude Code pour l'implémentation. Suivent strictement <code>DESIGN.md</code> (tokens, typo, composants).</p>
+    <div class="top-stats">
+      <div class="top-stat"><span class="top-stat-val">19</span><span class="top-stat-lbl">Nouvelles maquettes</span></div>
+      <div class="top-stat"><span class="top-stat-val">19</span><span class="top-stat-lbl">Existantes (déjà au repo)</span></div>
+      <div class="top-stat"><span class="top-stat-val">38</span><span class="top-stat-lbl">Total écrans MVP</span></div>
+      <div class="top-stat"><span class="top-stat-val">100%</span><span class="top-stat-lbl">Sitemap §10 couvert</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot new"></span> Créée cette session</div>
+    <div class="legend-item"><span class="legend-dot existing"></span> Déjà présente dans le repo</div>
+  </div>
+
+  <!-- ACHETEUR -->
+  <section class="persona-section">
+    <div class="persona-head">
+      <h2 class="persona-h">Acheteur</h2>
+      <span class="persona-count">14 écrans · 9 nouveaux + 5 existants</span>
+    </div>
+    <p class="persona-desc">Persona principal · Sophie, cadre urbaine sans voiture. Parcours : découverte → wishlist → match → paiement → réception → notation.</p>
+
+    <div class="grid">
+      <a href="acheteur/ac-01-authentication.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">AC-01</span></div>
+        <div class="mq-name">Inscription / connexion</div>
+        <div class="mq-desc">Email + mot de passe ou social login Google/Apple. Choix de rôle acheteur.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-2, KAN-3</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-02-onboarding.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-02</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Onboarding acheteur</div>
+        <div class="mq-desc">3 étapes : zone d'habitation (API Adresse Gouv.fr), catégories d'intérêt, permission notifications.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-25, KAN-26</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-03-accueil.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">AC-03</span></div>
+        <div class="mq-name">Accueil</div>
+        <div class="mq-desc">Disponible cette semaine · Mes envies · Découverte producteurs · Bilan CO₂.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-28</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-04-catalogue.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-04</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Catalogue parcourable</div>
+        <div class="mq-desc">Grille filtrée aux produits matchables uniquement. Filtres : catégorie, zone, producteur, dispo.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-28, KAN-29</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-05-fiche-produit.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">AC-05</span></div>
+        <div class="mq-name">Fiche produit</div>
+        <div class="mq-desc">Photos, prix, producteur, indicateur de match, CTA wishlist.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-28, KAN-30</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-06-mes-envies.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-06</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Mes envies (wishlist)</div>
+        <div class="mq-desc">Statuts pending / matchable / matched. Plafond 20 envies. Sections par statut.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-30</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-07-notification-match.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">AC-07</span></div>
+        <div class="mq-name">Notification de match</div>
+        <div class="mq-desc">Récap mission + répartition 85/10/5 + compte à rebours 24h.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-31, KAN-32</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-07b-paiement.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-07b</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Paiement Stripe</div>
+        <div class="mq-desc">Payment Element CB / Apple Pay / Google Pay / Lien. Récap escrow.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-33, KAN-34</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-08-mes-commandes.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">AC-08</span></div>
+        <div class="mq-name">Mes commandes</div>
+        <div class="mq-desc">Onglets À venir / En cours / Livrées. Tracker visuel 4 étapes.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-45, KAN-55</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-08b-qr-delivery.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-08b</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">QR de retrait (plein écran)</div>
+        <div class="mq-desc">QR signé propre à la mission, usage unique. Présenté au rameneur à la remise.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-48</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-08bis-profil-producteur.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-08bis</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Profil public producteur (vue acheteur)</div>
+        <div class="mq-desc">Description, note, avis, autres produits. Adresse exacte masquée.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-53</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-09-historique.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-09</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Historique commandes</div>
+        <div class="mq-desc">Liste chronologique inversée par mois, factures PDF, recommander, export CSV.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-27, KAN-36</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-10-evaluation.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-10</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Évaluation post-livraison</div>
+        <div class="mq-desc">Double notation producteur + rameneur (étoiles + tags + commentaire optionnel).</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-52</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-11-profil.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-11</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Profil & paramètres</div>
+        <div class="mq-desc">Adresses (1-3), notifications, moyens de paiement, RGPD, devenir rameneur.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-25, KAN-26</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="acheteur/ac-12-zone-non-couverte.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">AC-12</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Zone non couverte / liste d'attente</div>
+        <div class="mq-desc">État vide AC-04. Inscription waitlist, parrainage rameneur, zones proches.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-29</span><span class="mq-arrow">→</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- PRODUCTEUR -->
+  <section class="persona-section">
+    <div class="persona-head">
+      <h2 class="persona-h">Producteur</h2>
+      <span class="persona-count">9 écrans · 5 nouveaux + 4 existants</span>
+    </div>
+    <p class="persona-desc">Marie, maraîchère bio · Jean-Pierre, apiculteur. Layout sidebar persistant (desktop) + responsive. SIRET asynchrone, Stripe Connect, catalogue.</p>
+
+    <div class="grid">
+      <a href="producteur/pr-01-authentication.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">PR-01</span></div>
+        <div class="mq-name">Inscription / connexion</div>
+        <div class="mq-desc">Email + mdp ou social login. Choix de rôle producteur.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-2, KAN-3</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="producteur/pr-02-onboarding-stripe.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">PR-02</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Onboarding Stripe Connect</div>
+        <div class="mq-desc">SIRET asynchrone + Stripe Connect (KYC + IBAN). Timeline 3 étapes.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-16, KAN-62</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="producteur/pr-03-dashboard.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">PR-03</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Dashboard</div>
+        <div class="mq-desc">KPIs, récupérations à venir, alertes stock, virements Stripe, escrow en cours.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-18, KAN-56</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="producteur/pr-04-catalogue.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">PR-04</span></div>
+        <div class="mq-name">Catalogue produits</div>
+        <div class="mq-desc">Liste de mes produits, actions éditer / désactiver / supprimer.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-20, KAN-23</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="producteur/pr-05-edition-produit.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">PR-05</span></div>
+        <div class="mq-name">Création / édition produit</div>
+        <div class="mq-desc">Nom, photos, prix, unité, stock, fenêtre dispo, catégorie.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-20–24</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="producteur/pr-06-recuperation.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">PR-06</span></div>
+        <div class="mq-name">Récupération à venir</div>
+        <div class="mq-desc">Détail mission rameneur + QR scanner + checklist remise.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-46, KAN-47</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="producteur/pr-07-historique-ventes.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">PR-07</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Historique ventes & virements</div>
+        <div class="mq-desc">Tableau exhaustif, factures PDF, virements Stripe Connect, export CSV.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-19, KAN-36</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="producteur/pr-08-profil-public.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">PR-08</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Profil public (édition + preview)</div>
+        <div class="mq-desc">Édition + aperçu vue acheteur. Adresse exacte privée révélée uniquement aux rameneurs.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-17, KAN-53</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="producteur/pr-09-parametres.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">PR-09</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Paramètres compte</div>
+        <div class="mq-desc">Compte, Stripe, SIRET, notifications, multi-rôle, RGPD, suppression.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-17</span><span class="mq-arrow">→</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- RAMENEUR -->
+  <section class="persona-section">
+    <div class="persona-head">
+      <h2 class="persona-h">Rameneur</h2>
+      <span class="persona-count">12 écrans · 2 nouveaux + 10 existants</span>
+    </div>
+    <p class="persona-desc">Persona limitant · Thomas, navetteur. Initiateur de la transaction. Déclare trajet → réserve opportunité → pickup QR → delivery QR.</p>
+
+    <div class="grid">
+      <a href="rameneur/rm-01-authentication.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-01</span></div>
+        <div class="mq-name">Inscription / connexion</div>
+        <div class="mq-desc">Email + mdp ou social login. Choix de rôle rameneur.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-2, KAN-3</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-02-onboarding.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-02</span></div>
+        <div class="mq-name">Onboarding</div>
+        <div class="mq-desc">Stripe Identity + IBAN + zone d'habitation + capacité véhicule.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-37, KAN-38</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-03-accueil.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-03</span></div>
+        <div class="mq-name">Accueil rameneur</div>
+        <div class="mq-desc">Trajets actifs, opportunités à explorer, revenus du mois.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-39</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-04-declarer-trajet.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-04</span></div>
+        <div class="mq-name">Déclarer un trajet</div>
+        <div class="mq-desc">Origine, destination, dates aller/retour, capacité.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-41, KAN-38</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-05-liste-opportunites.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-05</span></div>
+        <div class="mq-name">Liste opportunités</div>
+        <div class="mq-desc">Missions calculées, triées par gain net.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-42</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-06-detail-opportunite.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-06</span></div>
+        <div class="mq-name">Détail opportunité</div>
+        <div class="mq-desc">Producteur, produits, voisins (anonymisés), gain, détour, CTA Réserver.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-43</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-07-mes-missions.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-07</span></div>
+        <div class="mq-name">Mes missions</div>
+        <div class="mq-desc">Liste par statut (en attente, confirmée, en cours, livrée).</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-44, KAN-45</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-08-mission-active.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-08</span></div>
+        <div class="mq-name">Mission active</div>
+        <div class="mq-desc">QR pickup + liste livraisons + QR delivery par acheteur.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-45–49</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-09-chat.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-09</span></div>
+        <div class="mq-name">Chat de mission</div>
+        <div class="mq-desc">Communication 3 participants (producteur + 1-N acheteurs).</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-50, KAN-51</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-10-historique-revenus.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">RM-10</span></div>
+        <div class="mq-name">Historique missions & revenus</div>
+        <div class="mq-desc">Détail missions passées + virements Stripe.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-39, KAN-19</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-11-profil-public.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">RM-11</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Profil rameneur public</div>
+        <div class="mq-desc">Édition + preview vue producteur. Note, missions, ancienneté, complétion, zones, véhicule, vérifications.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-53</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="rameneur/rm-12-pause.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">RM-12</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Pause / désactivation</div>
+        <div class="mq-desc">Pause réversible vs désactivation permanente. Vérification mission en cours. Multi-rôle préservé.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-40</span><span class="mq-arrow">→</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- TRANSVERSE -->
+  <section class="persona-section">
+    <div class="persona-head">
+      <h2 class="persona-h">Transverse</h2>
+      <span class="persona-count">4 écrans · 2 nouveaux + 2 couverts ailleurs</span>
+    </div>
+    <p class="persona-desc">Écrans communs aux 3 personas. TR-01 (auth) couvert par AC-01/PR-01/RM-01. TR-03 (chat) couvert par RM-09.</p>
+
+    <div class="grid">
+      <a href="../acheteur/ac-01-authentication.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">TR-01</span></div>
+        <div class="mq-name">Auth & gestion compte</div>
+        <div class="mq-desc">Couvert par AC-01, PR-01, RM-01 selon le persona.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-2, KAN-3, KAN-157</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="transverse/tr-02-notifications.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">TR-02</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Centre notifications</div>
+        <div class="mq-desc">Centre unifié multi-persona. Filtres par type. Tags acheteur/producteur/rameneur. Marquer lu.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-54, KAN-55</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="../rameneur/rm-09-chat.html" class="mq-card existing">
+        <div class="mq-head"><span class="mq-id">TR-03</span></div>
+        <div class="mq-name">Chat par mission</div>
+        <div class="mq-desc">Couvert par RM-09. Espace conversation lié à une mission.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-50, KAN-51</span><span class="mq-arrow">→</span></div>
+      </a>
+
+      <a href="transverse/tr-04-signalement.html" class="mq-card new">
+        <div class="mq-head"><span class="mq-id">TR-04</span><span class="mq-new-tag">Nouveau</span></div>
+        <div class="mq-name">Signalement / litige</div>
+        <div class="mq-desc">Formulaire catégorisé · 3 niveaux (résolution directe / médiation / décision unilatérale). Photos, historique tickets.</div>
+        <div class="mq-foot"><span class="mq-jira">KAN-60, KAN-32</span><span class="mq-arrow">→</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer note -->
+  <div class="footer-note">
+    <strong>Pour Claude Code :</strong> chaque maquette est auto-suffisante (CSS embarqué, design system DESIGN.md inline). Le commentaire HTML en tête liste les tickets Jira et règles métier clés. Responsive desktop + mobile via media queries. Les éléments interactifs sont fictifs — c'est l'apparence et la structure qui font foi.<br><br>
+    <strong>Conventions de nommage :</strong> <code>[persona]/[id]-[slug].html</code>. Persona : <code>ac</code>, <code>pr</code>, <code>rm</code>, <code>transverse</code>. Les IDs correspondent au sitemap PRD §10. Mapping Jira ↔ écran : <code>produit/jira_mapping.md</code>.
+  </div>
+
+</main>
+
+</body>
+</html>

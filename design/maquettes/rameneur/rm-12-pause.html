@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — RM-12 Pause / désactivation rameneur
+  Ticket(s) Jira : KAN-40 (Pause & désactivation)
+
+  Désactivation temporaire ou définitive du compte rameneur.
+  Pause = ne plus apparaître comme rameneur potentiel, garder compte acheteur actif.
+  Stoppe le calcul d'opportunités. Vérifie qu'aucune mission en cours.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM-12 · Pause rameneur — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-200: #EDCFB4; --earth-100: #F7E8D6; --earth-50: #FDF5ED;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --rose: #C75B5B; --rose-bg: #FDEDEC;
+    --orange-500: #EA580C; --orange-100: #FFEDD5;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); padding-bottom: 80px; }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  .header { background: rgba(250,247,242,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cream-200); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-icon { width: 32px; height: 32px; background: var(--green-800); border-radius: 9px; display: grid; place-items: center; font-size: 16px; }
+  .logo-text { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; color: var(--green-800); }
+  .logo-dot { color: var(--earth-500); }
+
+  .top-bar { background: white; border-bottom: 1px solid var(--cream-200); padding: 12px 22px; display: flex; align-items: center; gap: 14px; max-width: 720px; margin: 0 auto; }
+  .back-btn { background: transparent; border: none; color: var(--cream-700); padding: 4px; text-decoration: none; display: grid; place-items: center; }
+  .back-btn svg { width: 22px; height: 22px; }
+  .top-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; color: var(--green-900); }
+
+  .page { max-width: 720px; margin: 0 auto; padding: 26px 22px 40px; }
+  .page-h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: var(--cream-600); line-height: 1.55; margin-bottom: 26px; }
+
+  /* Current status */
+  .status-card {
+    background: linear-gradient(135deg, var(--green-700), var(--green-900));
+    color: white; padding: 18px; border-radius: 16px; margin-bottom: 22px;
+    display: flex; align-items: center; gap: 14px;
+    position: relative; overflow: hidden;
+  }
+  .status-card::before { content: '🚐'; position: absolute; right: -10px; bottom: -16px; font-size: 90px; opacity: 0.15; transform: rotate(-8deg); }
+  .status-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--green-400); flex-shrink: 0; box-shadow: 0 0 0 4px rgba(74,154,88,0.3); animation: pulse 2s infinite; position: relative; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .status-text { flex: 1; position: relative; }
+  .status-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; line-height: 1.3; }
+  .status-sub { font-size: 12px; color: rgba(255,255,255,0.78); margin-top: 2px; }
+
+  /* In-flight missions warning */
+  .warn-card {
+    background: var(--orange-100); border: 1px solid #FED7AA; border-radius: 14px; padding: 14px;
+    display: flex; gap: 12px; align-items: center; margin-bottom: 22px;
+  }
+  .warn-icon { width: 36px; height: 36px; border-radius: 50%; background: white; color: var(--orange-500); display: grid; place-items: center; flex-shrink: 0; }
+  .warn-icon svg { width: 18px; height: 18px; }
+  .warn-text { font-size: 13px; color: var(--cream-700); line-height: 1.5; }
+  .warn-text strong { color: var(--orange-500); }
+  .warn-link { font-size: 12px; font-weight: 600; color: var(--orange-500); text-decoration: none; flex-shrink: 0; }
+
+  /* Choice cards */
+  .choices { display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px; }
+  .choice {
+    background: white; border: 1.5px solid var(--cream-200); border-radius: 16px; padding: 18px;
+    cursor: pointer; transition: all 200ms;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .choice:hover { border-color: var(--green-300, #8FCB9C); }
+  .choice.selected { border-color: var(--green-600); background: var(--green-50); }
+  .choice-radio { width: 22px; height: 22px; border: 2px solid var(--cream-300); border-radius: 50%; flex-shrink: 0; margin-top: 2px; display: grid; place-items: center; }
+  .choice.selected .choice-radio { border-color: var(--green-600); }
+  .choice.selected .choice-radio::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--green-600); }
+  .choice-body { flex: 1; }
+  .choice-title { font-family: 'Lora', serif; font-size: 16px; font-weight: 700; color: var(--green-900); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; line-height: 1.3; }
+  .choice-title .tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .choice-title .tag.reversible { background: var(--green-100); color: var(--green-700); }
+  .choice-title .tag.permanent { background: var(--rose-bg); color: var(--rose); }
+  .choice-text { font-size: 13px; color: var(--cream-700); line-height: 1.55; }
+  .choice-effects { font-size: 12px; color: var(--cream-600); margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .choice-effect { display: flex; gap: 6px; align-items: flex-start; }
+  .choice-effect svg { width: 12px; height: 12px; color: var(--green-600); flex-shrink: 0; margin-top: 2px; }
+  .choice-effect.no svg { color: var(--rose); }
+
+  /* Form when paused */
+  .reason-card { background: white; border: 1px solid var(--cream-200); border-radius: 14px; padding: 18px; margin-bottom: 22px; }
+  .reason-h { font-family: 'Lora', serif; font-size: 15px; font-weight: 700; color: var(--green-900); margin-bottom: 12px; }
+  .reason-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .chip { padding: 6px 12px; background: var(--cream-50); border: 1px solid var(--cream-300); border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--cream-700); cursor: pointer; }
+  .chip.active { background: var(--green-100); border-color: var(--green-600); color: var(--green-800); }
+
+  .field-label { font-size: 12px; font-weight: 600; color: var(--cream-700); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .duration-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+  .duration-opt { padding: 10px; background: var(--cream-50); border: 1.5px solid var(--cream-300); border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--cream-700); text-align: center; cursor: pointer; }
+  .duration-opt.selected { background: var(--green-100); border-color: var(--green-600); color: var(--green-800); }
+  .reason-textarea { width: 100%; padding: 12px 14px; background: var(--cream-50); border: 1.5px solid var(--cream-300); border-radius: 10px; font-size: 14px; font-family: inherit; color: var(--cream-950); resize: vertical; min-height: 70px; line-height: 1.5; }
+
+  /* Footer CTAs */
+  .foot { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-cancel { background: transparent; border: 1px solid var(--cream-300); padding: 12px 20px; border-radius: 100px; font-size: 14px; font-weight: 500; color: var(--cream-700); cursor: pointer; text-decoration: none; }
+  .btn-confirm {
+    flex: 1; padding: 14px 22px; border: none; cursor: pointer;
+    background: var(--earth-500); color: white;
+    border-radius: 100px; font-size: 15px; font-weight: 600; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 3px 10px rgba(184,112,63,0.30);
+  }
+  .btn-confirm:hover { background: var(--earth-800); }
+
+  /* Multi-rôle reminder */
+  .info-note { background: var(--green-50); border: 1px solid var(--green-200); border-radius: 12px; padding: 12px; display: flex; gap: 10px; font-size: 12px; color: var(--cream-700); line-height: 1.5; margin-bottom: 22px; }
+  .info-note svg { width: 16px; height: 16px; color: var(--green-700); flex-shrink: 0; margin-top: 2px; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(250,247,242,0.97); backdrop-filter: blur(12px); border-top: 1px solid var(--cream-200); padding: 8px 12px 12px; display: flex; justify-content: space-around; z-index: 100; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--cream-500); font-size: 10px; font-weight: 500; padding: 6px 10px; border-radius: 10px; flex: 1; }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-item.active { color: var(--green-700); font-weight: 600; }
+
+  @media (min-width: 720px) { .bottom-nav { display: none; } body { padding-bottom: 0; } }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · ESPACE RAMENEUR</span>
+    <a href="rm-11-profil-public.html" class="demo-nav-link">RM-11 Profil</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">RM-12 Pause / désactivation</a>
+  </div>
+</div>
+
+<header class="header">
+  <a href="#" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+</header>
+
+<div class="top-bar">
+  <a href="rm-11-profil-public.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <div class="top-title">Mettre mon profil en pause</div>
+</div>
+
+<main class="page">
+
+  <h1 class="page-h1">Vous voulez faire une pause ?</h1>
+  <p class="page-sub">Vous pouvez désactiver temporairement votre compte rameneur — vous ne recevrez plus d'opportunités tant qu'il est en pause. Réactivation en 1 clic.</p>
+
+  <div class="status-card">
+    <div class="status-dot"></div>
+    <div class="status-text">
+      <div class="status-title">Profil rameneur actif</div>
+      <div class="status-sub">Vous recevez des opportunités calculées sur vos trajets déclarés</div>
+    </div>
+  </div>
+
+  <!-- Warn missions en cours -->
+  <div class="warn-card">
+    <div class="warn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+    <div class="warn-text" style="flex:1;">
+      <strong>1 mission en cours doit être terminée</strong> avant de pouvoir mettre votre profil en pause. Mission #M-3829 (livraison prévue jeudi 16/05).
+    </div>
+    <a href="rm-08-mission-active.html" class="warn-link">Voir →</a>
+  </div>
+
+  <!-- Choix -->
+  <div class="choices">
+
+    <div class="choice selected">
+      <div class="choice-radio"></div>
+      <div class="choice-body">
+        <div class="choice-title">Mettre en pause <span class="tag reversible">Réversible</span></div>
+        <p class="choice-text">Vous ne recevez plus d'opportunités et n'apparaissez plus dans les calculs. Votre profil, vos évaluations et votre IBAN sont conservés. Vous gardez l'accès à votre compte acheteur.</p>
+        <div class="choice-effects">
+          <div class="choice-effect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Votre compte acheteur reste actif</div>
+          <div class="choice-effect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Historique et virements préservés</div>
+          <div class="choice-effect no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Plus d'opportunités proposées</div>
+          <div class="choice-effect no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Trajets déclarés annulés automatiquement</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="choice">
+      <div class="choice-radio"></div>
+      <div class="choice-body">
+        <div class="choice-title">Désactiver définitivement le rôle rameneur <span class="tag permanent">Permanent</span></div>
+        <p class="choice-text">Suppression complète de votre profil rameneur (réputation, badges, statistiques) mais conservation de votre compte (acheteur). Pour le supprimer entièrement, voir paramètres compte.</p>
+        <div class="choice-effects">
+          <div class="choice-effect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Votre compte acheteur reste actif</div>
+          <div class="choice-effect no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Réputation rameneur perdue (17 missions, 4,8 ★)</div>
+          <div class="choice-effect no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Reprise impossible — il faudra recréer un profil</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Formulaire pause -->
+  <div class="reason-card">
+    <div class="reason-h">Pause jusqu'à quand ?</div>
+    <div class="duration-row">
+      <div class="duration-opt">1 semaine</div>
+      <div class="duration-opt selected">1 mois</div>
+      <div class="duration-opt">3 mois</div>
+      <div class="duration-opt">Indéterminé</div>
+    </div>
+
+    <div class="reason-h" style="margin-top:18px;">Raison (optionnel)</div>
+    <p style="font-size:12px; color:var(--cream-600); margin-bottom:10px;">Nous aide à améliorer l'expérience rameneur.</p>
+    <div class="reason-chips">
+      <span class="chip active">Vacances</span>
+      <span class="chip">Indisponibilité véhicule</span>
+      <span class="chip">Trop chronophage</span>
+      <span class="chip">Gains insuffisants</span>
+      <span class="chip">Trop de désistements acheteurs</span>
+      <span class="chip">Autre</span>
+    </div>
+    <textarea class="reason-textarea" placeholder="Un commentaire à partager avec l'équipe Delta ?"></textarea>
+  </div>
+
+  <div class="info-note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    <span>Le compte est <strong>multi-rôle progressif</strong> : mettre en pause le rôle rameneur n'impacte ni vos commandes acheteur, ni votre wishlist, ni vos paiements en cours.</span>
+  </div>
+
+  <div class="foot">
+    <a href="rm-11-profil-public.html" class="btn-cancel">Annuler</a>
+    <button class="btn-confirm">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      Mettre en pause pour 1 mois
+    </button>
+  </div>
+
+</main>
+
+<nav class="bottom-nav">
+  <a href="rm-03-accueil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Accueil</a>
+  <a href="rm-05-liste-opportunites.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Opportunités</a>
+  <a href="rm-07-mes-missions.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Missions</a>
+  <a href="rm-11-profil-public.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/></svg>Profil</a>
+</nav>
+
+</body>
+</html>

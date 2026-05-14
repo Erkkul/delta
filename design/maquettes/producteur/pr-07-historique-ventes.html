@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — PR-07 Historique ventes & virements Stripe
+  Ticket(s) Jira : KAN-19 (Historique ventes), KAN-36 (Factures PDF)
+
+  Vue exhaustive des ventes : liste paginée, KPIs financiers, virements Stripe,
+  télécharger factures PDF, export CSV. Filtres : période, produit, statut.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PR-07 · Historique & virements — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-100: #F7E8D6;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+    --rose: #C75B5B; --gold: #D4A017; --orange-500: #EA580C; --orange-100: #FFEDD5;
+    --stripe-purple: #635BFF;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  .app { display: flex; min-height: calc(100vh - 36px); }
+
+  /* Sidebar (idem PR-03) */
+  .sb { width: 240px; flex-shrink: 0; background: white; border-right: 1px solid var(--cream-200); padding: 18px 14px; display: flex; flex-direction: column; position: sticky; top: 0; align-self: flex-start; height: calc(100vh - 36px); }
+  .sb-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 6px 10px 18px; border-bottom: 1px solid var(--cream-100); margin-bottom: 14px; }
+  .sb-logo-icon { width: 36px; height: 36px; background: var(--green-800); border-radius: 10px; display: grid; place-items: center; font-size: 18px; }
+  .sb-logo-text { font-family: 'Lora', serif; font-size: 18px; font-weight: 700; color: var(--green-800); }
+  .sb-logo-dot { color: var(--earth-500); }
+  .sb-logo-role { font-size: 10px; color: var(--cream-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-top: 1px; }
+  .sb-section { font-size: 10px; font-weight: 700; color: var(--cream-500); text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 12px 8px; }
+  .sb-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--cream-700); text-decoration: none; }
+  .sb-link:hover { background: var(--green-50); color: var(--green-700); }
+  .sb-link.active { background: var(--green-100); color: var(--green-800); font-weight: 600; }
+  .sb-link svg { width: 16px; height: 16px; }
+  .sb-link .badge { margin-left: auto; background: var(--rose); color: white; font-size: 9px; padding: 2px 6px; border-radius: 100px; font-weight: 700; }
+  .sb-user { margin-top: auto; padding: 12px; background: var(--green-50); border-radius: 12px; display: flex; align-items: center; gap: 10px; }
+  .sb-user-av { width: 36px; height: 36px; border-radius: 50%; background: var(--earth-100); display: grid; place-items: center; font-size: 16px; }
+  .sb-user-name { font-size: 13px; font-weight: 600; color: var(--green-900); }
+  .sb-user-status { font-size: 11px; color: var(--cream-600); margin-top: 1px; }
+
+  .main { flex: 1; padding: 26px 32px 40px; max-width: 1100px; }
+  .main-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+  .main-h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--green-900); letter-spacing: -0.01em; }
+  .main-sub { font-size: 13px; color: var(--cream-600); margin-top: 2px; }
+  .toolbar { display: flex; gap: 10px; }
+  .tb-btn { padding: 8px 14px; border: 1px solid var(--cream-300); background: white; color: var(--cream-700); border-radius: 100px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .tb-btn svg { width: 14px; height: 14px; }
+  .tb-btn:hover { border-color: var(--green-300, #8FCB9C); background: var(--green-50); color: var(--green-700); }
+
+  /* KPIs */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 26px; }
+  .kpi-card { background: white; border: 1px solid var(--cream-200); border-radius: 14px; padding: 16px; }
+  .kpi-label { font-size: 11px; color: var(--cream-600); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 8px; }
+  .kpi-val { font-family: 'Lora', serif; font-size: 26px; font-weight: 700; color: var(--green-900); line-height: 1; }
+  .kpi-meta { font-size: 11px; color: var(--cream-600); margin-top: 4px; }
+  .kpi-meta.up { color: var(--green-700); font-weight: 600; }
+  .kpi-card.highlight { background: linear-gradient(135deg, var(--green-700), var(--green-900)); color: white; border: none; }
+  .kpi-card.highlight .kpi-label, .kpi-card.highlight .kpi-meta { color: rgba(255,255,255,0.78); }
+  .kpi-card.highlight .kpi-val { color: white; }
+
+  /* Filters */
+  .filters-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-chip { padding: 8px 14px; background: white; border: 1px solid var(--cream-300); border-radius: 100px; font-size: 13px; font-weight: 500; color: var(--cream-700); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .filter-chip.active { background: var(--green-700); color: white; border-color: var(--green-700); }
+  .filter-chip svg { width: 12px; height: 12px; }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid var(--cream-200); margin-bottom: 16px; }
+  .tab { padding: 12px 16px; font-size: 14px; font-weight: 500; color: var(--cream-700); cursor: pointer; background: transparent; border: none; border-bottom: 2px solid transparent; font-family: inherit; }
+  .tab.active { color: var(--green-700); border-bottom-color: var(--green-600); font-weight: 600; }
+
+  /* Table */
+  .table-card { background: white; border: 1px solid var(--cream-200); border-radius: 14px; overflow: hidden; }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { text-align: left; padding: 14px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cream-600); background: var(--cream-50); border-bottom: 1px solid var(--cream-200); }
+  .table td { padding: 14px 16px; font-size: 13px; color: var(--cream-950); border-bottom: 1px solid var(--cream-100); vertical-align: middle; }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover { background: var(--cream-50); }
+  .cell-prod { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+  .cell-prod-img { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font-size: 16px; flex-shrink: 0; }
+  .cell-prod-img.miel { background: linear-gradient(135deg, #F5C842, #D4901A); }
+  .cell-prod-img.tomate { background: linear-gradient(135deg, #E55B4F, #A03028); }
+  .cell-prod-img.oeufs { background: linear-gradient(135deg, #F5E6CB, #C9A471); }
+  .cell-prod-img.farine { background: linear-gradient(135deg, #EFE4D2, #C7A87A); }
+  .cell-prod-img.confiture { background: linear-gradient(135deg, #B8344A, #6E1C2A); }
+  .cell-prod-img.lentilles { background: linear-gradient(135deg, #6DB87A, #357F43); }
+  .cell-amount { font-family: 'Lora', serif; font-weight: 700; color: var(--green-800); font-size: 14px; }
+  .cell-net { font-size: 11px; color: var(--cream-600); }
+  .status-pill { font-size: 10px; padding: 3px 8px; border-radius: 100px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; display: inline-block; }
+  .status-pill.paid { background: var(--green-100); color: var(--green-700); }
+  .status-pill.escrow { background: var(--orange-100); color: var(--orange-500); }
+  .status-pill.refund { background: #FEE2E2; color: var(--rose); }
+  .invoice-btn { background: transparent; border: 1px solid var(--cream-300); border-radius: 8px; padding: 6px 10px; cursor: pointer; color: var(--cream-700); font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+  .invoice-btn:hover { border-color: var(--green-600); color: var(--green-700); }
+  .invoice-btn svg { width: 12px; height: 12px; }
+
+  /* Stripe payout banner */
+  .payouts-section { margin-top: 26px; background: white; border: 1px solid var(--cream-200); border-radius: 14px; padding: 18px; }
+  .payouts-h { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .stripe-logo-mini { width: 36px; height: 36px; background: var(--stripe-purple); color: white; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: 16px; }
+  .payouts-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; color: var(--green-900); }
+  .payouts-sub { font-size: 12px; color: var(--cream-600); margin-top: 2px; }
+  .payout-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--cream-100); gap: 12px; }
+  .payout-row:last-child { border-bottom: none; }
+  .payout-date { font-size: 12px; color: var(--cream-600); width: 90px; }
+  .payout-amt { font-family: 'Lora', serif; font-size: 16px; font-weight: 700; color: var(--green-800); flex: 1; }
+  .payout-iban { font-size: 12px; color: var(--cream-700); font-family: monospace; }
+
+  @media (max-width: 880px) {
+    .sb { display: none; }
+    .main { padding: 22px 18px 40px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .table { font-size: 12px; }
+    .table th, .table td { padding: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · ESPACE PRODUCTEUR</span>
+    <a href="pr-03-dashboard.html" class="demo-nav-link">Dashboard</a>
+    <span class="demo-nav-arrow">→</span>
+    <a href="#" class="demo-nav-link active">PR-07 Historique & virements</a>
+  </div>
+</div>
+
+<div class="app">
+
+  <aside class="sb">
+    <a href="pr-03-dashboard.html" class="sb-logo">
+      <div class="sb-logo-icon">🐜</div>
+      <div>
+        <div class="sb-logo-text">Delta<span class="sb-logo-dot">.</span></div>
+        <span class="sb-logo-role">Producteur</span>
+      </div>
+    </a>
+    <div class="sb-section">Activité</div>
+    <a href="pr-03-dashboard.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Tableau de bord</a>
+    <a href="pr-06-recuperation.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8.5" cy="7" r="4"/><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/></svg>Récupérations<span class="badge">3</span></a>
+    <div class="sb-section">Catalogue</div>
+    <a href="pr-04-catalogue.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4 8 4 8-4z"/></svg>Mes produits</a>
+    <div class="sb-section">Finances</div>
+    <a href="#" class="sb-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Ventes & virements</a>
+    <div class="sb-section">Profil</div>
+    <a href="pr-08-profil-public.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/></svg>Profil public</a>
+    <a href="pr-09-parametres.html" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Paramètres</a>
+
+    <div class="sb-user">
+      <div class="sb-user-av">🌻</div>
+      <div>
+        <div class="sb-user-name">EARL Dubois</div>
+        <div class="sb-user-status">Stripe Connect actif</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="main-h">
+      <div>
+        <h1 class="main-h1">Historique & virements</h1>
+        <p class="main-sub">Toutes vos ventes et les versements Stripe Connect</p>
+      </div>
+      <div class="toolbar">
+        <button class="tb-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+        <button class="tb-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mai 2026</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card highlight">
+        <div class="kpi-label">Revenus du mois</div>
+        <div class="kpi-val">348 €</div>
+        <div class="kpi-meta up">+24% vs avril</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">En attente (escrow)</div>
+        <div class="kpi-val">87 €</div>
+        <div class="kpi-meta">3 missions en cours</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Versé sur IBAN</div>
+        <div class="kpi-val">261 €</div>
+        <div class="kpi-meta">5 virements ce mois</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Commission Delta</div>
+        <div class="kpi-val">20,50 €</div>
+        <div class="kpi-meta">5% × CA brut</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active">Toutes les ventes (24)</button>
+      <button class="tab">En escrow (3)</button>
+      <button class="tab">Versées (21)</button>
+      <button class="tab">Litiges (0)</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-row">
+      <button class="filter-chip active">Toutes périodes
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button class="filter-chip">Tous produits
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button class="filter-chip">Tous rameneurs
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Produit · Mission</th>
+            <th>Rameneur</th>
+            <th>Acheteurs</th>
+            <th style="text-align:right;">Brut</th>
+            <th style="text-align:right;">Vous (85%)</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>16/05</td>
+            <td>
+              <div class="cell-prod">
+                <div class="cell-prod-img miel">🍯</div>
+                <div>
+                  <div>Miel × 2, Tomates × 3</div>
+                  <div style="font-size:11px;color:var(--cream-500);">M-3829</div>
+                </div>
+              </div>
+            </td>
+            <td>Thomas M.</td>
+            <td>3</td>
+            <td style="text-align:right;"><div class="cell-amount">48,20 €</div></td>
+            <td style="text-align:right;"><div class="cell-amount">40,97 €</div><div class="cell-net">– 5% Delta</div></td>
+            <td><span class="status-pill escrow">Escrow</span></td>
+            <td><button class="invoice-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF</button></td>
+          </tr>
+          <tr>
+            <td>14/05</td>
+            <td>
+              <div class="cell-prod">
+                <div class="cell-prod-img farine">🌾</div>
+                <div>
+                  <div>Farine T80 × 4</div>
+                  <div style="font-size:11px;color:var(--cream-500);">M-3825</div>
+                </div>
+              </div>
+            </td>
+            <td>Pierre M.</td>
+            <td>2</td>
+            <td style="text-align:right;"><div class="cell-amount">16,80 €</div></td>
+            <td style="text-align:right;"><div class="cell-amount">14,28 €</div><div class="cell-net">Versé le 15/05</div></td>
+            <td><span class="status-pill paid">Versée</span></td>
+            <td><button class="invoice-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>PDF</button></td>
+          </tr>
+          <tr>
+            <td>09/05</td>
+            <td>
+              <div class="cell-prod">
+                <div class="cell-prod-img tomate">🍅</div>
+                <div>
+                  <div>Tomates anciennes 1kg × 2</div>
+                  <div style="font-size:11px;color:var(--cream-500);">M-3819</div>
+                </div>
+              </div>
+            </td>
+            <td>Nadia M.</td>
+            <td>1</td>
+            <td style="text-align:right;"><div class="cell-amount">12,40 €</div></td>
+            <td style="text-align:right;"><div class="cell-amount">10,54 €</div><div class="cell-net">Versé le 10/05</div></td>
+            <td><span class="status-pill paid">Versée</span></td>
+            <td><button class="invoice-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>PDF</button></td>
+          </tr>
+          <tr>
+            <td>05/05</td>
+            <td>
+              <div class="cell-prod">
+                <div class="cell-prod-img confiture">🍇</div>
+                <div>
+                  <div>Confiture mûre sauvage × 6</div>
+                  <div style="font-size:11px;color:var(--cream-500);">M-3812</div>
+                </div>
+              </div>
+            </td>
+            <td>Thomas M.</td>
+            <td>3</td>
+            <td style="text-align:right;"><div class="cell-amount">35,40 €</div></td>
+            <td style="text-align:right;"><div class="cell-amount">30,09 €</div><div class="cell-net">Versé le 06/05</div></td>
+            <td><span class="status-pill paid">Versée</span></td>
+            <td><button class="invoice-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>PDF</button></td>
+          </tr>
+          <tr>
+            <td>02/05</td>
+            <td>
+              <div class="cell-prod">
+                <div class="cell-prod-img lentilles">🌾</div>
+                <div>
+                  <div>Lentilles vertes × 4</div>
+                  <div style="font-size:11px;color:var(--cream-500);">M-3806</div>
+                </div>
+              </div>
+            </td>
+            <td>Pierre M.</td>
+            <td>2</td>
+            <td style="text-align:right;"><div class="cell-amount">23,20 €</div></td>
+            <td style="text-align:right;"><div class="cell-amount">19,72 €</div><div class="cell-net">Versé le 03/05</div></td>
+            <td><span class="status-pill paid">Versée</span></td>
+            <td><button class="invoice-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>PDF</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Stripe payouts -->
+    <div class="payouts-section">
+      <div class="payouts-h">
+        <div class="stripe-logo-mini">S</div>
+        <div>
+          <div class="payouts-title">Virements Stripe Connect</div>
+          <div class="payouts-sub">Vers IBAN FR76 •••• •••• •••• 2891 · fréquence quotidienne</div>
+        </div>
+      </div>
+      <div class="payout-row">
+        <div class="payout-date">15/05</div>
+        <div class="payout-amt">+ 14,28 €</div>
+        <div class="payout-iban">FR76 **** 2891</div>
+        <span class="status-pill paid">Versé</span>
+      </div>
+      <div class="payout-row">
+        <div class="payout-date">10/05</div>
+        <div class="payout-amt">+ 10,54 €</div>
+        <div class="payout-iban">FR76 **** 2891</div>
+        <span class="status-pill paid">Versé</span>
+      </div>
+      <div class="payout-row">
+        <div class="payout-date">06/05</div>
+        <div class="payout-amt">+ 30,09 €</div>
+        <div class="payout-iban">FR76 **** 2891</div>
+        <span class="status-pill paid">Versé</span>
+      </div>
+      <div class="payout-row">
+        <div class="payout-date">03/05</div>
+        <div class="payout-amt">+ 19,72 €</div>
+        <div class="payout-iban">FR76 **** 2891</div>
+        <span class="status-pill paid">Versé</span>
+      </div>
+      <div class="payout-row">
+        <div class="payout-date">demain</div>
+        <div class="payout-amt">+ 62,30 €</div>
+        <div class="payout-iban">FR76 **** 2891</div>
+        <span class="status-pill escrow">Programmé</span>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>

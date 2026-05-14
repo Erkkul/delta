@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<!--
+  Maquette Delta — AC-12 Zone non couverte / liste d'attente
+  Ticket(s) Jira : KAN-29 (Zone non couverte & liste d'attente)
+
+  État vide de AC-04 quand aucun rameneur ne couvre la zone de l'acheteur.
+  Propose : (1) s'inscrire à la liste d'attente, (2) parrainer un proche
+  rameneur, (3) recevoir une alerte au premier trajet.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC-12 · Zone non couverte — Delta</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-900: #14351A; --green-800: #1E4D26; --green-700: #276634;
+    --green-600: #357F43; --green-500: #4A9A58; --green-200: #C0E4C7;
+    --green-100: #E4F4E7; --green-50: #F2FAF3;
+    --earth-800: #5C3214; --earth-500: #B8703F; --earth-200: #EDCFB4; --earth-100: #F7E8D6;
+    --cream-950: #1C1917; --cream-700: #57534E; --cream-600: #78716C;
+    --cream-500: #A8A29E; --cream-300: #D6D3D1; --cream-200: #E7E5E4;
+    --cream-100: #F5F5F4; --cream-50: #FAF7F2;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream-50); color: var(--cream-950); padding-bottom: 80px; }
+
+  .demo-nav { background: var(--cream-950); color: white; padding: 8px 16px; font-size: 12px; }
+  .demo-nav-inner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; }
+  .demo-nav-label { font-weight: 700; letter-spacing: 0.08em; font-size: 10px; color: rgba(255,255,255,0.5); }
+  .demo-nav-link { color: rgba(255,255,255,0.65); text-decoration: none; padding: 4px 11px; border-radius: 100px; font-size: 12px; }
+  .demo-nav-link.active { background: var(--green-500); color: white; font-weight: 600; }
+  .demo-nav-arrow { color: rgba(255,255,255,0.25); font-size: 10px; }
+
+  .header { background: rgba(250,247,242,0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cream-200); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-icon { width: 32px; height: 32px; background: var(--green-800); border-radius: 9px; display: grid; place-items: center; font-size: 16px; }
+  .logo-text { font-family: 'Lora', serif; font-size: 19px; font-weight: 700; color: var(--green-800); }
+  .logo-dot { color: var(--earth-500); }
+
+  .page { max-width: 720px; margin: 0 auto; padding: 30px 22px 40px; }
+
+  /* Empty hero */
+  .empty-hero {
+    background: white; border: 1px solid var(--cream-200); border-radius: 22px;
+    padding: 36px 26px; text-align: center; position: relative; overflow: hidden;
+    margin-bottom: 22px;
+  }
+  .empty-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, var(--green-50) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .empty-illo {
+    width: 100px; height: 100px; margin: 0 auto 18px;
+    background: var(--cream-100); border-radius: 50%;
+    display: grid; place-items: center; font-size: 48px;
+    position: relative;
+  }
+  .empty-illo::after {
+    content: ''; position: absolute; inset: -8px; border: 2px dashed var(--cream-300);
+    border-radius: 50%; animation: spin 30s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--earth-500); margin-bottom: 8px; position: relative; }
+  .empty-h1 { font-family: 'Lora', serif; font-size: 26px; font-weight: 700; color: var(--green-900); line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 10px; position: relative; }
+  .empty-text { font-size: 14px; color: var(--cream-600); line-height: 1.6; max-width: 420px; margin: 0 auto 18px; position: relative; }
+
+  /* Zone badge */
+  .zone-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--cream-100); padding: 6px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; color: var(--cream-700); position: relative; }
+  .zone-badge svg { width: 12px; height: 12px; color: var(--earth-500); }
+
+  /* Sections */
+  .section { margin-bottom: 22px; }
+  .section-h { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cream-500); margin-bottom: 10px; padding-left: 4px; }
+
+  /* Waitlist form */
+  .wait-card { background: white; border: 1px solid var(--cream-200); border-radius: 18px; padding: 22px; }
+  .wait-row { display: flex; gap: 10px; }
+  .wait-input { flex: 1; padding: 14px 16px; background: var(--cream-50); border: 1.5px solid var(--cream-300); border-radius: 12px; font-size: 14px; font-family: inherit; }
+  .wait-input:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(53,127,67,0.10); }
+  .wait-btn { padding: 14px 22px; background: var(--green-600); color: white; border: none; border-radius: 100px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 3px 10px rgba(53,127,67,0.25); }
+  .wait-btn:hover { background: var(--green-700); }
+
+  .wait-meta { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--cream-100); font-size: 12px; color: var(--cream-600); }
+  .wait-avatars { display: flex; }
+  .wait-av { width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; background: var(--green-100); display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--green-800); }
+  .wait-av:not(:first-child) { margin-left: -8px; }
+  .wait-av.more { background: var(--earth-100); color: var(--earth-800); }
+
+  /* Two-up actions */
+  .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 540px) { .actions-grid { grid-template-columns: 1fr; } }
+
+  .action-card { background: white; border: 1px solid var(--cream-200); border-radius: 16px; padding: 18px; text-decoration: none; color: inherit; cursor: pointer; transition: all 200ms; display: flex; flex-direction: column; gap: 10px; }
+  .action-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(53,127,67,0.08); border-color: var(--green-300, #8FCB9C); }
+  .action-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; }
+  .action-icon.share { background: var(--earth-100); }
+  .action-icon.bell { background: var(--green-100); }
+  .action-title { font-family: 'Lora', serif; font-size: 16px; font-weight: 700; color: var(--green-900); line-height: 1.3; }
+  .action-sub { font-size: 13px; color: var(--cream-600); line-height: 1.5; }
+  .action-cta { font-size: 13px; font-weight: 600; color: var(--green-700); margin-top: auto; display: flex; align-items: center; gap: 4px; }
+  .action-cta svg { width: 12px; height: 12px; }
+
+  /* Suggestion: nearby zone */
+  .nearby-card {
+    background: linear-gradient(135deg, var(--green-700), var(--green-900));
+    color: white; border-radius: 18px; padding: 20px;
+    display: flex; gap: 14px; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .nearby-card::before { content: '🚐'; position: absolute; right: -10px; bottom: -16px; font-size: 90px; opacity: 0.18; transform: rotate(-8deg); }
+  .nearby-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.15); display: grid; place-items: center; font-size: 24px; flex-shrink: 0; position: relative; }
+  .nearby-body { flex: 1; min-width: 0; position: relative; }
+  .nearby-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-200); }
+  .nearby-title { font-family: 'Lora', serif; font-size: 16px; font-weight: 700; margin-top: 2px; line-height: 1.3; }
+  .nearby-text { font-size: 12px; color: rgba(255,255,255,0.82); margin-top: 4px; line-height: 1.5; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(250,247,242,0.97); backdrop-filter: blur(12px); border-top: 1px solid var(--cream-200); padding: 8px 12px 12px; display: flex; justify-content: space-around; z-index: 100; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--cream-500); font-size: 10px; font-weight: 500; padding: 6px 10px; border-radius: 10px; flex: 1; }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-item.active { color: var(--green-700); font-weight: 600; }
+  .nav-item.active svg { color: var(--green-600); }
+
+  @media (min-width: 720px) { .bottom-nav { display: none; } body { padding-bottom: 0; } }
+</style>
+</head>
+<body>
+
+<div class="demo-nav">
+  <div class="demo-nav-inner">
+    <span class="demo-nav-label">DÉMO · ZONE NON COUVERTE</span>
+    <a href="ac-04-catalogue.html" class="demo-nav-link">Catalogue</a>
+    <span class="demo-nav-arrow">→ état vide →</span>
+    <a href="#" class="demo-nav-link active">AC-12 Liste d'attente</a>
+  </div>
+</div>
+
+<header class="header">
+  <a href="#" class="logo">
+    <div class="logo-icon">🐜</div>
+    <span class="logo-text">Delta<span class="logo-dot">.</span></span>
+  </a>
+</header>
+
+<main class="page">
+
+  <div class="empty-hero">
+    <div class="empty-illo">🌾</div>
+    <div class="empty-eyebrow">Bientôt chez vous</div>
+    <h1 class="empty-h1">Pas encore de rameneur dans votre zone</h1>
+    <p class="empty-text">Delta repose sur des trajets que des particuliers font déjà. Aucun rameneur n'a encore déclaré de trajet vers votre quartier — mais ça peut changer vite.</p>
+    <span class="zone-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Limoges centre · 87000
+    </span>
+  </div>
+
+  <!-- Liste d'attente -->
+  <section class="section">
+    <div class="section-h">Soyez prévenu·e en premier</div>
+    <div class="wait-card">
+      <p style="font-size:14px; color:var(--cream-700); line-height:1.55; margin-bottom:14px;">
+        Recevez une notification dès qu'un rameneur déclare un trajet compatible avec votre zone.
+      </p>
+      <div class="wait-row">
+        <input class="wait-input" type="email" value="marie.dubois@gmail.com">
+        <button class="wait-btn">Activer</button>
+      </div>
+      <div class="wait-meta">
+        <div class="wait-avatars">
+          <div class="wait-av">P</div>
+          <div class="wait-av">L</div>
+          <div class="wait-av">M</div>
+          <div class="wait-av more">+8</div>
+        </div>
+        <span><strong>11 acheteurs</strong> dans votre quartier attendent déjà</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Actions complémentaires -->
+  <section class="section">
+    <div class="section-h">Vous pouvez aussi…</div>
+    <div class="actions-grid">
+
+      <a href="#" class="action-card">
+        <div class="action-icon share">🤝</div>
+        <div class="action-title">Parrainer un proche rameneur</div>
+        <div class="action-sub">Vous connaissez quelqu'un qui fait régulièrement ce trajet ? Invitez-le, il aura 10€ offerts.</div>
+        <div class="action-cta">Inviter
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>
+
+      <a href="ac-04-catalogue.html" class="action-card">
+        <div class="action-icon bell">📍</div>
+        <div class="action-title">Changer de zone de livraison</div>
+        <div class="action-sub">Vous serez ailleurs cette semaine ? Saisissez une autre adresse pour voir les produits matchables.</div>
+        <div class="action-cta">Modifier ma zone
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Suggestion zone proche -->
+  <div class="nearby-card">
+    <div class="nearby-icon">🚐</div>
+    <div class="nearby-body">
+      <div class="nearby-eyebrow">À 12 km de chez vous</div>
+      <div class="nearby-title">Brive-la-Gaillarde est couverte</div>
+      <div class="nearby-text">3 rameneurs actifs · 24 produits disponibles. Si vous avez un point relais ami là-bas, vous pouvez en profiter.</div>
+    </div>
+  </div>
+
+</main>
+
+<nav class="bottom-nav">
+  <a href="ac-03-accueil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Accueil</a>
+  <a href="ac-04-catalogue.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/></svg>Catalogue</a>
+  <a href="ac-06-mes-envies.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Envies</a>
+  <a href="ac-08-mes-commandes.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Commandes</a>
+  <a href="ac-11-profil.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/></svg>Profil</a>
+</nav>
+
+</body>
+</html>

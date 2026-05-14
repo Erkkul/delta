@@ -10,6 +10,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 - **49 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-157 sous les autres épics — voir tables par épic ci-dessous)
 - **Subtasks** : voir le catalogue par épic ci-dessous. Le mapping peut être incomplet pour les subtasks les plus récentes — Jira fait foi pour la liste exhaustive.
 - État au 2026-05-12 : KAN-1 *Examiner* ; KAN-2 *Wip* (implémentation web démarrée sur `feat/kan-2-creation-compte`) ; KAN-3 *À faire* (cadrage ouvert) ; autres *Ideas*
+- **Maquettes (2026-05-14)** : les 35 écrans des 3 parcours (Producteur, Acheteur, Rameneur) du sitemap PRD §10 sont maquettés. Restent à maquetter : transverses **TR-02** (centre notifications) et **TR-04** (signalement / litige) ; **TR-03** est couvert par `rm-09-chat.html`. Index navigable de toutes les maquettes : `design/maquettes/index.html`
 
 ## Convention de référencement
 
@@ -27,60 +28,60 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
 | PR-01 Inscription / connexion | `pr-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/) |
-| PR-02 Onboarding Stripe Connect | — | KAN-16 (Onboarding Stripe Connect) | KAN-62 |
-| PR-03 Dashboard | — | KAN-18 (Tableau de bord producteur) | KAN-56 |
+| PR-02 Onboarding Stripe Connect | `pr-02-onboarding-stripe.html` | KAN-16 (Onboarding Stripe Connect) | KAN-62 |
+| PR-03 Dashboard | `pr-03-dashboard.html` | KAN-18 (Tableau de bord producteur) | KAN-56 |
 | PR-04 Catalogue produits | `pr-04-catalogue.html` | KAN-20 (Création & édition produit) | KAN-23 (Statuts produit) |
 | PR-05 Création / édition produit | `pr-05-edition-produit.html` | KAN-20 (Création & édition produit) | KAN-21 (Photos), KAN-22 (Stock), KAN-24 (Labels & catégories) |
 | PR-06 Récupération à venir | `pr-06-recuperation.html` | KAN-46 (QR Pickup), KAN-47 (Checklist remise producteur) | KAN-45 |
-| PR-07 Historique ventes | — | KAN-19 (Historique ventes) | KAN-36 (Factures PDF) |
-| PR-08 Profil public producteur | — | KAN-17 (Informations profil & ferme) | KAN-53 (Profils publics & avis), KAN-63, KAN-64, KAN-65, KAN-66 |
-| PR-09 Paramètres compte | — | KAN-17 (Informations profil & ferme) | — |
+| PR-07 Historique ventes | `pr-07-historique-ventes.html` | KAN-19 (Historique ventes) | KAN-36 (Factures PDF) |
+| PR-08 Profil public producteur | `pr-08-profil-public.html` | KAN-17 (Informations profil & ferme) | KAN-53 (Profils publics & avis), KAN-63, KAN-64, KAN-65, KAN-66 |
+| PR-09 Paramètres compte | `pr-09-parametres.html` | KAN-17 (Informations profil & ferme) | — |
 
 ### Parcours Acheteur (§10.3 PRD)
 
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
 | AC-01 Inscription / connexion | `ac-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/) |
-| AC-02 Onboarding | — | KAN-25 (Onboarding & zone), KAN-26 (Préférences catégories) | — |
+| AC-02 Onboarding | `ac-02-onboarding.html` | KAN-25 (Onboarding & zone), KAN-26 (Préférences catégories) | — |
 | AC-03 Accueil | `ac-03-accueil.html` | KAN-28 (Catalogue filtré) | — |
-| AC-04 Catalogue parcourable | — | KAN-28 (Catalogue filtré) | KAN-29 (Zone non couverte) |
+| AC-04 Catalogue parcourable | `ac-04-catalogue.html` | KAN-28 (Catalogue filtré) | KAN-29 (Zone non couverte) |
 | AC-05 Fiche produit | `ac-05-fiche-produit.html` | KAN-28 (Catalogue filtré) | KAN-30 (Wishlist privée) |
-| AC-06 Mes envies | — | KAN-30 (Wishlist privée) | — |
+| AC-06 Mes envies | `ac-06-mes-envies.html` | KAN-30 (Wishlist privée) | — |
 | AC-07 Notif match → confirmation | `ac-07-notification-match.html` | KAN-31 (Notification & confirmation match) | KAN-32 (Pénalités acheteur) |
-| AC-07b Paiement Stripe | — | KAN-33 (Paiement Stripe), KAN-34 (Escrow & libération) | — |
+| AC-07b Paiement Stripe | `ac-07b-paiement.html` | KAN-33 (Paiement Stripe), KAN-34 (Escrow & libération) | — |
 | AC-08 Mes commandes | `ac-08-mes-commandes.html` | KAN-45 (Suivi mission & états) | KAN-55 (Notif in-app) |
-| AC-08b QR delivery | — | KAN-48 (QR Delivery) | — |
-| AC-08bis Profil public producteur | — | KAN-53 (Profils publics & avis) | — |
-| AC-09 Historique commandes | — | KAN-27 (Historique commandes) | KAN-36 (Factures PDF) |
-| AC-10 Évaluation post-livraison | — | KAN-52 (Notation post-livraison) | — |
-| AC-11 Profil + paramètres | — | KAN-26 (Préférences catégories), KAN-25 (Onboarding & zone) | — |
-| AC-12 Zone non couverte | — | KAN-29 (Zone non couverte & liste d'attente) | — |
+| AC-08b QR delivery | `ac-08b-qr-delivery.html` | KAN-48 (QR Delivery) | — |
+| AC-08bis Profil public producteur | `ac-08bis-profil-producteur.html` | KAN-53 (Profils publics & avis) | — |
+| AC-09 Historique commandes | `ac-09-historique.html` | KAN-27 (Historique commandes) | KAN-36 (Factures PDF) |
+| AC-10 Évaluation post-livraison | `ac-10-evaluation.html` | KAN-52 (Notation post-livraison) | — |
+| AC-11 Profil + paramètres | `ac-11-profil.html` | KAN-26 (Préférences catégories), KAN-25 (Onboarding & zone) | — |
+| AC-12 Zone non couverte | `ac-12-zone-non-couverte.html` | KAN-29 (Zone non couverte & liste d'attente) | — |
 
 ### Parcours Rameneur (§10.4 PRD)
 
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
 | RM-01 Inscription / connexion | `rm-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/) |
-| RM-02 Onboarding | — | KAN-37 (Onboarding & Stripe Identity), KAN-38 (Capacité véhicule) | — |
-| RM-03 Accueil rameneur | — | KAN-39 (Tableau de bord rameneur) | — |
+| RM-02 Onboarding | `rm-02-onboarding.html` | KAN-37 (Onboarding & Stripe Identity), KAN-38 (Capacité véhicule) | — |
+| RM-03 Accueil rameneur | `rm-03-accueil.html` | KAN-39 (Tableau de bord rameneur) | — |
 | RM-04 Déclarer un trajet | `rm-04-declarer-trajet.html` | KAN-41 (Déclaration de trajet) | KAN-38 (Capacité véhicule) |
 | RM-05 Liste des opportunités | `rm-05-liste-opportunites.html` | KAN-42 (Calcul & affichage opportunités) | — |
 | RM-06 Détail opportunité | `rm-06-detail-opportunite.html` | KAN-43 (Détail & réservation mission) | — |
-| RM-07 Mes missions | — | KAN-44 (Gestion des trajets) | KAN-45 |
+| RM-07 Mes missions | `rm-07-mes-missions.html` | KAN-44 (Gestion des trajets) | KAN-45 |
 | RM-08 Mission active | `rm-08-mission-active.html` | KAN-45 (Suivi mission & états), KAN-46 (QR Pickup), KAN-48 (QR Delivery) | KAN-49 (Cas limites) |
-| RM-09 Chat de mission | — | KAN-50 (Chat par mission) | KAN-51 (Notifs messages) |
-| RM-10 Historique missions + revenus | — | KAN-39 (Tableau de bord rameneur) | KAN-19 |
-| RM-11 Profil rameneur public | — | KAN-53 (Profils publics & avis) | — |
-| RM-12 Pause / désactivation | — | KAN-40 (Pause & désactivation) | — |
+| RM-09 Chat de mission | `rm-09-chat.html` | KAN-50 (Chat par mission) | KAN-51 (Notifs messages) |
+| RM-10 Historique missions + revenus | `rm-10-historique-revenus.html` | KAN-39 (Tableau de bord rameneur) | KAN-19 |
+| RM-11 Profil rameneur public | `rm-11-profil-public.html` | KAN-53 (Profils publics & avis) | — |
+| RM-12 Pause / désactivation | `rm-12-pause.html` | KAN-40 (Pause & désactivation) | — |
 
 ### Écrans transverses (§10.5 PRD)
 
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
 | TR-01 Auth & gestion compte | voir PR-01 / AC-01 / RM-01 | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/) |
-| TR-02 Centre notifications | — | KAN-54 (Notifications push), KAN-55 (Notifications in-app) | KAN-56 |
-| TR-03 Chat par mission | — | KAN-50 (Chat par mission) | KAN-51 |
-| TR-04 Signalement / litige | — | KAN-60 (Gestion litiges & signalements) | KAN-32 (Pénalités acheteur) |
+| TR-02 Centre notifications | — *(à maquetter)* | KAN-54 (Notifications push), KAN-55 (Notifications in-app) | KAN-56 |
+| TR-03 Chat par mission | voir `rm-09-chat.html` | KAN-50 (Chat par mission) | KAN-51 |
+| TR-04 Signalement / litige | — *(à maquetter)* | KAN-60 (Gestion litiges & signalements) | KAN-32 (Pénalités acheteur) |
 
 ---
 
