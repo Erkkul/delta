@@ -13,10 +13,10 @@ Charge ce fichier à l'ouverture du projet pour comprendre rapidement où on en 
 ## Statut
 
 - **Phase** : conception produit, pré-développement
-- **Maquettes** : 11 écrans prioritaires posés (rameneur, producteur, acheteur). Avancement détaillé sur Jira (projet KAN).
+- **Maquettes** : 36 écrans cartographiés sur les 3 parcours (acheteur 15, producteur 9, rameneur 12). Index navigable : `design/maquettes/index.html`. Avancement détaillé sur Jira (projet KAN).
 - **Décisions structurantes** : prises (voir ci-dessous)
 - **Backlog** : structuré sur Jira (erkulaws.atlassian.net, projet KAN) — épics, features et subtasks créés pour l'ensemble du MVP
-- **Code** : pas commencé
+- **Code** : KAN-2 (création de compte) livré sur main — `/welcome`, `/signup`, `/auth/verify-email`, `/onboarding/role` + stubs `/onboarding/[role]`. Reste à attaquer : KAN-3 (connexion), KAN-157 (mot de passe oublié), puis onboardings par rôle (KAN-16 / KAN-25 / KAN-37).
 
 ## Modèle d'expérience (important — flip vs PRD initial)
 

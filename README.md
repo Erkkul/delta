@@ -28,8 +28,8 @@ Delta/
 ├── legal/               CGU, CGV, RGPD (à venir)
 ├── business/            Modèle économique, pricing, ops (à venir)
 │
-├── apps/                web (Next.js 15, signup KAN-2 en place), mobile (Expo) — à venir
-├── packages/            contracts, core, db, ui-web (scaffold KAN-2) ; ui-mobile, design-tokens, api-client, jobs à venir
+├── apps/                web (Next.js 15, flow auth KAN-2 livré : welcome / signup / verify-email / onboarding role) ; mobile (Expo) à venir
+├── packages/            contracts, core, db, ui-web (auth complet KAN-2) ; ui-mobile, design-tokens, api-client, jobs à venir
 └── supabase/            Config CLI, migrations versionnées, seeds, policies SQL
     ├── config.toml      Config locale Supabase CLI
     ├── migrations/      Migrations SQL horodatées (YYYYMMDDHHMMSS_*.sql)
