@@ -32,7 +32,39 @@ export class AuthValidationError extends Error {
   }
 }
 
+/**
+ * Erreur générique d'échec d'authentification (KAN-3 — login).
+ * Volontairement opaque : retournée à la fois quand l'email n'existe
+ * pas, quand le mot de passe est faux, ou quand l'email n'est pas
+ * vérifié. Ne JAMAIS distinguer côté API (anti-énumération, cf.
+ * specs/KAN-3/design.md §Risques).
+ */
+export class InvalidCredentialsError extends Error {
+  readonly code = "AUTH_INVALID_CREDENTIALS" as const
+
+  constructor() {
+    super("Identifiants invalides.")
+    this.name = "InvalidCredentialsError"
+  }
+}
+
+/**
+ * Limite de tentatives atteinte (KAN-3 — protection brute-force).
+ * `retryAfterMs` est exposé pour qu'un adapter HTTP puisse poser le
+ * header `Retry-After` (en secondes, arrondi sup.).
+ */
+export class RateLimitedError extends Error {
+  readonly code = "AUTH_RATE_LIMITED" as const
+
+  constructor(public readonly retryAfterMs: number) {
+    super("Trop de tentatives, réessayez plus tard.")
+    this.name = "RateLimitedError"
+  }
+}
+
 export type AuthErrorCode =
   | EmailAlreadyTakenError["code"]
   | WeakPasswordError["code"]
   | AuthValidationError["code"]
+  | InvalidCredentialsError["code"]
+  | RateLimitedError["code"]
