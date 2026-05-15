@@ -94,11 +94,36 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## Paiement
 
 ### Stripe Connect Express
-- **Statut** : À faire
+- **Statut** : Partiel — provisioning test mode fait le 2026-05-14 (compte plateforme, profil Connect, deux webhooks). Reste activation live mode au pré-lancement, branding hosted pages (optionnel), Stripe CLI local pour dev webhooks (au moment de KAN-16).
 - **Dashboard** : https://dashboard.stripe.com
 - **Plan** : pay-as-you-go (commission par transaction)
-- **Env vars produites** : `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CONNECT_CLIENT_ID`
-- **Notes** : compte plateforme. Activer Connect Express. Webhook `/api/v1/webhooks/stripe`. Test mode avant prod. Voir ARCHITECTURE.md §8.
+- **Compte plateforme** : `acct_1KPSvLL0nfTrCtHw` (compte Erkkul existant, repurposé Delta)
+- **Env vars produites** :
+  - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — `pk_test_...` (client web + mobile)
+  - `STRIPE_SECRET_KEY` — `sk_test_...` (server-only, appels API + Account Links)
+  - `STRIPE_WEBHOOK_SECRET_PLATFORM` — `whsec_...` (signature endpoint platform)
+  - `STRIPE_WEBHOOK_SECRET_CONNECT` — `whsec_...` (signature endpoint Connect)
+- **Fait le 2026-05-14** :
+  - Compte plateforme Delta activé sur l'environnement test (compte Erkkul vierge `acct_1KPSvLL0nfTrCtHw`).
+  - **Profil Connect** complété via le wizard `connect/set-up/profile` :
+    - Funds flow : *Buyers will purchase from you* + *Payouts can be split between sellers* (cohérent avec escrow plateforme + split 85% producteur / 10% rameneur / 5% plateforme).
+    - Industry : *E-commerce products* (modèle marketplace produits physiques d'indépendants, comparable Etsy).
+    - Products/services : produits similaires entre vendeurs, paniers < $10k (aligné MVP « produits secs et agricoles non sensibles uniquement »).
+    - Account creation : **Onboarding hosted by Stripe** (Account Links — KYC light hébergé par Stripe pour KAN-16).
+    - Account management : **Express Dashboard** (login link via API pour producteurs/rameneurs).
+    - Liability for refunds and chargebacks : *plateforme responsable* (standard Express). Couvre la responsabilité paiement uniquement, pas la responsabilité produit/qualité (statut juridique « marketplace pur » inchangé).
+  - **Deux webhook destinations** créées dans Workbench (la nouvelle UX Stripe oblige à séparer les scopes platform et Connect en deux destinations distinctes — pas possible de mixer en une seule depuis la migration vers Workbench / Accounts v2) :
+    - **Endpoint platform** (`Delta — plateforme (test mode)`, ID `we_1TXUSiL0nfTrCtHwONr40ncZ`) — scope *Votre compte*, version API `2020-08-27` (la dernière stable `2026-04-22.dahlia` a un catalogue d'événements amputé, à reconsidérer plus tard). 7 événements écoutés : `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `charge.dispute.created`, `transfer.created`, `transfer.reversed` (+1 bonus selon ajout fait). URL : `https://delta-web-gamma.vercel.app/api/v1/webhooks/stripe`. Note : `transfer.failed` n'existe pas comme événement webhook chez Stripe — les échecs de transfer sont synchrones côté API. L'échec asynchrone qui nous importe (l'argent n'arrive pas chez le producteur) est capté par `payout.failed` côté Connect.
+    - **Endpoint Connect** (`Delta — comptes connectés (test mode)`) — scope *Comptes connectés*, version API `2020-08-27`. 4 événements : `account.updated` (essentiel pour KAN-16 — état KYC + requirements), `account.application.deauthorized`, `payout.paid`, `payout.failed`. Même URL : `https://delta-web-gamma.vercel.app/api/v1/webhooks/stripe`.
+  - Les 4 clés (publishable, secret, deux whsec) ont été notées hors repo. Aucune n'est commitée — `.env.local` reste gitignored.
+  - Template versionné mis à jour : `apps/web/.env.local.example` reçoit les 4 vars Stripe avec la convention `NEXT_PUBLIC_*` pour la publishable et sans préfixe pour les server-only.
+  - **Décision env vars vs setup.md original** : `STRIPE_CONNECT_CLIENT_ID` listé historiquement n'est pas nécessaire (c'est pour Connect *Standard* OAuth, pas Express qui utilise Account Links). `STRIPE_WEBHOOK_SECRET` unique est remplacé par deux secrets `STRIPE_WEBHOOK_SECRET_PLATFORM` + `STRIPE_WEBHOOK_SECRET_CONNECT` car la nouvelle UX Stripe sépare obligatoirement les destinations platform/Connect en deux endpoints, chacun avec son propre signing secret. Le handler `/api/v1/webhooks/stripe` essaiera les deux à la vérification (cf. ARCHITECTURE.md §8 quand on cadrera KAN-16).
+- **À faire** :
+  - **Stripe CLI** local pour forwarder les webhooks vers `localhost:3000` en dev (`stripe listen --forward-to localhost:3000/api/v1/webhooks/stripe`) — produit un 3e `whsec_` local-only, à ajouter dans `.env.local` au moment de coder KAN-16.
+  - Activer le live mode (carte « Activez votre compte ») au pré-lancement : nécessitera infos légales complètes Erkkul (SIRET, RIB pro, justificatifs).
+  - **Branding hosted pages** (optionnel mais souhaitable) : ajouter logo Delta + couleurs sur les pages Stripe hosted (onboarding + Express Dashboard). À faire quand le logo est arrêté.
+  - **Câblage code** : implémentation du handler `/api/v1/webhooks/stripe` + idempotence (cf. ARCHITECTURE.md §8) + flow Account Links pour onboarding producteur (KAN-16) puis rameneur.
+- **Notes** : Mode test uniquement à ce stade — `pk_test_...` / `sk_test_...` / endpoints sur l'environnement de test Stripe. Le passage en live mode dupliquera tout en mode prod (clés `pk_live_...` / `sk_live_...` + nouveaux endpoints webhook avec leurs propres `whsec_`). Voir ARCHITECTURE.md §8 pour le détail de l'intégration code.
 
 ## Jobs et observabilité
 
