@@ -9,7 +9,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 - **13 épics** (KAN-1, KAN-4 → KAN-15) — un épic par grand domaine fonctionnel
 - **49 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-157 sous les autres épics — voir tables par épic ci-dessous)
 - **Subtasks** : voir le catalogue par épic ci-dessous. Le mapping peut être incomplet pour les subtasks les plus récentes — Jira fait foi pour la liste exhaustive.
-- État au 2026-05-14 : KAN-1 *Examiner* ; KAN-2 *Wip* (implémentation web livrée sur main) ; KAN-3 *Wip* (implémentation web sur `claude/kan-3-flow-connexion`) ; autres *Ideas*
+- État au 2026-05-16 : KAN-1 *Examiner* ; KAN-2 *Wip* (implémentation web livrée sur main) ; KAN-3 *Wip* (implémentation web sur `claude/kan-3-flow-connexion`) ; KAN-157 *À faire* (cadrage tech ouvert, voir `specs/KAN-157/`) ; autres *Ideas*
 - **Maquettes (2026-05-14)** : les 35 écrans des 3 parcours (Producteur, Acheteur, Rameneur) du sitemap PRD §10 sont maquettés. Restent à maquetter : transverses **TR-02** (centre notifications) et **TR-04** (signalement / litige) ; **TR-03** est couvert par `rm-09-chat.html`. Index navigable de toutes les maquettes : `design/maquettes/index.html`
 
 ## Convention de référencement
@@ -27,7 +27,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
-| PR-01 Inscription / connexion | `pr-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/) |
+| PR-01 Inscription / connexion | `pr-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
 | PR-02 Onboarding Stripe Connect | `pr-02-onboarding-stripe.html` | KAN-16 (Onboarding Stripe Connect) | KAN-62 |
 | PR-03 Dashboard | `pr-03-dashboard.html` | KAN-18 (Tableau de bord producteur) | KAN-56 |
 | PR-04 Catalogue produits | `pr-04-catalogue.html` | KAN-20 (Création & édition produit) | KAN-23 (Statuts produit) |
@@ -41,7 +41,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
-| AC-01 Inscription / connexion | `ac-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/) |
+| AC-01 Inscription / connexion | `ac-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
 | AC-02 Onboarding | `ac-02-onboarding.html` | KAN-25 (Onboarding & zone), KAN-26 (Préférences catégories) | — |
 | AC-03 Accueil | `ac-03-accueil.html` | KAN-28 (Catalogue filtré) | — |
 | AC-04 Catalogue parcourable | `ac-04-catalogue.html` | KAN-28 (Catalogue filtré) | KAN-29 (Zone non couverte) |
@@ -61,7 +61,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
-| RM-01 Inscription / connexion | `rm-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/) |
+| RM-01 Inscription / connexion | `rm-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
 | RM-02 Onboarding | `rm-02-onboarding.html` | KAN-37 (Onboarding & Stripe Identity), KAN-38 (Capacité véhicule) | — |
 | RM-03 Accueil rameneur | `rm-03-accueil.html` | KAN-39 (Tableau de bord rameneur) | — |
 | RM-04 Déclarer un trajet | `rm-04-declarer-trajet.html` | KAN-41 (Déclaration de trajet) | KAN-38 (Capacité véhicule) |
@@ -78,7 +78,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
-| TR-01 Auth & gestion compte | voir PR-01 / AC-01 / RM-01 | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/) |
+| TR-01 Auth & gestion compte | voir PR-01 / AC-01 / RM-01 | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
 | TR-02 Centre notifications | — *(à maquetter)* | KAN-54 (Notifications push), KAN-55 (Notifications in-app) | KAN-56 |
 | TR-03 Chat par mission | voir `rm-09-chat.html` | KAN-50 (Chat par mission) | KAN-51 |
 | TR-04 Signalement / litige | — *(à maquetter)* | KAN-60 (Gestion litiges & signalements) | KAN-32 (Pénalités acheteur) |
@@ -94,7 +94,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-1 | Epic | Examiner | Authentication |
 | KAN-2 | Feature | Wip | Création de compte — [Cadrage tech](specs/KAN-2/) |
 | KAN-3 | Feature | Wip | Connexion — [Cadrage tech](specs/KAN-3/) |
-| KAN-157 | Feature | Ideas | Récupération de mot de passe |
+| KAN-157 | Feature | À faire | Récupération de mot de passe — [Cadrage tech](specs/KAN-157/) |
 
 ### KAN-4 — Profil Producteur
 
