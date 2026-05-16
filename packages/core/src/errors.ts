@@ -62,9 +62,25 @@ export class RateLimitedError extends Error {
   }
 }
 
+/**
+ * Token de récupération invalide ou expiré (KAN-157 — reset password).
+ * Volontairement opaque : retournée que l'OTP soit faux, déjà consommé,
+ * expiré, ou que l'email soit inconnu (anti-énumération, cf.
+ * specs/KAN-157/design.md §Risques).
+ */
+export class InvalidRecoveryTokenError extends Error {
+  readonly code = "AUTH_INVALID_RECOVERY_TOKEN" as const
+
+  constructor() {
+    super("Code de récupération invalide ou expiré.")
+    this.name = "InvalidRecoveryTokenError"
+  }
+}
+
 export type AuthErrorCode =
   | EmailAlreadyTakenError["code"]
   | WeakPasswordError["code"]
   | AuthValidationError["code"]
   | InvalidCredentialsError["code"]
+  | InvalidRecoveryTokenError["code"]
   | RateLimitedError["code"]
