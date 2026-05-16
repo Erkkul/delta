@@ -28,7 +28,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
 | PR-01 Inscription / connexion | `pr-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
-| PR-02 Onboarding Stripe Connect | `pr-02-onboarding-stripe.html` | KAN-16 (Onboarding Stripe Connect) | KAN-62 |
+| PR-02 Onboarding Stripe Connect | `pr-02-onboarding-stripe.html` | KAN-16 (Onboarding Stripe Connect) — [Cadrage tech](specs/KAN-16/) | KAN-62 |
 | PR-03 Dashboard | `pr-03-dashboard.html` | KAN-18 (Tableau de bord producteur) | KAN-56 |
 | PR-04 Catalogue produits | `pr-04-catalogue.html` | KAN-20 (Création & édition produit) | KAN-23 (Statuts produit) |
 | PR-05 Création / édition produit | `pr-05-edition-produit.html` | KAN-20 (Création & édition produit) | KAN-21 (Photos), KAN-22 (Stock), KAN-24 (Labels & catégories) |
@@ -101,7 +101,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | Ticket | Type | Statut | Résumé |
 |--------|------|--------|--------|
 | KAN-4 | Epic | Ideas | Profil Producteur |
-| KAN-16 | Feature | Ideas | Onboarding Stripe Connect |
+| KAN-16 | Feature | À faire | Onboarding Stripe Connect — [Cadrage tech](specs/KAN-16/) |
 | KAN-17 | Feature | Ideas | Informations profil & ferme |
 | KAN-18 | Feature | Ideas | Tableau de bord producteur |
 | KAN-19 | Feature | Ideas | Historique ventes |
