@@ -1,14 +1,20 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  ForgotPasswordInput,
   LoginInput,
   OtpVerificationInput,
+  PASSWORD_MIN,
+  Password,
+  ResetPasswordInput,
+  ResetPasswordOutput,
   Role,
   ROLES,
   RoleSelectionInput,
   SignupInput,
   SignupOutput,
-} from "./auth"
+  passwordHint,
+} from "./index"
 
 describe("Role", () => {
   it("accepte les trois valeurs valides", () => {
@@ -19,6 +25,39 @@ describe("Role", () => {
 
   it("rejette une valeur inconnue", () => {
     expect(() => Role.parse("admin")).toThrow()
+  })
+})
+
+describe("passwordPolicy (partagée signup + reset)", () => {
+  it("exporte une politique de 10 caractères minimum", () => {
+    expect(PASSWORD_MIN).toBe(10)
+  })
+
+  it("hint UI mentionne explicitement la règle 10/maj/min/digit", () => {
+    expect(passwordHint).toContain("10")
+    expect(passwordHint.toLowerCase()).toContain("majuscule")
+    expect(passwordHint.toLowerCase()).toContain("minuscule")
+    expect(passwordHint.toLowerCase()).toContain("chiffre")
+  })
+
+  it("accepte un mot de passe conforme", () => {
+    expect(() => Password.parse("Motdepasse2026")).not.toThrow()
+  })
+
+  it("rejette < 10 caractères", () => {
+    expect(() => Password.parse("Aa12345")).toThrow()
+  })
+
+  it("rejette sans majuscule", () => {
+    expect(() => Password.parse("motdepasse2026")).toThrow()
+  })
+
+  it("rejette sans minuscule", () => {
+    expect(() => Password.parse("MOTDEPASSE2026")).toThrow()
+  })
+
+  it("rejette sans chiffre", () => {
+    expect(() => Password.parse("Motdepasseseul")).toThrow()
   })
 })
 
@@ -172,5 +211,73 @@ describe("LoginInput", () => {
     expect(() =>
       LoginInput.parse({ email: "user@example.fr", password: "abc" }),
     ).not.toThrow()
+  })
+})
+
+describe("ForgotPasswordInput (KAN-157)", () => {
+  it("accepte un email valide", () => {
+    const parsed = ForgotPasswordInput.parse({ email: "User@Example.fr" })
+    expect(parsed.email).toBe("user@example.fr")
+  })
+
+  it("rejette un email mal formé", () => {
+    expect(() => ForgotPasswordInput.parse({ email: "pas-un-email" })).toThrow()
+  })
+
+  it("rejette un body vide", () => {
+    expect(() => ForgotPasswordInput.parse({})).toThrow()
+  })
+})
+
+describe("ResetPasswordInput (KAN-157)", () => {
+  const valid = {
+    email: "user@example.fr",
+    token: "123456",
+    newPassword: "Motdepasse2026",
+  }
+
+  it("accepte un payload valide", () => {
+    const parsed = ResetPasswordInput.parse(valid)
+    expect(parsed.email).toBe("user@example.fr")
+    expect(parsed.token).toBe("123456")
+  })
+
+  it("normalise l'email (trim + lowercase)", () => {
+    const parsed = ResetPasswordInput.parse({
+      ...valid,
+      email: "  USER@Example.FR ",
+    })
+    expect(parsed.email).toBe("user@example.fr")
+  })
+
+  it("rejette un token non numérique", () => {
+    expect(() =>
+      ResetPasswordInput.parse({ ...valid, token: "12345A" }),
+    ).toThrow()
+  })
+
+  it("rejette un token de 5 chiffres", () => {
+    expect(() =>
+      ResetPasswordInput.parse({ ...valid, token: "12345" }),
+    ).toThrow()
+  })
+
+  it("applique la politique mot de passe partagée (rejette Aa1)", () => {
+    expect(() =>
+      ResetPasswordInput.parse({ ...valid, newPassword: "Aa1" }),
+    ).toThrow()
+  })
+})
+
+describe("ResetPasswordOutput (KAN-157)", () => {
+  it("accepte un payload bien formé", () => {
+    const parsed = ResetPasswordOutput.parse({
+      userId: "11111111-1111-4111-8111-111111111111",
+    })
+    expect(parsed.userId).toBe("11111111-1111-4111-8111-111111111111")
+  })
+
+  it("rejette un userId non UUID", () => {
+    expect(() => ResetPasswordOutput.parse({ userId: "abc" })).toThrow()
   })
 })
