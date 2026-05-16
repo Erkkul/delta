@@ -104,3 +104,18 @@ export const SIGNUP_ERROR_CODES = {
 } as const
 export type SignupErrorCode =
   (typeof SIGNUP_ERROR_CODES)[keyof typeof SIGNUP_ERROR_CODES]
+
+/**
+ * Codes d'erreur exposés par `POST /api/v1/auth/login` (KAN-3).
+ * `InvalidCredentials` est volontairement opaque : on ne distingue jamais
+ * email inconnu de mauvais mot de passe (anti-énumération, cf.
+ * specs/KAN-3/design.md §Risques techniques).
+ */
+export const LOGIN_ERROR_CODES = {
+  ValidationFailed: "AUTH_VALIDATION_FAILED",
+  InvalidCredentials: "AUTH_INVALID_CREDENTIALS",
+  RateLimited: "AUTH_RATE_LIMITED",
+  Unknown: "AUTH_UNKNOWN",
+} as const
+export type LoginErrorCode =
+  (typeof LOGIN_ERROR_CODES)[keyof typeof LOGIN_ERROR_CODES]

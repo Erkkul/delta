@@ -6,6 +6,8 @@ export type {
 } from "./auth-split-layout"
 export { SignupForm } from "./signup-form"
 export type { SignupFormProps } from "./signup-form"
+export { LoginForm } from "./login-form"
+export type { LoginFormProps } from "./login-form"
 export { Splash } from "./splash"
 export type { SplashProps } from "./splash"
 export { OtpForm, OtpError } from "./otp-form"

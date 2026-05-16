@@ -9,6 +9,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./signup-form": "./src/signup-form.tsx",
+    "./login-form": "./src/login-form.tsx",
     "./splash": "./src/splash.tsx",
     "./otp-form": "./src/otp-form.tsx",
     "./role-selector": "./src/role-selector.tsx",

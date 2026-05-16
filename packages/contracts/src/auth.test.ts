@@ -145,9 +145,32 @@ describe("LoginInput", () => {
     expect(parsed.email).toBe("user@example.fr")
   })
 
+  it("normalise l'email (trim + lowercase)", () => {
+    const parsed = LoginInput.parse({
+      email: "  USER@Example.FR ",
+      password: "x",
+    })
+    expect(parsed.email).toBe("user@example.fr")
+  })
+
   it("rejette un email invalide", () => {
     expect(() =>
       LoginInput.parse({ email: "pas-un-email", password: "x" }),
     ).toThrow()
+  })
+
+  it("rejette un mot de passe vide", () => {
+    expect(() =>
+      LoginInput.parse({ email: "user@example.fr", password: "" }),
+    ).toThrow()
+  })
+
+  it("n'applique PAS la politique 10 caractères (le contrôle de force est au signup uniquement)", () => {
+    // Important : le login doit accepter n'importe quel mot de passe non
+    // vide pour ne pas leaker le format historiquement accepté. La
+    // vérification de force se fait uniquement au signup / reset.
+    expect(() =>
+      LoginInput.parse({ email: "user@example.fr", password: "abc" }),
+    ).not.toThrow()
   })
 })
