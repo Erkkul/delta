@@ -1,6 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+
+import { OTP_LENGTH, OtpDigits } from "./otp-digits"
 
 /**
  * OtpForm AU-04 — saisie d'un code OTP 6 chiffres.
@@ -16,6 +18,9 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "re
  *     (Supabase a déjà envoyé un code lors du signup).
  *   - Erreurs typées via `OtpError` (code invalide / expiré / rate limit /
  *     inconnu) pour rendu adapté côté UI.
+ *
+ * L'input à 6 cases est extrait dans `OtpDigits` (réutilisé par
+ * `ResetPasswordForm` AU-FP3, KAN-157).
  */
 export type OtpErrorKind = "invalid" | "expired" | "rate_limit" | "unknown"
 
@@ -42,7 +47,6 @@ export type OtpFormProps = {
   resendCooldownSeconds?: number
 }
 
-const LENGTH = 6
 const ERROR_COPY: Record<OtpErrorKind, string> = {
   invalid: "Code incorrect. Vérifiez les chiffres saisis.",
   expired: "Code expiré. Demandez-en un nouveau via « Renvoyer le code ».",
@@ -60,7 +64,7 @@ export function OtpForm(props: OtpFormProps) {
     resendCooldownSeconds = 60,
   } = props
   const [digits, setDigits] = useState<string[]>(() =>
-    Array<string>(LENGTH).fill(""),
+    Array<string>(OTP_LENGTH).fill(""),
   )
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<OtpError | null>(null)
@@ -68,12 +72,7 @@ export function OtpForm(props: OtpFormProps) {
     "idle" | "sent" | "sending"
   >("idle")
   const [cooldown, setCooldown] = useState(resendCooldownSeconds)
-  const inputsRef = useRef<Array<HTMLInputElement | null>>([])
   const submittedRef = useRef(false)
-
-  useEffect(() => {
-    inputsRef.current[0]?.focus()
-  }, [])
 
   // Décrémente le compte à rebours du resend.
   useEffect(() => {
@@ -87,51 +86,7 @@ export function OtpForm(props: OtpFormProps) {
   }, [cooldown])
 
   const otp = digits.join("")
-  const isComplete = otp.length === LENGTH && /^\d{6}$/.test(otp)
-
-  function setDigit(index: number, value: string) {
-    const cleaned = value.replace(/\D/g, "")
-    const last = cleaned.slice(-1)
-    setDigits((prev) => {
-      const next = [...prev]
-      next[index] = last || ""
-      return next
-    })
-    if (last && index < LENGTH - 1) {
-      inputsRef.current[index + 1]?.focus()
-    }
-  }
-
-  function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "")
-    if (!pasted) return
-    e.preventDefault()
-    const chars = pasted.slice(0, LENGTH).split("")
-    setDigits((prev) => {
-      const next = [...prev]
-      for (let i = 0; i < LENGTH; i += 1) {
-        next[i] = chars[i] ?? ""
-      }
-      return next
-    })
-    const lastFilled = Math.min(chars.length, LENGTH) - 1
-    inputsRef.current[lastFilled]?.focus()
-  }
-
-  function handleKeyDown(
-    e: KeyboardEvent<HTMLInputElement>,
-    index: number,
-  ) {
-    if (e.key === "Backspace" && !digits[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus()
-    }
-    if (e.key === "ArrowLeft" && index > 0) {
-      inputsRef.current[index - 1]?.focus()
-    }
-    if (e.key === "ArrowRight" && index < LENGTH - 1) {
-      inputsRef.current[index + 1]?.focus()
-    }
-  }
+  const isComplete = otp.length === OTP_LENGTH && /^\d{6}$/.test(otp)
 
   const handleSubmit = useCallback(async () => {
     if (!isComplete || submittedRef.current || submitting) return
@@ -156,10 +111,8 @@ export function OtpForm(props: OtpFormProps) {
       await onResend()
       setResendInfo("sent")
       setCooldown(resendCooldownSeconds)
-      // Repositionne le focus sur la première case.
-      setDigits(Array<string>(LENGTH).fill(""))
+      setDigits(Array<string>(OTP_LENGTH).fill(""))
       submittedRef.current = false
-      inputsRef.current[0]?.focus()
     } catch (err) {
       setResendInfo("idle")
       setError(toOtpError(err))
@@ -206,33 +159,12 @@ export function OtpForm(props: OtpFormProps) {
         </p>
       </div>
 
-      <div
-        className="flex gap-2"
-        role="group"
-        aria-label="Code de vérification 6 chiffres"
-      >
-        {digits.map((d, i) => (
-          <input
-            key={i}
-            ref={(el) => {
-              inputsRef.current[i] = el
-            }}
-            value={d}
-            onChange={(e) => setDigit(i, e.target.value)}
-            onKeyDown={(e) => handleKeyDown(e, i)}
-            onPaste={i === 0 ? handlePaste : undefined}
-            inputMode="numeric"
-            pattern="\d*"
-            autoComplete="one-time-code"
-            maxLength={1}
-            disabled={submitting}
-            aria-invalid={Boolean(error)}
-            aria-label={`Chiffre ${String(i + 1)} sur 6`}
-            data-testid={`otp-digit-${String(i)}`}
-            className="h-14 w-12 rounded-md border border-cream-300 bg-cream-50 text-center font-body text-xl font-semibold text-cream-950 focus:border-green-600 focus:outline-none focus:shadow-focus tablet:h-16 tablet:w-14 tablet:text-2xl"
-          />
-        ))}
-      </div>
+      <OtpDigits
+        value={digits}
+        onChange={setDigits}
+        disabled={submitting}
+        invalid={Boolean(error)}
+      />
 
       {error ? (
         <div
