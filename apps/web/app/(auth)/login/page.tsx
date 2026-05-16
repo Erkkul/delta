@@ -12,10 +12,14 @@ export const metadata = {
   description: "Connectez-vous à votre compte Delta.",
 }
 
-type SearchParams = Promise<{ error?: string }>
+type SearchParams = Promise<{ error?: string; reset?: string }>
 
 export default async function LoginPage(props: { searchParams: SearchParams }) {
   const params = await props.searchParams
+  const resetNotice =
+    params.reset === "ok"
+      ? "Mot de passe mis à jour. Connectez-vous avec le nouveau."
+      : null
   return (
     <AuthSplitLayout
       hero={
@@ -45,7 +49,10 @@ export default async function LoginPage(props: { searchParams: SearchParams }) {
           Saisissez vos identifiants pour accéder à votre espace Delta.
         </p>
       </header>
-      <LoginClient initialError={mapLoginError(params.error)} />
+      <LoginClient
+        initialError={mapLoginError(params.error)}
+        initialNotice={resetNotice}
+      />
     </AuthSplitLayout>
   )
 }

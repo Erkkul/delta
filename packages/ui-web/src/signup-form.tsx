@@ -6,7 +6,7 @@ import {
 } from "@delta/contracts/auth"
 import { useState, type FormEvent } from "react"
 
-import { PasswordStrength } from "./password-strength"
+import { PasswordField } from "./password-field"
 
 /**
  * SignupForm AU-02 (révisé 2026-05-13) — email + password + Google
@@ -143,41 +143,14 @@ export function SignupForm(props: SignupFormProps) {
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="password"
-            className="font-body text-xs font-medium uppercase tracking-[0.04em] text-cream-700"
-          >
-            Mot de passe
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={10}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            aria-invalid={Boolean(fieldErrors.password)}
-            aria-describedby={
-              fieldErrors.password ? "password-error" : "password-hint"
-            }
-            className="rounded-md border border-cream-300 bg-cream-50 px-3.5 py-3 font-body text-base text-cream-950 placeholder:text-cream-500 focus:border-green-600 focus:outline-none focus:shadow-focus"
-          />
-          <PasswordStrength value={password} userInputs={[email]} />
-          {fieldErrors.password ? (
-            <p
-              id="password-error"
-              className="font-body text-xs text-[#C0392B]"
-            >
-              {fieldErrors.password}
-            </p>
-          ) : (
-            <p id="password-hint" className="font-body text-xs text-cream-600">
-              10 caractères minimum, au moins une majuscule, une minuscule et un chiffre.
-            </p>
-          )}
-        </div>
+        <PasswordField
+          id="password"
+          label="Mot de passe"
+          value={password}
+          onChange={setPassword}
+          userInputs={[email]}
+          error={fieldErrors.password}
+        />
       </fieldset>
 
       {formError ? (

@@ -25,10 +25,16 @@ export type LoginFormProps = {
   loginWithEmail: (input: LoginInputType) => Promise<void>
   loginWithGoogle: () => Promise<void>
   signupHref?: string
+  forgotPasswordHref?: string
 }
 
 export function LoginForm(props: LoginFormProps) {
-  const { loginWithEmail, loginWithGoogle, signupHref = "/signup" } = props
+  const {
+    loginWithEmail,
+    loginWithGoogle,
+    signupHref = "/signup",
+    forgotPasswordHref = "/forgot-password",
+  } = props
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -159,13 +165,12 @@ export function LoginForm(props: LoginFormProps) {
             >
               Mot de passe
             </label>
-            <span
-              aria-disabled="true"
-              title="Bientôt disponible"
-              className="font-body text-xs text-cream-500"
+            <a
+              href={forgotPasswordHref}
+              className="font-body text-xs text-green-700 underline decoration-cream-300 underline-offset-2 hover:text-green-800"
             >
               Mot de passe oublié&nbsp;?
-            </span>
+            </a>
           </div>
           <input
             id="password"

@@ -10,14 +10,17 @@ import { getBrowserSupabase } from "@/lib/supabase/client"
 
 type Props = {
   initialError: string | null
+  initialNotice?: string | null
 }
 
-export function LoginClient({ initialError }: Props) {
+export function LoginClient({ initialError, initialNotice = null }: Props) {
   const router = useRouter()
   const [topError, setTopError] = useState<string | null>(initialError)
+  const [topNotice, setTopNotice] = useState<string | null>(initialNotice)
 
   async function handleEmailLogin(input: LoginInput) {
     setTopError(null)
+    setTopNotice(null)
     const res = await fetch("/api/v1/auth/login", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -83,6 +86,15 @@ export function LoginClient({ initialError }: Props) {
 
   return (
     <div className="flex flex-col gap-5 rounded-lg border border-cream-200 bg-white p-6 shadow-card tablet:p-8">
+      {topNotice ? (
+        <div
+          role="status"
+          data-testid="login-notice"
+          className="rounded-md border border-green-200 bg-green-50 px-4 py-3 font-body text-sm text-green-900"
+        >
+          {topNotice}
+        </div>
+      ) : null}
       {topError ? (
         <div
           role="alert"

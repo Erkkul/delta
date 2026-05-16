@@ -1,31 +1,13 @@
 import { z } from "zod"
 
+import { Password } from "./password-policy"
+
+export { PASSWORD_MIN, PASSWORD_REGEX, Password, passwordHint } from "./password-policy"
+
 export const ROLES = ["acheteur", "rameneur", "producteur"] as const
 
 export const Role = z.enum(ROLES)
 export type Role = z.infer<typeof Role>
-
-const PASSWORD_MIN = 10
-const PASSWORD_REGEX = {
-  lower: /[a-z]/,
-  upper: /[A-Z]/,
-  digit: /[0-9]/,
-}
-
-const Password = z
-  .string()
-  .min(PASSWORD_MIN, {
-    message: `Le mot de passe doit faire au moins ${String(PASSWORD_MIN)} caractères.`,
-  })
-  .refine((v) => PASSWORD_REGEX.lower.test(v), {
-    message: "Doit contenir au moins une lettre minuscule.",
-  })
-  .refine((v) => PASSWORD_REGEX.upper.test(v), {
-    message: "Doit contenir au moins une lettre majuscule.",
-  })
-  .refine((v) => PASSWORD_REGEX.digit.test(v), {
-    message: "Doit contenir au moins un chiffre.",
-  })
 
 const Email = z
   .string()
@@ -94,6 +76,33 @@ export const LoginOutput = z.object({
 })
 export type LoginOutput = z.infer<typeof LoginOutput>
 
+/**
+ * Récupération de mot de passe (KAN-157) — AU-FP1. Anti-énumération côté
+ * adapter HTTP : la réponse est toujours 204, quel que soit l'état du
+ * compte.
+ */
+export const ForgotPasswordInput = z.object({
+  email: Email,
+})
+export type ForgotPasswordInput = z.infer<typeof ForgotPasswordInput>
+
+/**
+ * Reset effectif (KAN-157) — AU-FP3. Le `token` est l'OTP 6 chiffres
+ * reçu par mail (Supabase recovery flow, `type: 'recovery'`). Politique
+ * de mot de passe identique au signup (partagée via `Password`).
+ */
+export const ResetPasswordInput = z.object({
+  email: Email,
+  token: z.string().regex(/^\d{6}$/, "Le code doit faire 6 chiffres."),
+  newPassword: Password,
+})
+export type ResetPasswordInput = z.infer<typeof ResetPasswordInput>
+
+export const ResetPasswordOutput = z.object({
+  userId: z.string().uuid(),
+})
+export type ResetPasswordOutput = z.infer<typeof ResetPasswordOutput>
+
 export const SIGNUP_ERROR_CODES = {
   ValidationFailed: "AUTH_VALIDATION_FAILED",
   EmailAlreadyTaken: "AUTH_EMAIL_ALREADY_TAKEN",
@@ -119,3 +128,20 @@ export const LOGIN_ERROR_CODES = {
 } as const
 export type LoginErrorCode =
   (typeof LOGIN_ERROR_CODES)[keyof typeof LOGIN_ERROR_CODES]
+
+/**
+ * Codes d'erreur exposés par les endpoints de récupération (KAN-157).
+ * `forgot-password` ne renvoie jamais autre chose que `Validation` ou
+ * `RateLimited` (anti-énumération : tout échec d'envoi est avalé en 204).
+ * `reset-password` mappe les échecs OTP / token vers `InvalidRecoveryToken`
+ * — opaque par design comme `InvalidCredentials` côté login.
+ */
+export const RESET_PASSWORD_ERROR_CODES = {
+  ValidationFailed: "AUTH_VALIDATION_FAILED",
+  WeakPassword: "AUTH_WEAK_PASSWORD",
+  InvalidRecoveryToken: "AUTH_INVALID_RECOVERY_TOKEN",
+  RateLimited: "AUTH_RATE_LIMITED",
+  Unknown: "AUTH_UNKNOWN",
+} as const
+export type ResetPasswordErrorCode =
+  (typeof RESET_PASSWORD_ERROR_CODES)[keyof typeof RESET_PASSWORD_ERROR_CODES]
