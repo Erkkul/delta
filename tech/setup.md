@@ -122,17 +122,29 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
   - **Stripe CLI** local pour forwarder les webhooks vers `localhost:3000` en dev (`stripe listen --forward-to localhost:3000/api/v1/webhooks/stripe`) — produit un 3e `whsec_` local-only, à ajouter dans `.env.local` au moment de coder KAN-16.
   - Activer le live mode (carte « Activez votre compte ») au pré-lancement : nécessitera infos légales complètes Erkkul (SIRET, RIB pro, justificatifs).
   - **Branding hosted pages** (optionnel mais souhaitable) : ajouter logo Delta + couleurs sur les pages Stripe hosted (onboarding + Express Dashboard). À faire quand le logo est arrêté.
-  - **Câblage code** : implémentation du handler `/api/v1/webhooks/stripe` + idempotence (cf. ARCHITECTURE.md §8) + flow Account Links pour onboarding producteur (KAN-16) puis rameneur.
+  - **Câblage code** : implémentation du handler `/api/v1/webhooks/stripe` (multi-secret platform + Connect, idempotence via `stripe_webhook_events`, dispatch `account.updated`) **fait le 2026-05-17 (KAN-16)** ; flow Account Links pour onboarding producteur via `apps/web/lib/stripe/client.ts` (`getStripeConnectAdapter`) **fait le 2026-05-17 (KAN-16)**. Reste : flow Account Links rameneur (KAN-37), capture / transferts paiement (KAN-33/34).
 - **Notes** : Mode test uniquement à ce stade — `pk_test_...` / `sk_test_...` / endpoints sur l'environnement de test Stripe. Le passage en live mode dupliquera tout en mode prod (clés `pk_live_...` / `sk_live_...` + nouveaux endpoints webhook avec leurs propres `whsec_`). Voir ARCHITECTURE.md §8 pour le détail de l'intégration code.
 
 ## Jobs et observabilité
 
 ### Inngest (jobs asynchrones)
-- **Statut** : À faire
+- **Statut** : Partiel — compte créé, env Production provisionné, clés récupérées et collées côté Vercel + `.env.local` (2026-05-16). Package `@delta/jobs` scaffolé avec premier event `producer.siret.requested` et client Sirene (2026-05-17, KAN-16). Reste : endpoint `/api/v1/inngest` côté apps/web et sync de l'app sur le dashboard Inngest (à faire dans la suite de KAN-16).
 - **Dashboard** : https://app.inngest.com
-- **Plan** : Free puis pay-as-you-go
-- **Env vars produites** : `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY`
-- **Notes** : app Inngest + endpoint `/api/v1/inngest`. Voir ARCHITECTURE.md §7.
+- **Plan** : Free (50 000 step executions / mois, suffisant au MVP — cf. ARCHITECTURE.md §13.2)
+- **Env vars produites** : `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` (Sensitive côté Vercel pour la signing key, qui permet de forger des appels signés vers `/api/v1/inngest`)
+- **Environnement** : `Production` par défaut (Inngest cloud). Les développeurs locaux utilisent le **Dev Server** (`npx inngest-cli@latest dev`) qui tourne en bubble local sans consommer les clés Production — il signe avec une clé locale auto-générée.
+- **Fait le 2026-05-16** :
+  - Compte Inngest créé (auth GitHub via org Erkkul)
+  - Environnement `Production` initialisé (Inngest crée toujours un env Production par défaut)
+  - **Event Key** par défaut récupérée → exposée en `INNGEST_EVENT_KEY` côté Vercel + `.env.local`
+  - **Signing Key** récupérée → exposée en `INNGEST_SIGNING_KEY` côté Vercel (*Sensitive*) + `.env.local`
+  - Onboarding wizard fermé via « I already have an Inngest app » (pas de Dev Server lancé tant que `packages/jobs/` n'existe pas)
+- **À faire** :
+  - **Scaffold `packages/jobs/`** (manifest pnpm, deps `inngest`, exports, tsconfig) — premier package jobs du monorepo, attaché à KAN-16 cf. cadrage `specs/KAN-16/`
+  - **Endpoint `apps/web/app/api/v1/inngest/route.ts`** — utilise `serve({ client, functions })` du package `inngest/next` pour exposer les fonctions à Inngest cloud
+  - **Sync de l'app** côté dashboard Inngest → menu **Apps** → **Sync new app** → coller `https://delta-web-gamma.vercel.app/api/v1/inngest` (Inngest détecte alors les fonctions exportées via fetch HTTP)
+  - **Sentry pour les jobs** : `SENTRY_DSN_JOBS` à provisionner en même temps que Sentry (cf. § Sentry, *À faire*)
+- **Notes** : Inngest **ne fait pas tourner du code chez eux**, il invoque ton endpoint via HTTP avec retry exponentiel natif et orchestration des `step.run(...)`. Voir ARCHITECTURE.md §7 (matching pipeline) et le cadrage `specs/KAN-16/design.md` pour le premier event consommateur `producer.siret.requested`.
 
 ### Sentry (erreurs web + mobile + jobs)
 - **Statut** : À faire
@@ -186,12 +198,24 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 - **Statut** : À faire
 - **Notes** : choix domaine (`delta.fr` ou autre). DNS via Vercel pour web. MX/DKIM/SPF pour Resend.
 
-## Externe sans clé
+## APIs externes
 
 ### API Adresse Gouv.fr
 - **Statut** : Fait
 - **URL** : https://adresse.data.gouv.fr/api-doc/adresse
 - **Notes** : aucun provisionnement nécessaire (API publique, sans clé). Pas de quota documenté ; cache 24h côté serveur recommandé. Décision produit 2026-05-01.
+
+### API Sirene INSEE (vérification SIRET)
+- **Statut** : Fait le 2026-05-16
+- **Portail** : https://portail-api.insee.fr
+- **Plan** : Public (gratuit, ≤ 30 req/min, clé sans expiration)
+- **Env vars produites** : `INSEE_SIRENE_API_KEY`
+- **Application INSEE** : `delta-dev` — mode **Simple** (le mode Backend to backend ne fonctionne pas sur le plan public, cf. mode d'emploi officiel)
+- **Souscription** : créée séparément après l'app (Catalogue → API Sirene → Souscrire → plan Public → app `delta-dev`). La clé d'API se récupère sur la souscription (et non sur l'app), onglet « Mes applications » → `delta-dev` → « Souscriptions ».
+- **Endpoint** : `https://api.insee.fr/api-sirene/3.11/siret/<siret>` ou `/siren/<siren>`
+- **Header d'auth** : `X-INSEE-Api-Key-Integration: <key>` (pas d'OAuth, pas de `/token`, pas de cache bearer — la clé est posée directement sur chaque requête)
+- **Test rapide** : `curl 'https://api.insee.fr/api-sirene/3.11/siren/309634954' -H 'X-INSEE-Api-Key-Integration: <key>'` (309634954 = SIREN de l'INSEE, dataset de test officiel)
+- **Notes** : la clé peut être renouvelée ou révoquée depuis le portail. Quota 30 req/min largement suffisant au MVP (un appel par déclaration SIRET producteur). Consommée par le job Inngest `producer.siret.requested` (cf. cadrage KAN-16).
 
 ## CI/CD
 

@@ -1,0 +1,48 @@
+-- Policies RLS pour public.products — PLACEHOLDER DOCUMENTAIRE
+-- Ticket source : KAN-20 (Catalogue — Création & édition produit, status Ideas)
+-- Ticket nécessitant ce gating : KAN-16 (Onboarding Stripe Connect)
+--
+-- ⚠️ ATTENTION : la table public.products N'EXISTE PAS ENCORE. Sa migration
+-- sera livrée par KAN-20. Ce fichier sert uniquement à documenter le gating
+-- de visibilité catalogue exigé par KAN-16, pour que KAN-20 l'intègre dans
+-- sa propre migration / fichier de policies.
+--
+-- Règle (cf. décision produit 2026-05-03 + specs/KAN-16/design.md) :
+-- Un produit n'est visible côté catalogue acheteur QUE si son producteur a :
+--   - siret_status = 'verified'
+--   - payouts_enabled = true
+--   - deleted_at IS NULL
+-- Le producteur lui-même voit toujours ses propres produits indépendamment
+-- de ces conditions (pour pouvoir configurer son catalogue avant validation).
+--
+-- Le gating est exprimé en RLS (defense in depth, ARCHITECTURE.md §9.2)
+-- plutôt qu'en filtrage applicatif.
+--
+-- ====================================================================
+-- POLICY À AJOUTER DANS LA MIGRATION KAN-20 (NE PAS APPLIQUER ICI) :
+-- ====================================================================
+--
+--   DROP POLICY IF EXISTS "products_select_public" ON public.products;
+--   CREATE POLICY "products_select_public"
+--     ON public.products
+--     FOR SELECT
+--     TO anon, authenticated
+--     USING (
+--       -- Le producteur voit toujours ses propres produits
+--       auth.uid() = producer_user_id
+--       -- OU le produit est publié et son producteur est complètement vérifié
+--       OR EXISTS (
+--         SELECT 1 FROM public.producers p
+--         WHERE p.user_id = public.products.producer_user_id
+--           AND p.siret_status = 'verified'
+--           AND p.payouts_enabled = true
+--           AND p.deleted_at IS NULL
+--       )
+--     );
+--
+-- ====================================================================
+--
+-- Note de tracking : quand KAN-20 sera implémenté, ce fichier doit être
+-- soit (a) remplacé par les policies réelles intégrées à la migration KAN-20,
+-- soit (b) supprimé si KAN-20 le miroir lui-même. Ne pas laisser le
+-- placeholder traîner après livraison KAN-20.
