@@ -86,6 +86,7 @@ export async function requestStripeOnboardingLink(
 
   // Création du compte Stripe Connect Express si absent. Idempotence
   // garantie par la row producer : un user a au plus 1 stripe_account_id.
+  let justCreated = false
   if (!producer.stripe_account_id) {
     let accountId: string
     try {
@@ -99,6 +100,7 @@ export async function requestStripeOnboardingLink(
       )
     }
     producer = await deps.setStripeAccount(userId, accountId)
+    justCreated = true
   }
 
   // Account Link toujours frais — pas de cache. Si Stripe est down ici,
@@ -111,12 +113,22 @@ export async function requestStripeOnboardingLink(
     )
   }
 
+  // Dispatch onboarding initial vs update (KAN-158) :
+  //   - Compte fraîchement créé → `account_onboarding` (collecte initiale complète)
+  //   - Compte pré-existant en restricted → `account_update` (collecte ciblée
+  //     sur les `requirements_currently_due`, plus rapide pour l'utilisateur)
   try {
-    const link = await deps.createAccountLink({
-      accountId: producer.stripe_account_id,
-      refreshUrl: input.refreshUrl,
-      returnUrl: input.returnUrl,
-    })
+    const link = justCreated
+      ? await deps.createAccountLink({
+          accountId: producer.stripe_account_id,
+          refreshUrl: input.refreshUrl,
+          returnUrl: input.returnUrl,
+        })
+      : await deps.createAccountUpdateLink({
+          accountId: producer.stripe_account_id,
+          refreshUrl: input.refreshUrl,
+          returnUrl: input.returnUrl,
+        })
     return { url: link.url, expires_at: link.expiresAt }
   } catch (err) {
     throw new StripeUpstreamError(

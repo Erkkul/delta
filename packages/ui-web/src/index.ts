@@ -40,3 +40,8 @@ export type {
   StripeOnboardingCardProps,
   StripeOnboardingCardResult,
 } from "./stripe-onboarding-card"
+export { StripeAccountStatusCard } from "./stripe-account-status-card"
+export type {
+  StripeAccountStatusCardProps,
+  StripeAccountStatusCardResult,
+} from "./stripe-account-status-card"

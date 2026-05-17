@@ -42,6 +42,8 @@ export default async function ProducerOnboardingPage() {
         stripe_status: producer?.stripe_status ?? "not_created",
         payouts_enabled: producer?.payouts_enabled ?? false,
         siret_rejection_reason: producer?.siret_rejection_reason ?? null,
+        stripe_account_id: producer?.stripe_account_id ?? null,
+        requirements_currently_due: producer?.requirements_currently_due ?? [],
       }}
     />
   )
