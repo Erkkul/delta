@@ -91,7 +91,26 @@ export type StripeConnectAdapter = {
   createConnectAccount(input: {
     email: string
   }): Promise<{ accountId: string }>
+  /**
+   * Crée un Account Link de type `account_onboarding` pour l'onboarding
+   * initial du compte Stripe Connect Express (KAN-16). Utilisé seulement
+   * juste après `createConnectAccount` — la suite passe par
+   * `createAccountUpdateLink` pour ne re-demander que les champs encore
+   * en attente.
+   */
   createAccountLink(input: {
+    accountId: string
+    refreshUrl: string
+    returnUrl: string
+  }): Promise<{ url: string; expiresAt: string }>
+  /**
+   * Crée un Account Link de type `account_update` pour compléter
+   * uniquement les `requirements_currently_due` (KAN-158). Stripe v2024
+   * exige `collection_options.fields = 'currently_due'` côté
+   * implémentation pour cibler les champs en attente. Le `return_url`
+   * et `refresh_url` restent identiques au flow onboarding.
+   */
+  createAccountUpdateLink(input: {
     accountId: string
     refreshUrl: string
     returnUrl: string

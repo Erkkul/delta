@@ -60,7 +60,7 @@ function freshProducer(overrides: Partial<Producer> = {}): Producer {
 }
 
 describe("requestStripeOnboardingLink", () => {
-  it("crée le compte Stripe puis renvoie l'Account Link sur premier appel", async () => {
+  it("crée le compte Stripe puis renvoie un Account Link d'onboarding sur premier appel", async () => {
     const ensureForUser = vi.fn().mockResolvedValue(freshProducer())
     const createConnectAccount = vi
       .fn()
@@ -77,6 +77,7 @@ describe("requestStripeOnboardingLink", () => {
       url: "https://connect.stripe.com/setup/s/acct_test_1",
       expiresAt: "2026-05-17T10:30:00.000Z",
     })
+    const createAccountUpdateLink = vi.fn()
 
     const out = await requestStripeOnboardingLink(INPUT, USER_ID, {
       hasProducerRole: vi.fn().mockResolvedValue(true),
@@ -89,6 +90,7 @@ describe("requestStripeOnboardingLink", () => {
       applyStripeAccountUpdate: vi.fn(),
       createConnectAccount,
       createAccountLink,
+      createAccountUpdateLink,
       store: noopStore(),
     })
 
@@ -99,16 +101,19 @@ describe("requestStripeOnboardingLink", () => {
       refreshUrl: INPUT.refreshUrl,
       returnUrl: INPUT.returnUrl,
     })
+    // On vient de créer le compte → flow onboarding initial, PAS update.
+    expect(createAccountUpdateLink).not.toHaveBeenCalled()
     expect(out).toEqual({
       url: "https://connect.stripe.com/setup/s/acct_test_1",
       expires_at: "2026-05-17T10:30:00.000Z",
     })
   })
 
-  it("réutilise le stripe_account_id existant (idempotence)", async () => {
+  it("réutilise le stripe_account_id existant et génère un Account Link de type update (KAN-158)", async () => {
     const createConnectAccount = vi.fn()
     const setStripeAccount = vi.fn()
-    const createAccountLink = vi
+    const createAccountLink = vi.fn()
+    const createAccountUpdateLink = vi
       .fn()
       .mockResolvedValue({ url: "https://x", expiresAt: "2026-05-17T11:00:00Z" })
     await requestStripeOnboardingLink(INPUT, USER_ID, {
@@ -120,7 +125,7 @@ describe("requestStripeOnboardingLink", () => {
         .mockResolvedValue(
           freshProducer({
             stripe_account_id: "acct_existing",
-            stripe_status: "pending",
+            stripe_status: "restricted",
           }),
         ),
       updateSiretDeclaration: vi.fn(),
@@ -129,11 +134,14 @@ describe("requestStripeOnboardingLink", () => {
       applyStripeAccountUpdate: vi.fn(),
       createConnectAccount,
       createAccountLink,
+      createAccountUpdateLink,
       store: noopStore(),
     })
     expect(createConnectAccount).not.toHaveBeenCalled()
     expect(setStripeAccount).not.toHaveBeenCalled()
-    expect(createAccountLink).toHaveBeenCalledWith(
+    // Compte pré-existant → flow update, PAS onboarding.
+    expect(createAccountLink).not.toHaveBeenCalled()
+    expect(createAccountUpdateLink).toHaveBeenCalledWith(
       expect.objectContaining({ accountId: "acct_existing" }),
     )
   })
@@ -151,6 +159,7 @@ describe("requestStripeOnboardingLink", () => {
         applyStripeAccountUpdate: vi.fn(),
         createConnectAccount: vi.fn(),
         createAccountLink: vi.fn(),
+        createAccountUpdateLink: vi.fn(),
         store: noopStore(),
       }),
     ).rejects.toBeInstanceOf(ProducerRoleForbiddenError)
@@ -159,6 +168,7 @@ describe("requestStripeOnboardingLink", () => {
   it("rejette StripeAccountAlreadyEnabledError si payouts_enabled = true", async () => {
     const createConnectAccount = vi.fn()
     const createAccountLink = vi.fn()
+    const createAccountUpdateLink = vi.fn()
     await expect(
       requestStripeOnboardingLink(INPUT, USER_ID, {
         hasProducerRole: vi.fn().mockResolvedValue(true),
@@ -178,11 +188,13 @@ describe("requestStripeOnboardingLink", () => {
         applyStripeAccountUpdate: vi.fn(),
         createConnectAccount,
         createAccountLink,
+        createAccountUpdateLink,
         store: noopStore(),
       }),
     ).rejects.toBeInstanceOf(StripeAccountAlreadyEnabledError)
     expect(createConnectAccount).not.toHaveBeenCalled()
     expect(createAccountLink).not.toHaveBeenCalled()
+    expect(createAccountUpdateLink).not.toHaveBeenCalled()
   })
 
   it("rejette RateLimitedError si la limite est dépassée", async () => {
@@ -198,6 +210,7 @@ describe("requestStripeOnboardingLink", () => {
         applyStripeAccountUpdate: vi.fn(),
         createConnectAccount: vi.fn(),
         createAccountLink: vi.fn(),
+        createAccountUpdateLink: vi.fn(),
         store: exhaustedStore(),
       })
       expect.fail("Devait throw RateLimitedError")
@@ -207,7 +220,7 @@ describe("requestStripeOnboardingLink", () => {
     }
   })
 
-  it("convertit les erreurs Stripe SDK en StripeUpstreamError", async () => {
+  it("convertit les erreurs Stripe SDK en StripeUpstreamError (création compte)", async () => {
     await expect(
       requestStripeOnboardingLink(INPUT, USER_ID, {
         hasProducerRole: vi.fn().mockResolvedValue(true),
@@ -222,6 +235,33 @@ describe("requestStripeOnboardingLink", () => {
           .fn()
           .mockRejectedValue(new Error("Stripe 503")),
         createAccountLink: vi.fn(),
+        createAccountUpdateLink: vi.fn(),
+        store: noopStore(),
+      }),
+    ).rejects.toBeInstanceOf(StripeUpstreamError)
+  })
+
+  it("convertit les erreurs createAccountUpdateLink en StripeUpstreamError (KAN-158)", async () => {
+    await expect(
+      requestStripeOnboardingLink(INPUT, USER_ID, {
+        hasProducerRole: vi.fn().mockResolvedValue(true),
+        findByUserId: vi.fn(),
+        findByStripeAccountId: vi.fn(),
+        ensureForUser: vi.fn().mockResolvedValue(
+          freshProducer({
+            stripe_account_id: "acct_existing",
+            stripe_status: "restricted",
+          }),
+        ),
+        updateSiretDeclaration: vi.fn(),
+        setSiretVerificationResult: vi.fn(),
+        setStripeAccount: vi.fn(),
+        applyStripeAccountUpdate: vi.fn(),
+        createConnectAccount: vi.fn(),
+        createAccountLink: vi.fn(),
+        createAccountUpdateLink: vi
+          .fn()
+          .mockRejectedValue(new Error("Stripe 502")),
         store: noopStore(),
       }),
     ).rejects.toBeInstanceOf(StripeUpstreamError)
