@@ -70,7 +70,7 @@ ALTER TABLE public.producers
   ADD COLUMN IF NOT EXISTS labels public.producer_label[] NOT NULL DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS pickup_public_zone text,
   ADD COLUMN IF NOT EXISTS pickup_address text,
-  ADD COLUMN IF NOT EXISTS pickup_location geography(Point, 4326),
+  ADD COLUMN IF NOT EXISTS pickup_location extensions.geography(Point, 4326),
   ADD COLUMN IF NOT EXISTS pickup_days public.weekday[] NOT NULL DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS pickup_hours_start time,
   ADD COLUMN IF NOT EXISTS pickup_hours_end time,
@@ -92,7 +92,7 @@ COMMENT ON COLUMN public.producers.pickup_public_zone IS
 COMMENT ON COLUMN public.producers.pickup_address IS
   'Adresse exacte du point de récupération (sensible). RLS strict + RPC reveal_pickup_address pour exposer aux rameneurs en mission.';
 COMMENT ON COLUMN public.producers.pickup_location IS
-  'Coordonnées géocodées via API Adresse Gouv.fr (geography sphérique, EPSG:4326). Index GIST pour matching futur (KAN-42).';
+  'Coordonnées géocodées via API Adresse Gouv.fr (extensions.geography sphérique, EPSG:4326). Index GIST pour matching futur (KAN-42).';
 COMMENT ON COLUMN public.producers.pickup_days IS
   'Jours d''ouverture des créneaux de récupération (array enum weekday).';
 COMMENT ON COLUMN public.producers.pickup_hours_start IS
@@ -251,7 +251,7 @@ CREATE OR REPLACE FUNCTION public.set_pickup_location(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY INVOKER
-SET search_path = public, pg_temp
+SET search_path = public, extensions, pg_temp
 AS $$
 BEGIN
   IF p_longitude IS NULL OR p_latitude IS NULL THEN
@@ -260,7 +260,11 @@ BEGIN
      WHERE user_id = auth.uid();
   ELSE
     UPDATE public.producers
-       SET pickup_location = ST_SetSRID(ST_MakePoint(p_longitude, p_latitude), 4326)::geography
+       SET pickup_location =
+         extensions.ST_SetSRID(
+           extensions.ST_MakePoint(p_longitude, p_latitude),
+           4326
+         )::extensions.geography
      WHERE user_id = auth.uid();
   END IF;
 END;
