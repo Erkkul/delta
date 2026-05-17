@@ -122,7 +122,7 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
   - **Stripe CLI** local pour forwarder les webhooks vers `localhost:3000` en dev (`stripe listen --forward-to localhost:3000/api/v1/webhooks/stripe`) — produit un 3e `whsec_` local-only, à ajouter dans `.env.local` au moment de coder KAN-16.
   - Activer le live mode (carte « Activez votre compte ») au pré-lancement : nécessitera infos légales complètes Erkkul (SIRET, RIB pro, justificatifs).
   - **Branding hosted pages** (optionnel mais souhaitable) : ajouter logo Delta + couleurs sur les pages Stripe hosted (onboarding + Express Dashboard). À faire quand le logo est arrêté.
-  - **Câblage code** : implémentation du handler `/api/v1/webhooks/stripe` + idempotence (cf. ARCHITECTURE.md §8) + flow Account Links pour onboarding producteur (KAN-16) puis rameneur.
+  - **Câblage code** : implémentation du handler `/api/v1/webhooks/stripe` (multi-secret platform + Connect, idempotence via `stripe_webhook_events`, dispatch `account.updated`) **fait le 2026-05-17 (KAN-16)** ; flow Account Links pour onboarding producteur via `apps/web/lib/stripe/client.ts` (`getStripeConnectAdapter`) **fait le 2026-05-17 (KAN-16)**. Reste : flow Account Links rameneur (KAN-37), capture / transferts paiement (KAN-33/34).
 - **Notes** : Mode test uniquement à ce stade — `pk_test_...` / `sk_test_...` / endpoints sur l'environnement de test Stripe. Le passage en live mode dupliquera tout en mode prod (clés `pk_live_...` / `sk_live_...` + nouveaux endpoints webhook avec leurs propres `whsec_`). Voir ARCHITECTURE.md §8 pour le détail de l'intégration code.
 
 ## Jobs et observabilité
