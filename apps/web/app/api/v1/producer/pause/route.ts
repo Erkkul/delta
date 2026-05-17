@@ -8,6 +8,7 @@ import {
 import { type NextRequest, NextResponse } from "next/server"
 
 import { getProducerAdapter, getRoleChecker } from "@/lib/producer/adapters"
+import { serializeError } from "@/lib/serialize-error"
 import { getServerSupabase } from "@/lib/supabase/server"
 
 /**
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
     }
     console.error("[api/v1/producer/pause] POST failed", {
       userId: user.id,
-      error: err instanceof Error ? err.message : String(err),
+      error: serializeError(err),
     })
     return NextResponse.json(
       {

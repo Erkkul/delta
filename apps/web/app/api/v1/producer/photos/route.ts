@@ -6,6 +6,7 @@ import {
 import { type NextRequest, NextResponse } from "next/server"
 
 import { getRoleChecker } from "@/lib/producer/adapters"
+import { serializeError } from "@/lib/serialize-error"
 import {
   createPhotoUploadUrl,
   deletePhoto,
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[api/v1/producer/photos] POST failed", {
       userId: user.id,
-      error: err instanceof Error ? err.message : String(err),
+      error: serializeError(err),
     })
     return NextResponse.json(
       {
@@ -134,7 +135,7 @@ export async function DELETE(req: NextRequest) {
   } catch (err) {
     console.error("[api/v1/producer/photos] DELETE failed", {
       userId: user.id,
-      error: err instanceof Error ? err.message : String(err),
+      error: serializeError(err),
     })
     return NextResponse.json(
       {

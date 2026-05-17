@@ -17,6 +17,7 @@ import {
   getRoleChecker,
 } from "@/lib/producer/adapters"
 import { getServerSupabase } from "@/lib/supabase/server"
+import { serializeError } from "@/lib/serialize-error"
 import { getRateLimitStore } from "@/lib/upstash"
 
 /**
@@ -177,7 +178,7 @@ export async function PATCH(req: NextRequest) {
     }
     console.error("[api/v1/producer/profile] PATCH failed", {
       userId: user.id,
-      error: err instanceof Error ? err.message : String(err),
+      error: serializeError(err),
     })
     return NextResponse.json(
       {
