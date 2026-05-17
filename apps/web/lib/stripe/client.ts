@@ -62,6 +62,25 @@ export function getStripeConnectAdapter(): StripeConnectAdapter {
       const expiresAt = new Date(link.expires_at * 1000).toISOString()
       return { url: link.url, expiresAt }
     },
+
+    async createAccountUpdateLink({ accountId, refreshUrl, returnUrl }) {
+      const stripe = getStripeClient()
+      // `type: 'account_update'` ouvre la page hosted ciblée sur les
+      // requirements en attente plutôt que l'onboarding complet.
+      // `collection_options.fields = 'currently_due'` est exigé par
+      // l'API Stripe v2024 pour limiter la collecte aux champs présents
+      // dans `requirements.currently_due` du compte (cf. KAN-158
+      // proposal, doc https://docs.stripe.com/api/account_links/create).
+      const link = await stripe.accountLinks.create({
+        account: accountId,
+        refresh_url: refreshUrl,
+        return_url: returnUrl,
+        type: "account_update",
+        collection_options: { fields: "currently_due" },
+      })
+      const expiresAt = new Date(link.expires_at * 1000).toISOString()
+      return { url: link.url, expiresAt }
+    },
   }
 }
 
