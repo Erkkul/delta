@@ -83,6 +83,9 @@ describe("applyStripeAccountUpdate", () => {
         setSiretVerificationResult: vi.fn(),
         setStripeAccount: vi.fn(),
         applyStripeAccountUpdate: applyStripeAccountUpdateAdapter,
+        updateProfile: vi.fn(),
+        setPauseState: vi.fn(),
+        setPickupLocation: vi.fn(),
       },
     )
     expect(applyStripeAccountUpdateAdapter).toHaveBeenCalledWith(ACCOUNT_ID, {
@@ -102,6 +105,9 @@ describe("applyStripeAccountUpdate", () => {
       setSiretVerificationResult: vi.fn(),
       setStripeAccount: vi.fn(),
       applyStripeAccountUpdate: vi.fn().mockResolvedValue(null),
+      updateProfile: vi.fn(),
+      setPauseState: vi.fn(),
+      setPickupLocation: vi.fn(),
     })
     expect(out).toBeNull()
   })

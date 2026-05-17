@@ -1,4 +1,5 @@
 import {
+  type GeocodeAdapter,
   type Producer,
   type ProducerAdapter,
   type RoleChecker,
@@ -10,6 +11,8 @@ import { type Database } from "@delta/db/types"
 import { usersRepo } from "@delta/db/users"
 import { inngest } from "@delta/jobs/inngest-client"
 import { type SupabaseClient } from "@supabase/supabase-js"
+
+import { geocodeAddress as geocodeAdresseGouv } from "@/lib/geocoding/adresse-gouv"
 
 /**
  * Mappe une `ProducerRow` (forme DB) vers la `Producer` (forme métier
@@ -32,6 +35,18 @@ function toProducer(row: ProducerRow): Producer {
     payouts_enabled: row.payouts_enabled,
     charges_enabled: row.charges_enabled,
     requirements_currently_due: row.requirements_currently_due,
+    display_name: row.display_name,
+    public_description: row.public_description,
+    profile_photo_url: row.profile_photo_url,
+    farm_photos: row.farm_photos ?? [],
+    labels: row.labels ?? [],
+    pickup_public_zone: row.pickup_public_zone,
+    pickup_address: row.pickup_address,
+    pickup_days: row.pickup_days ?? [],
+    pickup_hours_start: row.pickup_hours_start,
+    pickup_hours_end: row.pickup_hours_end,
+    paused: row.paused,
+    paused_at: row.paused_at,
   }
 }
 
@@ -127,6 +142,32 @@ export function getProducerAdapter(client: Client): ProducerAdapter & {
         fields,
       )
       return row ? toProducer(row) : null
+    },
+
+    async updateProfile(userId, patch) {
+      const row = await producersRepo.updateProfile(client, userId, patch)
+      return toProducer(row)
+    },
+
+    async setPauseState(userId, paused) {
+      const row = await producersRepo.setPaused(client, userId, paused)
+      return toProducer(row)
+    },
+
+    async setPickupLocation(longitude, latitude) {
+      await producersRepo.setPickupLocationViaRpc(client, longitude, latitude)
+    },
+  }
+}
+
+/**
+ * Implémentation de `GeocodeAdapter` — wrapper sur l'API Adresse Gouv.fr.
+ * Le client utilisateur n'a pas besoin de la moindre clé (API publique).
+ */
+export function getGeocodeAdapter(): GeocodeAdapter {
+  return {
+    async geocodeAddress(address) {
+      return geocodeAdresseGouv(address)
     },
   }
 }
