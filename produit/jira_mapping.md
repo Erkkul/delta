@@ -34,8 +34,8 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | PR-05 Création / édition produit | `pr-05-edition-produit.html` | KAN-20 (Création & édition produit) | KAN-21 (Photos), KAN-22 (Stock), KAN-24 (Labels & catégories) |
 | PR-06 Récupération à venir | `pr-06-recuperation.html` | KAN-46 (QR Pickup), KAN-47 (Checklist remise producteur) | KAN-45 |
 | PR-07 Historique ventes | `pr-07-historique-ventes.html` | KAN-19 (Historique ventes) | KAN-36 (Factures PDF) |
-| PR-08 Profil public producteur | `pr-08-profil-public.html` | KAN-17 (Informations profil & ferme) | KAN-53 (Profils publics & avis), KAN-63, KAN-64, KAN-65, KAN-66 |
-| PR-09 Paramètres compte | `pr-09-parametres.html` | KAN-17 (Informations profil & ferme) | — |
+| PR-08 Profil public producteur | `pr-08-profil-public.html` | KAN-17 (Informations profil & ferme) — [Cadrage tech](specs/KAN-17/) | KAN-53 (Profils publics & avis), KAN-63, KAN-64, KAN-65, KAN-66 |
+| PR-09 Paramètres compte | `pr-09-parametres.html` | KAN-17 (Informations profil & ferme) — [Cadrage tech](specs/KAN-17/) | — |
 
 ### Parcours Acheteur (§10.3 PRD)
 
@@ -102,7 +102,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 |--------|------|--------|--------|
 | KAN-4 | Epic | Ideas | Profil Producteur |
 | KAN-16 | Feature | Terminé | Onboarding Stripe Connect — [Cadrage tech](specs/KAN-16/) — mergé sur main (PR #10) |
-| KAN-17 | Feature | Ideas | Informations profil & ferme |
+| KAN-17 | Feature | À faire | Informations profil & ferme — [Cadrage tech](specs/KAN-17/) |
 | KAN-18 | Feature | Ideas | Tableau de bord producteur |
 | KAN-19 | Feature | Ideas | Historique ventes |
 | KAN-158 | Feature | Terminé | Polish UX onboarding producteur — état Stripe restricted (KYC incomplet) — [Cadrage tech](specs/KAN-158/) — mergé sur main (PR #15) |
