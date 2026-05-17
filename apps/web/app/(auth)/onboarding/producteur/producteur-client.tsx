@@ -9,10 +9,16 @@ import {
   type StripeOnboardingLinkErrorCode,
 } from "@delta/contracts/producer"
 import {
+  groupRequirementsByLabel,
+  translateRequirements,
+  type GroupedRequirement,
+} from "@delta/core/producer"
+import {
   OnboardingWizardShell,
   SiretForm,
   type SiretFormResult,
   type SiretFormValues,
+  StripeAccountStatusCard,
   StripeOnboardingCard,
   type StripeOnboardingCardResult,
   type WizardStep,
@@ -24,6 +30,10 @@ export type ProducerOnboardingState = {
   stripe_status: StripeAccountStatus
   payouts_enabled: boolean
   siret_rejection_reason: string | null
+  /** `producers.stripe_account_id` — null tant que le compte n'est pas créé. */
+  stripe_account_id: string | null
+  /** `producers.requirements_currently_due` — non vide tant que Stripe attend des champs. */
+  requirements_currently_due: string[]
 }
 
 type WizardPhase = "siret" | "stripe" | "done"
@@ -36,6 +46,9 @@ export function ProducerOnboardingClient({
   const [phase, setPhase] = useState<WizardPhase>(() => initialPhase(initialState))
 
   const steps = buildSteps(phase, initialState)
+  const stripeRequirements = groupRequirementsByLabel(
+    translateRequirements(initialState.requirements_currently_due),
+  )
 
   return (
     <OnboardingWizardShell
@@ -51,10 +64,41 @@ export function ProducerOnboardingClient({
         />
       ) : null}
       {phase === "stripe" ? (
-        <StripeOnboardingCard onRequestLink={requestStripeLink} />
+        <StripeStep
+          state={initialState}
+          requirements={stripeRequirements}
+        />
       ) : null}
       {phase === "done" ? <DonePanel /> : null}
     </OnboardingWizardShell>
+  )
+}
+
+/**
+ * Sélectionne le composant Stripe approprié à l'état courant (KAN-158).
+ *
+ * - `not_created` → StripeOnboardingCard (KAN-16, flow initial)
+ * - `pending` / `restricted` / `disabled` → StripeAccountStatusCard (KAN-158)
+ * - `active` ne devrait pas arriver ici — `initialPhase()` route vers `done`
+ *   en amont. Garde silencieuse au cas où l'utilisateur revient via une
+ *   URL stale après que le webhook ait basculé l'état.
+ */
+function StripeStep({
+  state,
+  requirements,
+}: {
+  state: ProducerOnboardingState
+  requirements: GroupedRequirement[]
+}) {
+  if (state.stripe_account_id === null) {
+    return <StripeOnboardingCard onRequestLink={requestStripeLink} />
+  }
+  return (
+    <StripeAccountStatusCard
+      status={state.stripe_status}
+      requirements={requirements}
+      onRequestLink={requestStripeLink}
+    />
   )
 }
 
@@ -96,7 +140,7 @@ function buildSteps(
     {
       id: "stripe",
       title: "Compte Stripe Connect",
-      meta: state.payouts_enabled ? "Actif" : "KYC + IBAN pour être payé",
+      meta: stripeStepMeta(state),
       status:
         state.payouts_enabled || phase === "done"
           ? "done"
@@ -105,6 +149,18 @@ function buildSteps(
             : "pending",
     },
   ]
+}
+
+function stripeStepMeta(state: ProducerOnboardingState): string {
+  if (state.payouts_enabled) return "Actif"
+  if (state.stripe_status === "disabled") return "Désactivé"
+  if (state.stripe_status === "restricted") {
+    return state.requirements_currently_due.length > 0
+      ? "À compléter"
+      : "Validation en cours"
+  }
+  if (state.stripe_status === "pending") return "Validation en cours"
+  return "KYC + IBAN pour être payé"
 }
 
 async function submitSiret(values: SiretFormValues): Promise<SiretFormResult> {
