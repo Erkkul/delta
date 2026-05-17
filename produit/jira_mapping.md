@@ -9,7 +9,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 - **13 épics** (KAN-1, KAN-4 → KAN-15) — un épic par grand domaine fonctionnel
 - **49 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-157 sous les autres épics — voir tables par épic ci-dessous)
 - **Subtasks** : voir le catalogue par épic ci-dessous. Le mapping peut être incomplet pour les subtasks les plus récentes — Jira fait foi pour la liste exhaustive.
-- État au 2026-05-16 : KAN-1 *Examiner* ; KAN-2 *Wip* (implémentation web livrée sur main) ; KAN-3 *Wip* (implémentation web sur `claude/kan-3-flow-connexion`) ; KAN-157 *Examiner* (implémentation web sur `claude/propose-kan-157-PJeF3`, PR #9, cadrage `specs/KAN-157/`) ; autres *Ideas*
+- État au 2026-05-17 : KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *À faire* (cadrage à venir, Stripe Connect Express provisionné en test mode le 2026-05-14, cf. `tech/setup.md`) ; autres *Ideas*
 - **Maquettes (2026-05-14)** : les 35 écrans des 3 parcours (Producteur, Acheteur, Rameneur) du sitemap PRD §10 sont maquettés. Restent à maquetter : transverses **TR-02** (centre notifications) et **TR-04** (signalement / litige) ; **TR-03** est couvert par `rm-09-chat.html`. Index navigable de toutes les maquettes : `design/maquettes/index.html`
 
 ## Convention de référencement
@@ -92,9 +92,9 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | Ticket | Type | Statut | Résumé |
 |--------|------|--------|--------|
 | KAN-1 | Epic | Examiner | Authentication |
-| KAN-2 | Feature | Wip | Création de compte — [Cadrage tech](specs/KAN-2/) |
-| KAN-3 | Feature | Wip | Connexion — [Cadrage tech](specs/KAN-3/) |
-| KAN-157 | Feature | Examiner | Récupération de mot de passe — [Cadrage tech](specs/KAN-157/) — PR #9 |
+| KAN-2 | Feature | Terminé | Création de compte — [Cadrage tech](specs/KAN-2/) — mergé sur main (PRs #2/#3/#4/#5) |
+| KAN-3 | Feature | Terminé | Connexion — [Cadrage tech](specs/KAN-3/) — mergé sur main (PR #8) |
+| KAN-157 | Feature | Terminé | Récupération de mot de passe — [Cadrage tech](specs/KAN-157/) — mergé sur main (PR #9) |
 
 ### KAN-4 — Profil Producteur
 
