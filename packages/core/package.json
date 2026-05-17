@@ -9,6 +9,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./auth": "./src/auth/index.ts",
+    "./producer": "./src/producer/index.ts",
     "./errors": "./src/errors.ts",
     "./rate-limit": "./src/rate-limit/index.ts"
   },
