@@ -7,7 +7,8 @@
 
 ## Tâches
 
-- [ ] **Setup Inngest** (`tech/setup.md` § Inngest, *À faire*) : créer compte, app `delta`, récupérer `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY`, scaffold `packages/jobs/` (manifest pnpm, exports, tsconfig), poser `apps/web/app/api/v1/inngest/route.ts`, mettre à jour `tech/setup.md`
+- [x] **Setup Inngest — compte + clés** (`tech/setup.md` § Inngest, *Partiel le 2026-05-16*) : compte créé, env Production initialisé, `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` (Sensitive) ajoutées dans Vercel + `.env.local.example`
+- [ ] **Setup Inngest — scaffold + sync app** : créer `packages/jobs/` (manifest pnpm, deps `inngest`, exports, tsconfig), poser `apps/web/app/api/v1/inngest/route.ts` (utilise `serve` du package `inngest/next`), puis aller sync l'app sur app.inngest.com → Apps → Sync new app → URL `https://delta-web-gamma.vercel.app/api/v1/inngest`
 - [x] **Setup API Sirene INSEE** (`tech/setup.md` § APIs externes, *Fait le 2026-05-16*) : app `delta-dev` mode Simple créée, souscription plan Public validée, clé d'API récupérée, `INSEE_SIRENE_API_KEY` ajoutée dans Vercel + `.env.local.example`
 - [ ] **Setup Stripe CLI local** : `stripe login`, `stripe listen --forward-to localhost:3000/api/v1/webhooks/stripe`, ajouter le `whsec_` local-only dans `.env.local` (3e secret webhook, dev only)
 - [ ] Créer `packages/jobs/src/inngest/client.ts` (instance Inngest) + `packages/jobs/src/producer/verify-siret.ts` (handler `producer.siret.requested`)
@@ -17,7 +18,7 @@
 - [ ] Policies `supabase/policies/producers.sql` : RLS user-owned (select / update / insert par `auth.uid()`)
 - [ ] Policies `supabase/policies/products.sql` : si fichier inexistant, créer en posant la contrainte `producers.siret_status = verified ET payouts_enabled = true` dans la policy `select` publique. Commentaire SQL pointant KAN-16
 - [ ] Vérifier la garde rôle dans le handler `siret` (`users.metadata.roles.includes('producer')`) et la sélection AU-06 si pas encore active
-- [ ] Ajouter dans `apps/web/.env.local.example` : `STRIPE_WEBHOOK_SECRET_LOCAL`, `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` (sans valeurs). `INSEE_SIRENE_API_KEY` déjà ajoutée (commit `[setup] API Sirene INSEE provisionnée`)
+- [ ] Ajouter dans `apps/web/.env.local.example` : `STRIPE_WEBHOOK_SECRET_LOCAL` (sans valeur). `INSEE_SIRENE_API_KEY` + `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` déjà ajoutées (commits `[setup] API Sirene INSEE provisionnée` et `[setup] Inngest provisionné`)
 - [ ] Mettre à jour `ARCHITECTURE.md` §18 : entrée « Premier consommateur Inngest = onboarding producteur (KAN-16) » + « Premier handler webhook Stripe (account.updated) »
 - [ ] Mettre à jour `ARCHITECTURE.md` §8.2 si la logique multi-secrets (platform + Connect) doit être documentée explicitement (le squelette actuel mentionne « vérification signature » sans détailler)
 - [ ] Mettre à jour `tech/setup.md` § Stripe Connect Express : marquer *Câblage code* progressé (handler webhook actif, client Stripe partagé)

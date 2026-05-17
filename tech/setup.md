@@ -128,11 +128,23 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## Jobs et observabilité
 
 ### Inngest (jobs asynchrones)
-- **Statut** : À faire
+- **Statut** : Partiel — compte créé, env Production provisionné, clés récupérées et collées côté Vercel + `.env.local` (2026-05-16). Reste : scaffold `packages/jobs/`, endpoint `/api/v1/inngest`, sync de l'app côté dashboard Inngest (à faire à l'implémentation de KAN-16).
 - **Dashboard** : https://app.inngest.com
-- **Plan** : Free puis pay-as-you-go
-- **Env vars produites** : `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY`
-- **Notes** : app Inngest + endpoint `/api/v1/inngest`. Voir ARCHITECTURE.md §7.
+- **Plan** : Free (50 000 step executions / mois, suffisant au MVP — cf. ARCHITECTURE.md §13.2)
+- **Env vars produites** : `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` (Sensitive côté Vercel pour la signing key, qui permet de forger des appels signés vers `/api/v1/inngest`)
+- **Environnement** : `Production` par défaut (Inngest cloud). Les développeurs locaux utilisent le **Dev Server** (`npx inngest-cli@latest dev`) qui tourne en bubble local sans consommer les clés Production — il signe avec une clé locale auto-générée.
+- **Fait le 2026-05-16** :
+  - Compte Inngest créé (auth GitHub via org Erkkul)
+  - Environnement `Production` initialisé (Inngest crée toujours un env Production par défaut)
+  - **Event Key** par défaut récupérée → exposée en `INNGEST_EVENT_KEY` côté Vercel + `.env.local`
+  - **Signing Key** récupérée → exposée en `INNGEST_SIGNING_KEY` côté Vercel (*Sensitive*) + `.env.local`
+  - Onboarding wizard fermé via « I already have an Inngest app » (pas de Dev Server lancé tant que `packages/jobs/` n'existe pas)
+- **À faire** :
+  - **Scaffold `packages/jobs/`** (manifest pnpm, deps `inngest`, exports, tsconfig) — premier package jobs du monorepo, attaché à KAN-16 cf. cadrage `specs/KAN-16/`
+  - **Endpoint `apps/web/app/api/v1/inngest/route.ts`** — utilise `serve({ client, functions })` du package `inngest/next` pour exposer les fonctions à Inngest cloud
+  - **Sync de l'app** côté dashboard Inngest → menu **Apps** → **Sync new app** → coller `https://delta-web-gamma.vercel.app/api/v1/inngest` (Inngest détecte alors les fonctions exportées via fetch HTTP)
+  - **Sentry pour les jobs** : `SENTRY_DSN_JOBS` à provisionner en même temps que Sentry (cf. § Sentry, *À faire*)
+- **Notes** : Inngest **ne fait pas tourner du code chez eux**, il invoque ton endpoint via HTTP avec retry exponentiel natif et orchestration des `step.run(...)`. Voir ARCHITECTURE.md §7 (matching pipeline) et le cadrage `specs/KAN-16/design.md` pour le premier event consommateur `producer.siret.requested`.
 
 ### Sentry (erreurs web + mobile + jobs)
 - **Statut** : À faire
