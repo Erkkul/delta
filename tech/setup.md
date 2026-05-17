@@ -128,7 +128,7 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## Jobs et observabilité
 
 ### Inngest (jobs asynchrones)
-- **Statut** : Partiel — compte créé, env Production provisionné, clés récupérées et collées côté Vercel + `.env.local` (2026-05-16). Reste : scaffold `packages/jobs/`, endpoint `/api/v1/inngest`, sync de l'app côté dashboard Inngest (à faire à l'implémentation de KAN-16).
+- **Statut** : Partiel — compte créé, env Production provisionné, clés récupérées et collées côté Vercel + `.env.local` (2026-05-16). Package `@delta/jobs` scaffolé avec premier event `producer.siret.requested` et client Sirene (2026-05-17, KAN-16). Reste : endpoint `/api/v1/inngest` côté apps/web et sync de l'app sur le dashboard Inngest (à faire dans la suite de KAN-16).
 - **Dashboard** : https://app.inngest.com
 - **Plan** : Free (50 000 step executions / mois, suffisant au MVP — cf. ARCHITECTURE.md §13.2)
 - **Env vars produites** : `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` (Sensitive côté Vercel pour la signing key, qui permet de forger des appels signés vers `/api/v1/inngest`)
