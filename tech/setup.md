@@ -186,12 +186,24 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 - **Statut** : À faire
 - **Notes** : choix domaine (`delta.fr` ou autre). DNS via Vercel pour web. MX/DKIM/SPF pour Resend.
 
-## Externe sans clé
+## APIs externes
 
 ### API Adresse Gouv.fr
 - **Statut** : Fait
 - **URL** : https://adresse.data.gouv.fr/api-doc/adresse
 - **Notes** : aucun provisionnement nécessaire (API publique, sans clé). Pas de quota documenté ; cache 24h côté serveur recommandé. Décision produit 2026-05-01.
+
+### API Sirene INSEE (vérification SIRET)
+- **Statut** : Fait le 2026-05-16
+- **Portail** : https://portail-api.insee.fr
+- **Plan** : Public (gratuit, ≤ 30 req/min, clé sans expiration)
+- **Env vars produites** : `INSEE_SIRENE_API_KEY`
+- **Application INSEE** : `delta-dev` — mode **Simple** (le mode Backend to backend ne fonctionne pas sur le plan public, cf. mode d'emploi officiel)
+- **Souscription** : créée séparément après l'app (Catalogue → API Sirene → Souscrire → plan Public → app `delta-dev`). La clé d'API se récupère sur la souscription (et non sur l'app), onglet « Mes applications » → `delta-dev` → « Souscriptions ».
+- **Endpoint** : `https://api.insee.fr/api-sirene/3.11/siret/<siret>` ou `/siren/<siren>`
+- **Header d'auth** : `X-INSEE-Api-Key-Integration: <key>` (pas d'OAuth, pas de `/token`, pas de cache bearer — la clé est posée directement sur chaque requête)
+- **Test rapide** : `curl 'https://api.insee.fr/api-sirene/3.11/siren/309634954' -H 'X-INSEE-Api-Key-Integration: <key>'` (309634954 = SIREN de l'INSEE, dataset de test officiel)
+- **Notes** : la clé peut être renouvelée ou révoquée depuis le portail. Quota 30 req/min largement suffisant au MVP (un appel par déclaration SIRET producteur). Consommée par le job Inngest `producer.siret.requested` (cf. cadrage KAN-16).
 
 ## CI/CD
 

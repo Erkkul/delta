@@ -40,7 +40,7 @@ Premier contact post-auth pour un user qui sélectionne le rôle « producteur �
 
 ## Hypothèses
 
-- L'API publique Sirene INSEE (`https://api.insee.fr/entreprises/sirene/V3`) reste utilisable au MVP avec un compte gratuit (token bearer + 30 req/min). À ajouter à `tech/setup.md` § Externe.
+- L'API publique Sirene INSEE (`https://api.insee.fr/api-sirene/3.11`) est utilisable au MVP avec un compte gratuit (plan Public, ≤ 30 req/min, clé d'API sans expiration en header `X-INSEE-Api-Key-Integration`). Provisionnée le 2026-05-16, cf. `tech/setup.md` § APIs externes.
 - Stripe Connect Express en mode test est suffisant tant que le live mode n'est pas activé (cf. `tech/setup.md` § Stripe Connect Express, *À faire* live mode au pré-lancement).
 - Le webhook Connect (`account.updated`) est déjà reçu sur `/api/v1/webhooks/stripe` côté Stripe (configuré le 2026-05-14) — reste à câbler côté code.
 - La table `producers` n'existe pas encore en DB — la migration est portée par cette US.

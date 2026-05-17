@@ -106,7 +106,7 @@ Référence : ARCHITECTURE.md §6 et §8.
 Référence : ARCHITECTURE.md §2. État du provisionnement : `tech/setup.md`.
 
 - **Stripe Connect Express** — voir `tech/setup.md` § Stripe Connect Express. Statut *Partiel* : compte plateforme + profil Connect + 2 webhook destinations OK en test mode. Reste à provisionner côté code : Stripe CLI local (`stripe listen --forward-to localhost:3000/api/v1/webhooks/stripe`) qui produit un 3e `whsec_` local-only à coller dans `.env.local`.
-- **API Sirene INSEE** — **non listé dans `tech/setup.md`** au moment du cadrage. À ajouter en § Externe : URL `https://api.insee.fr/entreprises/sirene/V3`, plan gratuit (token bearer + 30 req/min), env var `INSEE_SIRENE_TOKEN`. Action setup à exécuter avant de coder l'étape SIRET.
+- **API Sirene INSEE** — voir `tech/setup.md` § APIs externes / API Sirene INSEE. Statut *Fait* (2026-05-16). Plan public gratuit, ≤ 30 req/min, clé sans expiration posée dans le header `X-INSEE-Api-Key-Integration` de chaque requête (pas d'OAuth, pas de `/token`, pas de cache de bearer). Env var unique : `INSEE_SIRENE_API_KEY`. Endpoint `https://api.insee.fr/api-sirene/3.11/siret/<siret>`.
 - **Inngest** — voir `tech/setup.md` § Inngest. Statut *À faire*. Provisionnement requis : compte Inngest + app `delta` + endpoint `/api/v1/inngest` + env `INNGEST_EVENT_KEY` / `INNGEST_SIGNING_KEY` + scaffold `packages/jobs/`. **Cette US devient le premier consommateur d'Inngest du repo** — décision à acter au journal §18 d'ARCHITECTURE.md.
 - **Supabase Auth** — voir `tech/setup.md` § Supabase. Déjà OK (KAN-2, KAN-3). Pas de changement.
 - **Supabase Realtime** — voir `tech/setup.md` § Supabase. Première utilisation Realtime du repo (souscription à la row `producers`). Activable sans provisionnement supplémentaire (Free tier).
@@ -135,8 +135,9 @@ Pièges, limites, free-tier, observabilité. Références : ARCHITECTURE.md §9,
 - **Idempotence webhook** : sans `stripe_webhook_events`, un retry Stripe (si on n'a pas répondu 200 dans 30 s) doublerait des updates. `INSERT ... ON CONFLICT (event_id) DO NOTHING` puis traitement conditionné par `processed_at IS NULL`.
 - **Account Link expire vite (≤ 5 min)**. L'endpoint `stripe-link` doit toujours générer un lien frais — pas de cache. Le `refresh_url` sert exactement à ça.
 - **Stripe Connect Express en mode test** : impossible de simuler un payout réel, mais `account.updated` arrive bien (Stripe dashboard test → `Trigger event`, ou Stripe CLI `stripe trigger account.updated`).
-- **API Sirene INSEE** : token bearer expire (compte gratuit, renouvellement quotidien). Cache 23 h côté handler du job + retry exponentiel Inngest si INSEE down.
-- **Sirene quota 30 req/min** : largement suffisant au MVP.
+- **API Sirene INSEE** : clé d'API simple en header `X-INSEE-Api-Key-Integration`, sans expiration. Pas de gestion de token. Retry exponentiel Inngest si INSEE renvoie 5xx ou timeout.
+- **Sirene quota 30 req/min** : largement suffisant au MVP. Si dépassement, INSEE renvoie 429 — Inngest backoff naturel.
+- **Cohérence dénomination** : la comparaison entre `legal_name` saisi par le producteur et `uniteLegale.periodesUniteLegale[0].denominationUniteLegale` du payload Sirene doit être fuzzy (Levenshtein ≤ 3 ou normalisation lowercase + suppression accents + tokens identiques) plutôt que strict equality, car les graphies divergent souvent (avec/sans forme juridique, accents, abréviations).
 - **Free-tier Inngest** : limite 50 000 fonctions / mois. Un job par producteur — négligeable.
 - **RLS gating produits** : la policy `select` publique sur `products` join `producers` à chaque requête catalogue. Index `producers.user_id` (déjà unique) garantit coût constant. À profiler si catalogue > 10k produits.
 - **Realtime sur `producers`** : consomme un slot de réplication. Ouvrir une seule souscription par tab, cleanup au unmount.
