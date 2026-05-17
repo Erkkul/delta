@@ -7,7 +7,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 ## Vue d'ensemble
 
 - **13 épics** (KAN-1, KAN-4 → KAN-15) — un épic par grand domaine fonctionnel
-- **49 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-157 sous les autres épics — voir tables par épic ci-dessous)
+- **50 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-158 sous les autres épics — voir tables par épic ci-dessous)
 - **Subtasks** : voir le catalogue par épic ci-dessous. Le mapping peut être incomplet pour les subtasks les plus récentes — Jira fait foi pour la liste exhaustive.
 - État au 2026-05-17 : KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *Terminé* (mergé sur `main` — PR #10, cadrage `specs/KAN-16/`) ; autres *Ideas*
 - **Maquettes (2026-05-14)** : les 35 écrans des 3 parcours (Producteur, Acheteur, Rameneur) du sitemap PRD §10 sont maquettés. Restent à maquetter : transverses **TR-02** (centre notifications) et **TR-04** (signalement / litige) ; **TR-03** est couvert par `rm-09-chat.html`. Index navigable de toutes les maquettes : `design/maquettes/index.html`
@@ -28,7 +28,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
 | PR-01 Inscription / connexion | `pr-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
-| PR-02 Onboarding Stripe Connect | `pr-02-onboarding-stripe.html` | KAN-16 (Onboarding Stripe Connect) — [Cadrage tech](specs/KAN-16/) | KAN-62 |
+| PR-02 Onboarding Stripe Connect | `pr-02-onboarding-stripe.html` | KAN-16 (Onboarding Stripe Connect) — [Cadrage tech](specs/KAN-16/) | KAN-62, KAN-158 (polish UX restricted) |
 | PR-03 Dashboard | `pr-03-dashboard.html` | KAN-18 (Tableau de bord producteur) | KAN-56 |
 | PR-04 Catalogue produits | `pr-04-catalogue.html` | KAN-20 (Création & édition produit) | KAN-23 (Statuts produit) |
 | PR-05 Création / édition produit | `pr-05-edition-produit.html` | KAN-20 (Création & édition produit) | KAN-21 (Photos), KAN-22 (Stock), KAN-24 (Labels & catégories) |
@@ -105,6 +105,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-17 | Feature | Ideas | Informations profil & ferme |
 | KAN-18 | Feature | Ideas | Tableau de bord producteur |
 | KAN-19 | Feature | Ideas | Historique ventes |
+| KAN-158 | Feature | Ideas | Polish UX onboarding producteur — état Stripe restricted (KYC incomplet) |
 | KAN-62 | Subtask | Ideas | Connecter son compte bancaire via Stripe Connect (KYC léger + IBAN) — parent KAN-16 |
 | KAN-63 | Subtask | Ideas | Renseigner ses informations de profil (nom, description, photo) — parent KAN-17 |
 | KAN-64 | Subtask | Ideas | Renseigner l'adresse exacte de la ferme ou du point de collecte — parent KAN-17 |
