@@ -9,6 +9,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./users": "./src/users/index.ts",
+    "./producers": "./src/producers/index.ts",
     "./client": "./src/client.ts",
     "./types": "./src/types.ts"
   },
