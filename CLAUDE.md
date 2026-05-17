@@ -207,6 +207,20 @@ Pour préparer techniquement une feature Jira KAN avant de coder, utiliser le sk
 - Pas de slug dans le nom du dossier : `specs/KAN-XXX/`, pas `specs/KAN-XXX-slug/`.
 - Définition complète et workflow : `.claude/skills/propose-spec/SKILL.md`.
 
+### Après merge d'une feature sur `main` — règle impérative
+Quand une PR portant une feature KAN-XXX est mergée sur `main` (origin), le ticket Jira correspondant doit être basculé en **Terminé** et le mapping mis à jour, **sans attendre**. Sinon la vue Jira reste désynchronisée du repo et la prochaine session ne sait plus ce qui est livré.
+
+À faire dans la foulée du merge (manuellement ou via un agent dédié) :
+
+1. **Transitionner le ticket Jira** vers `Terminé` (transition id `51` dans le workflow KAN, cf. `getTransitionsForJiraIssue`). Si le ticket est en `Wip` ou `Examiner`, la transition directe vers `Terminé` est disponible — pas besoin de passer par les états intermédiaires.
+2. **Mettre à jour `produit/jira_mapping.md`** :
+   - Statut du ticket dans la table « Catalogue Jira complet » de l'épic concerné : `Wip` / `Examiner` → `Terminé`, avec mention du PR de merge entre tirets (ex : `— mergé sur main (PR #N)`)
+   - Ligne « État au YYYY-MM-DD » de la section « Vue d'ensemble » mise à jour avec le nouveau statut
+3. **Commit dédié** : `Mapping Jira : KAN-XXX en Terminé (merge PR #N)`. Ne pas mélanger avec d'autres modifications.
+4. **Si l'épic parent voit toutes ses features passées en `Terminé`**, le signaler en chat — la clôture d'épic est une décision manuelle (parfois on garde l'épic ouvert pour des sous-tickets de polish).
+
+Cette règle complète la règle « Après toute création, modification ou suppression de ticket Jira » qui couvre déjà les changements de structure, et la règle `/propose` qui couvre la transition d'entrée vers `To Do`. C'est la fermeture symétrique du cycle.
+
 ### Hiérarchie en cas de conflit entre sources
 **Sur sujets produit / fonctionnels :**
 1. `produit/decisions/decisions_produit.md` (dernière entrée datée)
