@@ -24,3 +24,19 @@ export { ForgotPasswordForm } from "./forgot-password-form"
 export type { ForgotPasswordFormProps } from "./forgot-password-form"
 export { ResetPasswordForm } from "./reset-password-form"
 export type { ResetPasswordFormProps } from "./reset-password-form"
+export { OnboardingWizardShell } from "./onboarding-wizard-shell"
+export type {
+  OnboardingWizardShellProps,
+  WizardStep,
+} from "./onboarding-wizard-shell"
+export { SiretForm } from "./siret-form"
+export type {
+  SiretFormProps,
+  SiretFormResult,
+  SiretFormValues,
+} from "./siret-form"
+export { StripeOnboardingCard } from "./stripe-onboarding-card"
+export type {
+  StripeOnboardingCardProps,
+  StripeOnboardingCardResult,
+} from "./stripe-onboarding-card"
