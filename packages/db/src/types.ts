@@ -30,11 +30,22 @@ export type Database = {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      reveal_pickup_address: {
+        Args: { producer_id: string }
+        Returns: string | null
+      }
+      set_pickup_location: {
+        Args: { p_longitude: number | null; p_latitude: number | null }
+        Returns: undefined
+      }
+    }
     Enums: {
       user_role: Role
       producer_siret_status: ProducerSiretStatus
       producer_stripe_status: ProducerStripeStatus
+      producer_label: ProducerLabel
+      weekday: Weekday
     }
     CompositeTypes: Record<string, never>
   }
@@ -79,9 +90,33 @@ export type ProducerStripeStatus =
   | "restricted"
   | "disabled"
 
+// ─── Producers — extension profil & ferme (KAN-17) ───────────────────────
+
+export type ProducerLabel =
+  | "bio_ab"
+  | "demeter"
+  | "nature_et_progres"
+  | "hve_3"
+  | "producteur_fermier"
+
+export type Weekday =
+  | "mon"
+  | "tue"
+  | "wed"
+  | "thu"
+  | "fri"
+  | "sat"
+  | "sun"
+
+export type FarmPhoto = {
+  url: string
+  alt?: string
+}
+
 export type ProducerRow = {
   id: string
   user_id: string
+  // KAN-16 : SIRET
   siret: string | null
   legal_name: string | null
   legal_form: string | null
@@ -89,11 +124,30 @@ export type ProducerRow = {
   siret_status: ProducerSiretStatus
   siret_verified_at: string | null
   siret_rejection_reason: string | null
+  // KAN-16 : Stripe
   stripe_account_id: string | null
   stripe_status: ProducerStripeStatus
   payouts_enabled: boolean
   charges_enabled: boolean
   requirements_currently_due: string[]
+  // KAN-17 : profil public
+  display_name: string | null
+  public_description: string | null
+  profile_photo_url: string | null
+  farm_photos: FarmPhoto[]
+  labels: ProducerLabel[]
+  // KAN-17 : adresse de récupération
+  pickup_public_zone: string | null
+  pickup_address: string | null
+  // Note : pickup_location (geography) n'est pas exposée côté TS — toutes
+  // les lectures passent par RPC. Le champ existe en DB pour le matching futur.
+  pickup_days: Weekday[]
+  pickup_hours_start: string | null
+  pickup_hours_end: string | null
+  // KAN-17 : exploitation
+  paused: boolean
+  paused_at: string | null
+  // Conventions user-data
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -113,6 +167,18 @@ export type ProducerInsert = {
   payouts_enabled?: boolean
   charges_enabled?: boolean
   requirements_currently_due?: string[]
+  display_name?: string | null
+  public_description?: string | null
+  profile_photo_url?: string | null
+  farm_photos?: FarmPhoto[]
+  labels?: ProducerLabel[]
+  pickup_public_zone?: string | null
+  pickup_address?: string | null
+  pickup_days?: Weekday[]
+  pickup_hours_start?: string | null
+  pickup_hours_end?: string | null
+  paused?: boolean
+  paused_at?: string | null
 }
 
 export type ProducerUpdate = {
@@ -128,6 +194,19 @@ export type ProducerUpdate = {
   payouts_enabled?: boolean
   charges_enabled?: boolean
   requirements_currently_due?: string[]
+  display_name?: string | null
+  public_description?: string | null
+  profile_photo_url?: string | null
+  farm_photos?: FarmPhoto[]
+  labels?: ProducerLabel[]
+  pickup_public_zone?: string | null
+  pickup_address?: string | null
+  // pickup_location écrit via RPC distincte (cf. core), pas en update direct
+  pickup_days?: Weekday[]
+  pickup_hours_start?: string | null
+  pickup_hours_end?: string | null
+  paused?: boolean
+  paused_at?: string | null
   deleted_at?: string | null
 }
 
