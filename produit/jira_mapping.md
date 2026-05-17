@@ -105,7 +105,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-17 | Feature | Ideas | Informations profil & ferme |
 | KAN-18 | Feature | Ideas | Tableau de bord producteur |
 | KAN-19 | Feature | Ideas | Historique ventes |
-| KAN-158 | Feature | Ideas | Polish UX onboarding producteur — état Stripe restricted (KYC incomplet) |
+| KAN-158 | Feature | À faire | Polish UX onboarding producteur — état Stripe restricted (KYC incomplet) — [Cadrage tech](specs/KAN-158/) |
 | KAN-62 | Subtask | Ideas | Connecter son compte bancaire via Stripe Connect (KYC léger + IBAN) — parent KAN-16 |
 | KAN-63 | Subtask | Ideas | Renseigner ses informations de profil (nom, description, photo) — parent KAN-17 |
 | KAN-64 | Subtask | Ideas | Renseigner l'adresse exacte de la ferme ou du point de collecte — parent KAN-17 |
