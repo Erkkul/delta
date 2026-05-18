@@ -43,10 +43,10 @@ export type AppSidebarConfig = {
  * `design/maquettes/producteur/pr-03-dashboard.html` (sections Activité /
  * Catalogue / Finances / Profil).
  *
- * État au MVP (KAN-18) : seuls les écrans déjà livrés par KAN-17 sont
- * actifs (Tableau de bord, Profil public, Paramètres). Les autres
- * items sont `disabled` jusqu'à ce que leurs tickets respectifs livrent
- * leur route (KAN-20 catalogue, KAN-46/47 pickups, KAN-19 ventes).
+ * État au MVP : Tableau de bord (KAN-18), Profil public + Paramètres
+ * (KAN-17), Ventes & virements (KAN-19) sont actifs. Les items restants
+ * sont `disabled` jusqu'à ce que leurs tickets respectifs livrent leur
+ * route (KAN-20 catalogue, KAN-46/47 pickups).
  */
 export const PRODUCER_SIDEBAR: AppSidebarConfig = {
   role: "producteur",
@@ -82,9 +82,9 @@ export const PRODUCER_SIDEBAR: AppSidebarConfig = {
       heading: "Finances",
       items: [
         {
+          href: "/producer/sales",
           label: "Ventes & virements",
           iconKey: "sales",
-          disabled: true,
         },
       ],
     },
