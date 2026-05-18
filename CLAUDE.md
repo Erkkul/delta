@@ -35,6 +35,7 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 | Journal des arbitrages produit (avec dates) | `produit/decisions/decisions_produit.md` |
 | Maquettes HTML cliquables | `design/maquettes/` — index navigable : `design/maquettes/index.html` |
 | Stack technique, structure du monorepo, conventions de code | `ARCHITECTURE.md` — sections 2 à 4 |
+| Diagramme système global (Mermaid) | `ARCHITECTURE.md` — §2.3 |
 | Modélisation DB, RLS, migrations | `ARCHITECTURE.md` — section 5 |
 | Implémentation machine à états mission, pipeline matching, flow Stripe | `ARCHITECTURE.md` — sections 6 à 8 |
 | Sécurité, tests, observabilité, CI/CD | `ARCHITECTURE.md` — sections 9 à 12 |

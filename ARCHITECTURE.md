@@ -73,6 +73,166 @@ Sept principes qui tranchent quand deux options techniques s'opposent. Ils compl
 | TypeScript | 5.5+ | `strict: true`, `noUncheckedIndexedAccess: true` |
 | Postgres | 15 | géré par Supabase |
 
+### 2.3 Diagramme système (vue d'ensemble)
+
+Vue C4 niveau 2 — composants et flux principaux. Source de vérité du schéma global ; toute évolution structurante (nouveau service externe, nouvelle frontière de package, bascule de provider) doit mettre ce diagramme à jour dans le même commit. Les flèches pleines représentent un appel synchrone, les flèches pointillées un événement asynchrone ou un trigger.
+
+```mermaid
+flowchart LR
+    %% ===== Acteurs =====
+    Acheteur(["Acheteur"])
+    Producteur(["Producteur"])
+    Rameneur(["Rameneur"])
+
+    %% ===== Clients =====
+    subgraph Clients["Clients"]
+        Web["apps/web<br/>Next.js 15 App Router<br/>Tailwind + shadcn/ui"]
+        Mobile["apps/mobile<br/>Expo SDK 53<br/>NativeWind 4"]
+    end
+
+    %% ===== Edge Vercel =====
+    subgraph VercelEdge["Vercel"]
+        Pages["Pages RSC<br/>+ Server Actions"]
+        API["API Route Handlers<br/>/api/v1/*"]
+        Webhook["Webhook Stripe<br/>/api/v1/webhooks/stripe<br/>signature multi-secret"]
+    end
+
+    %% ===== Domaine TS =====
+    subgraph Domain["packages/* (TypeScript)"]
+        Contracts["@delta/contracts<br/>Zod schemas"]
+        Core["@delta/core<br/>state machine mission<br/>matching, payment"]
+        DB["@delta/db<br/>repos Supabase typés"]
+        Jobs["@delta/jobs<br/>handlers Inngest fins"]
+        UI["@delta/ui-web<br/>@delta/ui-mobile"]
+    end
+
+    %% ===== Supabase =====
+    subgraph SupabaseBox["Supabase (eu-west-3)"]
+        Auth["Supabase Auth<br/>Email + Google"]
+        Postgres[("Postgres 15<br/>PostGIS + pgcrypto<br/>RLS forcée")]
+        Realtime["Realtime<br/>chat mission"]
+        Storage["Storage<br/>photos produits, KYC"]
+    end
+
+    %% ===== Async =====
+    subgraph Async["Plateformes asynchrones"]
+        Inngest["Inngest<br/>matching, notifs<br/>timers, expirations"]
+        Upstash[("Upstash Redis<br/>rate-limit")]
+    end
+
+    %% ===== Externes =====
+    subgraph External["Services externes"]
+        Stripe["Stripe Connect Express<br/>escrow 85 / 10 / 5"]
+        Routes["Google Routes API"]
+        Adresse["API Adresse Gouv.fr"]
+        Insee["API Sirene INSEE"]
+        Google["Google OAuth"]
+        Apple["Apple OAuth<br/>différé post-MVP"]
+        Resend["Resend<br/>email transactionnel"]
+        ExpoPush["Expo Push"]
+    end
+
+    %% ===== Observabilité =====
+    subgraph Obs["Observabilité"]
+        Sentry["Sentry<br/>web + mobile + jobs"]
+        Pino["pino logs JSON"]
+        VA["Vercel Analytics"]
+    end
+
+    %% ===== CI/CD =====
+    subgraph CICD["CI/CD"]
+        GH["GitHub Actions<br/>lint • typecheck • test • build<br/>keepalive Supabase"]
+        EAS["EAS Build / Submit<br/>TestFlight + Play Internal"]
+    end
+
+    %% --- Acteurs -> clients ---
+    Acheteur --> Web
+    Producteur --> Web
+    Rameneur --> Mobile
+
+    %% --- Clients -> Vercel ---
+    Web -->|RSC / fetch| Pages
+    Web -->|JWT cookie httpOnly| API
+    Mobile -->|JWT SecureStore| API
+
+    %% --- API -> domain ---
+    API -->|parse| Contracts
+    API -->|use cases| Core
+    Pages -->|reads| DB
+    Core --> Contracts
+    Core --> DB
+    Jobs --> Core
+    UI -.->|consommé par| Web
+    UI -.->|consommé par| Mobile
+
+    %% --- DB -> Supabase ---
+    DB -->|publishable key + JWT user| Postgres
+    DB --> Storage
+    Web -->|client SDK| Auth
+    Mobile -->|client SDK| Auth
+    Web -->|subscribe| Realtime
+    Mobile -->|subscribe| Realtime
+    Auth -.->|trigger on signup| Postgres
+    Auth -->|OAuth| Google
+    Auth -.->|OAuth| Apple
+
+    %% --- Rate-limit ---
+    API -->|check| Upstash
+
+    %% --- Inngest ---
+    API -.->|emit events| Inngest
+    Webhook -.->|emit events| Inngest
+    Inngest --> Jobs
+    Jobs -->|secret key| Postgres
+    Jobs --> Routes
+    Jobs --> Insee
+    Jobs --> ExpoPush
+    Jobs --> Resend
+
+    %% --- Stripe ---
+    API -->|PaymentIntent / Transfer| Stripe
+    Stripe -.->|webhook signé| Webhook
+    Webhook -->|secret key| Postgres
+
+    %% --- Adresses (FE direct) ---
+    Web --> Adresse
+    Mobile --> Adresse
+
+    %% --- Observabilité ---
+    Web --> Sentry
+    Mobile --> Sentry
+    Jobs --> Sentry
+    API --> Pino
+    Web --> VA
+
+    %% --- CI/CD ---
+    GH -.->|build + deploy| VercelEdge
+    GH -.->|ping /auth/v1/settings| SupabaseBox
+    EAS -.->|builds| Mobile
+
+    %% --- Styling ---
+    classDef actor fill:#e6f4ea,stroke:#1f7a3a,color:#0c3d1c
+    classDef ext fill:#fff3e0,stroke:#a05a00,color:#3d2400
+    classDef data fill:#e8f0fe,stroke:#1a4fb8,color:#0c2a6b
+    classDef obs fill:#f3e8fd,stroke:#7a36c2,color:#3d1a6b
+    class Acheteur,Producteur,Rameneur actor
+    class Stripe,Routes,Adresse,Insee,Google,Apple,Resend,ExpoPush ext
+    class Postgres,Storage,Upstash data
+    class Sentry,Pino,VA obs
+```
+
+**Légende rapide**
+
+- **Acteurs** (vert) : trois personas du PRD §2.2.
+- **Clients** : `apps/web` (acheteur + producteur prioritaires) et `apps/mobile` (rameneur prioritaire).
+- **Vercel** : héberge Pages RSC, Route Handlers `/api/v1/*` et l'unique webhook Stripe à signature multi-secret (cf. §8.2 + journal 1.18).
+- **Domaine** : `@delta/core` reste indépendant de tout framework (principe A2). Les handlers HTTP, jobs et UI ne contiennent que de la plomberie.
+- **Supabase** (bleu) : seul vrai engagement structurant (cf. §16). Auth, Postgres+PostGIS, Realtime et Storage dans la même région `eu-west-3`. Pour le détail des clés `sb_publishable_*` / `sb_secret_*`, cf. §5.2 et journal 1.3. Premier usage applicatif de PostGIS et de Storage : journal 1.19 (KAN-17 profil producteur).
+- **Inngest + Upstash** : asynchrone et garde-fous de débit. Tous les jobs sont idempotents (principe A6).
+- **Services externes** (orange) : Stripe Connect Express en escrow, Google Routes pour le LineString trajet, API Adresse Gouv.fr appelée directement depuis le front (pas de proxy serveur), API Sirene pour la vérification SIRET producteur (cf. journal 1.17). Apple OAuth différé jusqu'à l'enrôlement Apple Developer.
+- **Observabilité** (violet) : Sentry sur les trois runtimes (web, mobile, jobs), `pino` JSON côté API, Vercel Analytics pour les events critiques.
+- **CI/CD** : GitHub Actions (lint + typecheck + test + build + keepalive Supabase, cf. journal 1.7 et 1.10) ; le deploy Vercel est géré nativement via l'intégration GitHub (pas d'orchestration depuis Actions). EAS Build pour le mobile.
+
 ---
 
 ## 3. Structure du monorepo
@@ -727,6 +887,7 @@ Le seul vrai engagement structurant est **Postgres**. Tout le reste est swappabl
 | 1.8 | 2026-05-11 | Correctif ESLint flat config. `packages/config/eslint/base.js` enrichi d'un bloc `ignores` global couvrant les dossiers générés (`.next`, `.turbo`, `dist`, `build`, `coverage`, `node_modules`) et **les fichiers de config** (`**/*.config.{js,mjs,ts,cjs}`, `**/eslint.config.{js,mjs,ts}`, `**/next-env.d.ts`). Motif : typescript-eslint v8 utilise `projectService: true` qui tente de typer chaque fichier via tsconfig — il échoue avec `Parsing error: ... was not found by the project service` sur les `.mjs` de config (next, postcss, tailwind, eslint) volontairement absents de `tsconfig.json`. L'ignore est plus propre que d'élargir `include` ou d'activer `allowDefaultProject` (les fichiers de config sont de l'outillage, pas du code applicatif). Override historique `**/*.config.{js,mjs,ts}` (qui désactivait `no-floating-promises`) réduit aux seuls tests `**/*.test.{ts,tsx}` puisque les configs sont désormais entièrement ignorées. Découvert via run CI rouge du commit 1.7 sur l'étape `pnpm lint`. |
 | 1.9 | 2026-05-11 | Correctif keepalive Supabase #1. Le workflow `.github/workflows/supabase-keepalive.yml` ciblait initialement `/rest/v1/` avec la publishable key. Échec : `HTTP 401 — Only secret API keys can be used for this endpoint`. Comportement documenté par Supabase pour la nouvelle gen de clés (entrée 1.3) : la publishable est destinée au client et refusée sur certains endpoints serveur, dont la racine PostgREST. Tentative #1 abandonnée. |
 | 1.10 | 2026-05-11 | Correctif keepalive Supabase #2. Bascule de `/rest/v1/` vers `/auth/v1/health` sans clé pour rester sans secret. Nouvel échec : `HTTP 401 — No API key found in request`. Supabase exige désormais le header `apikey` sur **tous** les endpoints, y compris les `/auth/v1/*` qui étaient historiquement publics. **Solution finale** : cibler `/auth/v1/settings` (endpoint GoTrue qui retourne la config OIDC publique) avec les deux headers du pattern client Supabase JS — `apikey: $SUPABASE_PUBLISHABLE_KEY` et `Authorization: Bearer $SUPABASE_PUBLISHABLE_KEY`. La publishable key est acceptée par GoTrue (c'est précisément son rôle : permettre au client front d'interagir avec Auth pour les `signIn`, `signUp`, `resetPassword`, etc.). Le secret `SUPABASE_PUBLISHABLE_KEY` redevient requis côté GitHub Actions (re-classé en « secret à configurer » dans `tech/setup.md`). Garde-fou ajouté en début de script : si le secret est manquant, le run échoue immédiatement avec un message explicite plutôt qu'un `HTTP 401` opaque. Si plus tard un round-trip Postgres garanti devient nécessaire (ex : monitoring santé prod), basculer sur une `SUPABASE_SECRET_KEY` dédiée + endpoint REST (clé secret distincte par service backend, principe 1.3). Aucune section normative impactée. |
+| 1.20 | 2026-05-17 | Ajout du diagramme système global dans une nouvelle sous-section §2.3 « Diagramme système (vue d'ensemble) ». Bloc Mermaid (C4 niveau 2) intégré inline pour rendu natif GitHub — pas de fichier `.mermaid` séparé pour éviter la dérive avec la doc. Composants couverts : acteurs (acheteur / producteur / rameneur), clients (`apps/web`, `apps/mobile`), Vercel (Pages RSC + Route Handlers + webhook Stripe), packages TS (`contracts`, `core`, `db`, `jobs`, `ui-*`), Supabase (Auth + Postgres+PostGIS + Realtime + Storage), Inngest + Upstash Redis, services externes (Stripe Connect Express, Google Routes, API Adresse Gouv.fr, API Sirene INSEE, Google OAuth, Apple OAuth différé, Resend, Expo Push), observabilité (Sentry, pino, Vercel Analytics) et CI/CD (GitHub Actions + EAS). Légende ajoutée sous le diagramme pour relier chaque cluster aux sections normatives (§5.2, §8.2, §13, §16) et aux journaux 1.3 / 1.7 / 1.10 / 1.17 / 1.18 / 1.19. CLAUDE.md « Où trouver quoi » enrichi d'une ligne « Diagramme système global → ARCHITECTURE.md §2.3 ». Convention adoptée : tout changement structurant (nouveau provider, nouvelle frontière de package, bascule cloud) doit mettre à jour ce diagramme dans le même commit. Aucune section normative supprimée — événement additif. |
 | 1.19 | 2026-05-17 | Livraison KAN-17 profil & ferme producteur (web). **Premier bucket Supabase Storage versionné** par migration : `producer-photos` (public, 5 MB, MIME jpeg/png/webp) créé via `INSERT INTO storage.buckets ... ON CONFLICT DO UPDATE` dans la migration `20260517150000_extend_producers_profile.sql`, avec policies storage explicites (`storage/policies.sql` mirroré). Pose la convention : tout bucket futur (`product-photos` KAN-20, `kyc-documents` éventuel) est versionné de la même manière, plus de provisionnement dashboard manuel. **Premier usage PostGIS applicatif** : colonne `pickup_location extensions.geography(Point, 4326)` sur `producers` + index GIST `producers_pickup_location_gist`. Type et fonctions PostGIS schéma-qualifiés (`extensions.geography`, `extensions.ST_SetSRID`, `extensions.ST_MakePoint`) car Supabase installe PostGIS dans le schéma `extensions` (cf. `tech/setup.md`), hors `search_path` par défaut. supabase-js ne sait pas écrire un `geography` en update direct → introduction d'une RPC dédiée `set_pickup_location(longitude, latitude)` SECURITY INVOKER (RLS appliquée) ; côté core, le use case `updateProducerProfile` orchestre `updateProfile` (texte) + `setPickupLocationViaRpc` (géographie) en transactionnel logique. **Pattern « colonne sensible exposée via RPC SECURITY DEFINER »** établi avec `reveal_pickup_address(producer_id uuid)` : Postgres n'ayant pas de RLS column-level natif, l'adresse exacte du producteur (lue uniquement par owner ou rameneur en mission active) passe par une fonction `SECURITY DEFINER SET search_path = public, pg_temp` qui combine vérification owner + jointure tolérante `to_regclass('public.missions')` pour ne pas casser tant que les tables missions/trips n'existent pas (KAN-10 / KAN-11 livrés plus tard). Réutilisable pour tout futur champ asymétrique (ex : numéro de téléphone rameneur révélé à un producteur en pickup). **Use cases core** ajoutés : `updateProducerProfile` (rate-limit 60/h, géocodage best-effort via API Adresse Gouv.fr), `setProducerPause` (toggle « Boutique en pause »). Erreurs typées : `ProducerProfileNotFoundError` (404), `AddressGeocodeFailedError`, `PhotoLimitReachedError`, `PhotoMimeRejectedError`. **Endpoints** : `GET/PATCH /api/v1/producer/profile`, `POST /api/v1/producer/pause`, `POST/DELETE /api/v1/producer/photos` (URL signée Storage côté serveur, PUT direct côté client, puis PATCH profile pour persister l'URL — pattern adoptable par KAN-20 catalogue). **UI** : composants `<ProducerProfileForm mode='wizard'|'edit'>` (un seul form, deux contextes), `<AddressAutocomplete>`, `<PhotoUploader>`, `<ProducerPublicCardPreview>` dans `apps/web/components/producer/` (pas dans `packages/ui-web/` au MVP — pas de réutilisation cross-app prévue). Pages : `/producer/profile` (édition + preview), `/producer/settings` (skeleton avec toggle pause câblé, autres rangs en placeholder « Bientôt »). **Wizard onboarding** : phase `profile` ajoutée en tête de la machine d'état du client component, le placeholder « Bientôt — KAN-17 » de KAN-16 est remplacé par le formulaire réel ; le step est considéré rempli dès que `display_name` est saisi. **Gating produits** : placeholder `supabase/policies/products.sql` enrichi de `producer.paused = false` pour KAN-20 (le toggle masque les produits sans toucher leur statut). Sections impactées : §5 (DB — extension `producers`, RPCs, PostGIS), §9.3 (données sensibles — pattern RPC SECURITY DEFINER pour adresse exacte). Tests : 21 nouveaux contracts (profile.test.ts) + 10 update-profile.test.ts + 5 set-pause.test.ts ; tests E2E Playwright et tests RLS d'intégration différés (cf. specs/KAN-17/tasks.md). Spec `specs/KAN-17/` synchronisée (toutes les tâches non différées cochées). |
 | 1.18 | 2026-05-17 | Premier handler webhook Stripe du repo (KAN-16). Endpoint `POST /api/v1/webhooks/stripe` posé côté `apps/web` avec le pattern §8.2 : (1) lecture du raw body via `req.text()` (la signature exige les octets originaux), (2) vérification signature **multi-secret** via `constructStripeEvent` — la fonction essaie successivement `STRIPE_WEBHOOK_SECRET_PLATFORM` puis `STRIPE_WEBHOOK_SECRET_CONNECT` (la nouvelle UX Stripe Workbench impose deux destinations distinctes, chacune avec son propre `whsec_`, cf. tech/setup.md), (3) INSERT idempotent dans `stripe_webhook_events` (ON CONFLICT DO NOTHING via détection PG `23505`), (4) dispatch sur `event.type` → use case `applyStripeAccountUpdate` de `@delta/core/producer`, (5) réponse 200 pour stopper les retries. Au MVP, seul `account.updated` est câblé (KYC Connect Express) ; les autres events configurés côté Stripe (payment_intent.*, charge.*, transfer.*, payout.*) sont acceptés et ignorés en attendant les tickets paiement (KAN-33, KAN-34). Précision §8.2 : la vérification signature dispatch « premier secret qui valide gagne » ; si aucun ne valide → 400. Sections impactées : §8.2 (squelette enrichi de l'aspect multi-secret), §11.1 (log structuré du dispatch côté webhook). |
 | 1.17 | 2026-05-17 | Premier consommateur Inngest du repo (KAN-16 onboarding producteur). Scaffold du package `@delta/jobs` (deps : `inngest`, `@delta/core`, `@delta/db`, `@delta/contracts`) avec `inngest-client.ts` (client `Inngest` typé via `EventSchemas` — premier event `producer.siret.requested`), `integrations/insee.ts` (client API Sirene V3.11, header `X-INSEE-Api-Key-Integration`, parsing tolérant du payload `etablissement.uniteLegale` avec gestion `[ND]` Sirene), et `producer/verify-siret-function.ts` (fonction Inngest `verify-siret-producer` qui consomme `producer.siret.requested` → délégation pure au use case `verifySiretWithInsee` de `@delta/core/producer`). Builder `buildDeltaFunctions({ producer, insee })` exposé pour que le serve handler d'`apps/web` injecte les adapters concrets (Supabase admin + clé INSEE) sans coupler le package jobs au runtime web. Pattern adopté : **les handlers Inngest restent fins, toute la logique vit dans `@delta/core` ; `@delta/jobs` est uniquement un câblage Inngest + clients externes**. Cohérent avec §4.1 (séparation domain/adapter) — `core` ne dépend pas du SDK Inngest, `jobs` ne contient pas de règle métier. Le serve handler côté apps/web sera posé dans le commit suivant. Sections impactées : §3 (monorepo — `packages/jobs` apparaît officiellement), §7 (matching — futur consommateur du même pattern). Tests : 7 unit Sirene client. `tech/setup.md` § Inngest passe de *Partiel (clés)* à *Partiel (clés + scaffold)* (reste : endpoint + sync app cloud). |
