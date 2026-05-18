@@ -1,3 +1,5 @@
+import { type ProductPhotoEntry } from "@delta/contracts/product"
+import { ProductPhotoLimitReachedError } from "@delta/core/errors"
 import {
   type Product,
   type ProductAdapter,
@@ -96,7 +98,42 @@ export function getProductAdapter(client: Client): ProductAdapter {
       const row = await productsRepo.softDelete(client, productId, ownerId)
       return toProduct(row)
     },
+
+    async updatePhotos(
+      productId: string,
+      ownerId: string,
+      photos: ProductPhotoEntry[],
+    ) {
+      try {
+        const row = await productsRepo.update(client, productId, ownerId, {
+          photos,
+        })
+        return toProduct(row)
+      } catch (err) {
+        // CHECK `products_photos_max` (`jsonb_array_length ≤ 4`) — rattrape
+        // les races d'uploads concurrents quand le use case a vu
+        // `photos.length < 4` mais que deux confirms passent en parallèle.
+        if (isPgCheckViolation(err)) {
+          throw new ProductPhotoLimitReachedError()
+        }
+        throw err
+      }
+    },
   }
+}
+
+/**
+ * Test si l'erreur remontée par supabase-js est un `check_violation` Postgres
+ * (`23514`). Évite le couplage avec la classe `PostgrestError` (non exportée
+ * publiquement par `@supabase/postgrest-js`).
+ */
+function isPgCheckViolation(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code: unknown }).code === "23514"
+  )
 }
 
 export { toProduct }

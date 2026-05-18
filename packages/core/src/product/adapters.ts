@@ -2,6 +2,7 @@ import {
   type ProductCategory,
   type ProductPackaging,
   type ProductPhoto,
+  type ProductPhotoEntry,
   type ProductStatus,
 } from "@delta/contracts/product"
 
@@ -112,4 +113,19 @@ export type ProductAdapter = {
    * (les erreurs typées sont levées côté use case).
    */
   softDelete(productId: string, ownerId: string): Promise<Product>
+
+  /**
+   * Écrit le tableau `photos` complet (KAN-21). Le use case appelle
+   * `findById` puis recompose le tableau (append / splice / swap) avant
+   * d'invoquer cette méthode — évite un double SELECT côté adapter.
+   *
+   * Le CHECK DB `products_photos_max` (`jsonb_array_length ≤ 4`)
+   * rattrape les races concurrentes. L'adapter web traduit le code
+   * Postgres `23514` en `ProductPhotoLimitReachedError`.
+   */
+  updatePhotos(
+    productId: string,
+    ownerId: string,
+    photos: ProductPhotoEntry[],
+  ): Promise<Product>
 }

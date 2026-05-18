@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { ProductPhotoEntry } from "./photos"
 import {
   ProductCategory,
   ProductPackaging,
@@ -7,12 +8,14 @@ import {
 } from "./shared"
 
 /**
- * Photo produit (KAN-21, préparée en DB par KAN-20). Format jsonb `{ url, alt? }`.
+ * Photo produit (KAN-21). Préparée en DB par KAN-20 (colonne `photos jsonb`,
+ * CHECK `jsonb_array_length ≤ 4`), câblée par KAN-21. Format `{ url, path, alt? }`
+ * — `path` redondant avec `url` pour éviter le reparsing au DELETE Storage
+ * (cf. specs/KAN-21/design.md § Risques techniques).
+ *
+ * Alias rétrocompat — la forme canonique est `ProductPhotoEntry` (photos.ts).
  */
-export const ProductPhoto = z.object({
-  url: z.string().url(),
-  alt: z.string().max(120).optional(),
-})
+export const ProductPhoto = ProductPhotoEntry
 export type ProductPhoto = z.infer<typeof ProductPhoto>
 
 /**
