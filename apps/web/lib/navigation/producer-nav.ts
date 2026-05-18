@@ -67,14 +67,14 @@ export const PRODUCER_SIDEBAR: AppSidebarConfig = {
       heading: "Catalogue",
       items: [
         {
+          href: "/producer/catalogue",
           label: "Mes produits",
           iconKey: "products",
-          disabled: true,
         },
         {
+          href: "/producer/catalogue/nouveau",
           label: "Ajouter un produit",
           iconKey: "add-product",
-          disabled: true,
         },
       ],
     },
