@@ -258,8 +258,14 @@ export type ProductPackaging =
 
 export type ProductStatus = "active" | "draft" | "disabled"
 
+/**
+ * Photo produit (KAN-21). `path` est le chemin canonique dans le bucket
+ * `product-photos` (`{user_id}/{product_id}/<random8>.<ext>`) — stocké en plus
+ * de `url` pour éviter le reparsing fragile de l'URL au DELETE Storage.
+ */
 export type ProductPhoto = {
   url: string
+  path: string
   alt?: string
 }
 

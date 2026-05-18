@@ -94,7 +94,8 @@ export const PRODUCT_STATUS_FR: Record<ProductStatus, string> = {
 
 /**
  * Codes d'erreur retournés par les endpoints `/api/v1/producer/products[/...]`
- * (KAN-20). Mapping HTTP côté route handler.
+ * (KAN-20) et `/api/v1/producer/products/[id]/photos*` (KAN-21). Mapping
+ * HTTP côté route handler.
  */
 export const PRODUCT_ERROR_CODES = {
   ValidationFailed: "PRODUCT_VALIDATION_FAILED",
@@ -104,6 +105,12 @@ export const PRODUCT_ERROR_CODES = {
   InvalidPrice: "PRODUCT_INVALID_PRICE",
   InvalidAvailabilityWindow: "PRODUCT_INVALID_AVAILABILITY_WINDOW",
   NameTooLong: "PRODUCT_NAME_TOO_LONG",
+  // ─── KAN-21 (Gestion photos) ──────────────────────────────────────────
+  PhotoLimitReached: "PRODUCT_PHOTO_LIMIT_REACHED",
+  PhotoNotFound: "PRODUCT_PHOTO_NOT_FOUND",
+  PhotoInvalidReorder: "PRODUCT_PHOTO_INVALID_REORDER",
+  PhotoMimeRejected: "PRODUCT_PHOTO_MIME_REJECTED",
+  PhotoPathRejected: "PRODUCT_PHOTO_PATH_REJECTED",
   Unknown: "PRODUCT_UNKNOWN",
 } as const
 export type ProductErrorCode =

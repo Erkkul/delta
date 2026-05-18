@@ -58,6 +58,13 @@ export function makeAdapter(overrides: Record<string, unknown> = {}) {
         makeProduct({ deleted_at: "2026-05-18T11:00:00.000Z" }),
       ),
     ),
+    updatePhotos: vi.fn(
+      (
+        _productId: string,
+        _ownerId: string,
+        photos: Array<{ url: string; path: string; alt?: string }>,
+      ) => Promise.resolve(makeProduct({ photos })),
+    ),
     ...overrides,
   }
 }

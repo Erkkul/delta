@@ -117,6 +117,7 @@ export default async function EditProductPage({
               availability_from: product.availability_from,
               availability_to: product.availability_to,
               status: product.status,
+              photos: product.photos,
             }}
             producerName={producer.display_name ?? "Mon catalogue"}
             producerCity={producer.pickup_public_zone}

@@ -291,8 +291,82 @@ export class ProductAlreadyDeletedError extends Error {
   }
 }
 
+/**
+ * Quota de 4 photos par produit atteint (KAN-21). Mapping HTTP : 409.
+ * Levée par `addProductPhoto` lorsque `photos.length === 4`. Le CHECK DB
+ * `products_photos_max` rattrape par ailleurs les races concurrentes —
+ * l'adapter web traduit alors le code Postgres `23514` (check_violation)
+ * vers ce même code applicatif.
+ */
+export class ProductPhotoLimitReachedError extends Error {
+  readonly code = "PRODUCT_PHOTO_LIMIT_REACHED" as const
+
+  constructor() {
+    super("Limite de 4 photos atteinte pour ce produit.")
+    this.name = "ProductPhotoLimitReachedError"
+  }
+}
+
+/**
+ * Index photo hors plage (KAN-21). Mapping HTTP : 404. Levée quand
+ * `removeProductPhoto` ou `reorderProductPhotos` reçoit un index `>= photos.length`.
+ */
+export class ProductPhotoNotFoundError extends Error {
+  readonly code = "PRODUCT_PHOTO_NOT_FOUND" as const
+
+  constructor() {
+    super("Photo introuvable à cet index.")
+    this.name = "ProductPhotoNotFoundError"
+  }
+}
+
+/**
+ * Réordonnement invalide (KAN-21). Mapping HTTP : 400. Levée si
+ * `from === to` ou si une des positions est hors plage.
+ */
+export class ProductPhotoInvalidReorderError extends Error {
+  readonly code = "PRODUCT_PHOTO_INVALID_REORDER" as const
+
+  constructor(message = "Le réordonnement est invalide.") {
+    super(message)
+    this.name = "ProductPhotoInvalidReorderError"
+  }
+}
+
+/**
+ * MIME type uploadé hors whitelist (KAN-21). Mapping HTTP : 400. Levée
+ * par la validation Zod côté `ProductPhotoUploadInput`.
+ */
+export class ProductPhotoMimeRejectedError extends Error {
+  readonly code = "PRODUCT_PHOTO_MIME_REJECTED" as const
+
+  constructor(mime: string) {
+    super(`Type d'image non supporté : ${mime}.`)
+    this.name = "ProductPhotoMimeRejectedError"
+  }
+}
+
+/**
+ * Path Storage ne commençant pas par `{auth.uid()}/{product_id}/` (KAN-21).
+ * Anti-tampering sur l'endpoint `confirm` : un client malveillant ne peut
+ * pas faire référencer une photo qui ne lui appartient pas. Mapping HTTP : 400.
+ */
+export class ProductPhotoPathRejectedError extends Error {
+  readonly code = "PRODUCT_PHOTO_PATH_REJECTED" as const
+
+  constructor() {
+    super("Le chemin de la photo ne correspond pas à ce produit.")
+    this.name = "ProductPhotoPathRejectedError"
+  }
+}
+
 export type ProductErrorCode =
   | ProductValidationError["code"]
   | ProductNotFoundError["code"]
   | ProductForbiddenError["code"]
   | ProductAlreadyDeletedError["code"]
+  | ProductPhotoLimitReachedError["code"]
+  | ProductPhotoNotFoundError["code"]
+  | ProductPhotoInvalidReorderError["code"]
+  | ProductPhotoMimeRejectedError["code"]
+  | ProductPhotoPathRejectedError["code"]

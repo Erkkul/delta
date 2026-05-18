@@ -14,6 +14,9 @@ import { formatEuros } from "./format"
 /**
  * Aperçu sticky droit (PR-05). Carte mockée vue acheteur dérivée du
  * state local du form parent.
+ *
+ * KAN-21 : `coverPhotoUrl` (= `photos[0]?.url`) remplace l'emoji fallback
+ * quand au moins une photo est uploadée.
  */
 export function ProductFormPreview({
   name,
@@ -22,6 +25,7 @@ export function ProductFormPreview({
   unitPriceCents,
   producerName,
   producerCity,
+  coverPhotoUrl,
 }: {
   name: string
   category: ProductCategory
@@ -29,6 +33,7 @@ export function ProductFormPreview({
   unitPriceCents: number | null
   producerName: string
   producerCity: string | null
+  coverPhotoUrl: string | null
 }) {
   const emoji = PRODUCT_CATEGORY_EMOJI[category]
   const categoryLabel = PRODUCT_CATEGORY_FR[category]
@@ -49,13 +54,22 @@ export function ProductFormPreview({
         </div>
         <div className="p-4">
           <div className="overflow-hidden rounded-md border border-cream-200 bg-white shadow-card">
-            <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-earth-100 to-earth-200">
-              <span
-                aria-hidden="true"
-                className="select-none text-5xl opacity-70"
-              >
-                {emoji}
-              </span>
+            <div className="relative flex h-32 items-center justify-center overflow-hidden bg-gradient-to-br from-earth-100 to-earth-200">
+              {coverPhotoUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={coverPhotoUrl}
+                  alt={displayName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="select-none text-5xl opacity-70"
+                >
+                  {emoji}
+                </span>
+              )}
               <span className="absolute left-2 top-2 rounded-pill bg-earth-100/90 px-2 py-0.5 text-[10px] font-semibold text-earth-800">
                 {emoji} {categoryLabel}
               </span>
@@ -92,9 +106,6 @@ export function ProductFormPreview({
             fiches avec photos détaillées génèrent jusqu&apos;à{" "}
             <strong className="text-green-800">2,5×</strong> plus
             d&apos;envies qu&apos;une photo générique.
-          </p>
-          <p className="mt-2 text-[11px] italic text-cream-500">
-            Photos en cours d&apos;intégration (KAN-21).
           </p>
           <p className="mt-2 text-[11px] text-cream-500">
             Unité : {unitShort}
