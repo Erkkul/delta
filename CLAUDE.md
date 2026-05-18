@@ -209,33 +209,49 @@ Pour préparer techniquement une feature Jira KAN avant de coder, utiliser le sk
 - Définition complète et workflow : `.claude/skills/propose-spec/SKILL.md`.
 
 ### Cadrage → implémentation : deux branches, deux PRs — règle impérative
-`/propose KAN-XX` et `/implement KAN-XX` produisent du contenu **différent en nature** (cadrage docs vs code applicatif). Pour pouvoir reviewer / merger l'un sans bloquer l'autre, ils vivent sur deux branches distinctes et ouvrent deux PRs séparées :
+`/propose KAN-XX` et `/implement KAN-XX` produisent du contenu **différent en nature** (cadrage docs vs code applicatif). Pour pouvoir reviewer / merger l'un sans bloquer l'autre, ils vivent sur deux branches distinctes et ouvrent deux PRs séparées, chacune avec son cycle de transitions Jira :
 
-| Étape | Slug branche | Contenu typique | PR |
+| Étape | Slug branche | Action agent | Transition Jira |
 |---|---|---|---|
-| `/propose KAN-XX` | `claude/propose-kan-XX-<slug>` | `specs/KAN-XX/{proposal,design,tasks}.md`, MAJ mapping, transition Jira `To Do` | « specs KAN-XX » |
-| `/implement KAN-XX` | `claude/kan-XX-<slug>` | Migrations, contracts, core, API, UI, tests, transition Jira `Wip` | « implémentation KAN-XX » |
+| Fin de `/propose KAN-XX` | `claude/propose-kan-XX-<slug>` | Push, ouvre PR « specs KAN-XX », **active GitHub auto-merge squash**, souscrit à l'activité PR | aucune (reste `Ideas`) |
+| Merge PR cadrage (CI verte → auto-merge) | — | Event merge → transition + commit mapping, désabonne | `Ideas` → `À faire` (id `21`) |
+| 1er push sur `claude/kan-XX-<slug>` (début `/implement KAN-XX`) | `claude/kan-XX-<slug>` | Push, ouvre PR « implémentation KAN-XX », **active GitHub auto-merge squash**, souscrit | `À faire` → `Wip` (id `31`) |
+| Merge PR implémentation (CI verte → auto-merge) | — | Event merge → transition + commit mapping, désabonne | `Wip` → `Examiner` (id `41`) |
+| Validation produit / QA | — | Humain (jamais automatique) | `Examiner` → `Terminé` (id `51`) |
 
 **Conséquences pratiques :**
+- L'agent active `enable_pr_auto_merge(squash)` à la création de chaque PR (cadrage et implémentation). Prérequis repo : « Allow auto-merge » activé dans `Settings → General → Pull Requests`. Si l'auto-merge ne peut pas être activé (option repo désactivée, branche protégée incompatible), l'agent le signale en chat et laisse la PR en merge manuel.
+- L'agent souscrit à l'activité PR (`subscribe_pr_activity`) au moment où il pousse la PR, pour traiter le post-merge dans la même session : transition Jira + commit mapping + désabonnement. Si la session se termine avant le merge, le post-merge est ramassé par la session suivante via la règle « Après merge d'une PR KAN-XXX sur `main` ».
+- La transition `Wip` est **déclenchée au premier push** sur `claude/kan-XX-<slug>`, pas au démarrage du skill `/implement`. Tant que rien n'est poussé, le ticket reste en `À faire`.
 - Quand l'environnement remote démarre une session `/implement KAN-XX`, le harness doit l'ouvrir sur `claude/kan-XX-<slug>`, **pas** sur la branche `claude/propose-kan-XX-*` du cadrage. Si la session démarre par erreur sur la branche propose alors que le cadrage est déjà mergé, **créer une nouvelle branche locale `claude/kan-XX-<slug>` depuis main et y placer tous les commits d'implémentation** avant le `git push`.
-- Le ticket Jira passe en `To Do` à la fin de `/propose`, puis en `Wip` à la fin de `/implement` (transitions `21` puis `31` dans le workflow KAN, cf. `getTransitionsForJiraIssue`).
-- Le ticket Jira passe en `Terminé` quand la PR d'implémentation est mergée (cf. section « Après merge d'une feature sur `main` »). La PR de cadrage est `merge` aussi, mais elle ne déclenche pas la transition `Terminé` — son merge n'est qu'une étape intermédiaire.
+- La transition vers `Terminé` (id `51`) est **toujours manuelle** : produit ou QA valide en aval. L'agent ne déclenche jamais cette transition.
 
-**Origine de la règle :** observée sur KAN-17 (2026-05-17) — `/propose` et `/implement` ont tourné sur la même branche `claude/propose-kan-17-lWOkr`, le cadrage a été mergé via PR #17 dès qu'il a été poussé, puis les 6 commits d'implémentation suivants ont été pushés sur la même branche sans nouvelle PR. Résultat : implémentation invisible sur `main` jusqu'à ouverture manuelle d'une seconde PR depuis une nouvelle branche.
+**Origine de la règle :** observée sur KAN-17 (2026-05-17) — `/propose` et `/implement` ont tourné sur la même branche `claude/propose-kan-17-lWOkr`. Workflow révisé le 2026-05-18 après merge de KAN-19 : passage à l'auto-merge sur CI verte + transitions Jira pilotées par les événements de merge.
 
-### Après merge d'une feature sur `main` — règle impérative
-Quand une PR portant une feature KAN-XXX est mergée sur `main` (origin), le ticket Jira correspondant doit être basculé en **Terminé** et le mapping mis à jour, **sans attendre**. Sinon la vue Jira reste désynchronisée du repo et la prochaine session ne sait plus ce qui est livré.
+### Après merge d'une PR KAN-XXX sur `main` — règle impérative
+La cible visée est l'auto-merge GitHub : à la création de chaque PR (cadrage ou implémentation), l'agent active `enable_pr_auto_merge(squash)` et souscrit à l'activité PR. Quand la CI passe, GitHub merge automatiquement et l'agent reçoit l'event dans la même session. Cas de figure :
 
-À faire dans la foulée du merge (manuellement ou via un agent dédié) :
+**Cas A — PR cadrage `claude/propose-kan-XX-*` mergée :**
+1. Transitionner le ticket Jira `Ideas` → `À faire` (transition id `21`, cf. `getTransitionsForJiraIssue`).
+2. Mettre à jour `produit/jira_mapping.md` :
+   - Ligne du ticket dans la table « Catalogue Jira complet » de l'épic concerné : statut passe à `À faire`, mention `[Cadrage tech](specs/KAN-XX/)` déjà présente.
+   - Ligne « État au YYYY-MM-DD » de la « Vue d'ensemble » : sortir le ticket du bloc « *Ideas* » et le mentionner en `À faire (cadrage)`.
+3. Commit dédié : `Mapping Jira : KAN-XX en À faire (merge cadrage PR #N)`.
+4. `unsubscribe_pr_activity` sur la PR cadrage.
 
-1. **Transitionner le ticket Jira** vers `Terminé` (transition id `51` dans le workflow KAN, cf. `getTransitionsForJiraIssue`). Si le ticket est en `Wip` ou `Examiner`, la transition directe vers `Terminé` est disponible — pas besoin de passer par les états intermédiaires.
-2. **Mettre à jour `produit/jira_mapping.md`** :
-   - Statut du ticket dans la table « Catalogue Jira complet » de l'épic concerné : `Wip` / `Examiner` → `Terminé`, avec mention du PR de merge entre tirets (ex : `— mergé sur main (PR #N)`)
-   - Ligne « État au YYYY-MM-DD » de la section « Vue d'ensemble » mise à jour avec le nouveau statut
-3. **Commit dédié** : `Mapping Jira : KAN-XXX en Terminé (merge PR #N)`. Ne pas mélanger avec d'autres modifications.
-4. **Si l'épic parent voit toutes ses features passées en `Terminé`**, le signaler en chat — la clôture d'épic est une décision manuelle (parfois on garde l'épic ouvert pour des sous-tickets de polish).
+**Cas B — PR implémentation `claude/kan-XX-*` mergée :**
+1. Transitionner le ticket Jira `Wip` → `Examiner` (transition id `41`). **Ne jamais transitionner vers `Terminé` automatiquement** — c'est une validation produit / QA manuelle.
+2. Mettre à jour `produit/jira_mapping.md` :
+   - Ligne du ticket dans la table « Catalogue Jira complet » : statut passe à `Examiner`, mention `— mergé sur main (PR #N)` entre tirets.
+   - Ligne « État au YYYY-MM-DD » : mise à jour avec le nouveau statut.
+3. Commit dédié : `Mapping Jira : KAN-XX en Examiner (merge PR #N)`.
+4. `unsubscribe_pr_activity` sur la PR implémentation.
 
-Cette règle complète la règle « Après toute création, modification ou suppression de ticket Jira » qui couvre déjà les changements de structure, et la règle `/propose` qui couvre la transition d'entrée vers `To Do`. C'est la fermeture symétrique du cycle.
+**Si la session a été perdue avant l'event de merge** (timeout, redémarrage harness), la session suivante détecte le décalage en relisant `produit/jira_mapping.md` vs l'état Jira et applique le cas A ou B correspondant.
+
+**Transition `Terminé` (id `51`) :** déclenchée manuellement par le produit / QA après recette du ticket. L'agent ne transitionne **jamais** vers `Terminé`. Quand toutes les features d'un épic sont en `Terminé`, le signaler en chat — clôture de l'épic = décision manuelle.
+
+Cette règle complète la règle « Après toute création, modification ou suppression de ticket Jira » qui couvre les changements de structure, et la matrice de la règle « Cadrage → implémentation : deux branches, deux PRs » qui définit le cycle complet.
 
 ### Hiérarchie en cas de conflit entre sources
 **Sur sujets produit / fonctionnels :**
