@@ -5,11 +5,11 @@ import { type ProducerProfileSnapshot } from "@delta/contracts/producer"
 import { ProducerProfileForm } from "@/components/producer/producer-profile-form"
 
 /**
- * Layout principal de la page `/producer/profile` (KAN-17 — PR-08).
+ * Contenu de la page `/producer/profile` (KAN-17 — PR-08).
  *
- * MVP : pas de sidebar gauche (la sidebar producteur globale arrivera avec
- * KAN-18 — Tableau de bord producteur). La page se compose simplement d'un
- * header + du formulaire en mode `edit` (split édition + preview à droite).
+ * Le shell (sidebar + topbar mobile + fond crème) est fourni par
+ * `apps/web/app/producer/layout.tsx` (KAN-18). Ce client component se
+ * limite au header + au formulaire.
  */
 export function ProfileClient({
   initial,
@@ -17,7 +17,7 @@ export function ProfileClient({
   initial: ProducerProfileSnapshot
 }) {
   return (
-    <main className="min-h-screen bg-cream-50 px-6 py-8 desktop:px-10 desktop:py-10">
+    <div className="px-6 py-8 desktop:px-10 desktop:py-10">
       <div className="mx-auto max-w-[1280px]">
         <header className="mb-6 flex items-center justify-between gap-4">
           <div>
@@ -37,6 +37,6 @@ export function ProfileClient({
         </header>
         <ProducerProfileForm initial={initial} mode="edit" />
       </div>
-    </main>
+    </div>
   )
 }

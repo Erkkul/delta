@@ -53,7 +53,7 @@ export function SettingsClient({
   }
 
   return (
-    <main className="min-h-screen bg-cream-50 px-6 py-8 desktop:px-10 desktop:py-10">
+    <div className="px-6 py-8 desktop:px-10 desktop:py-10">
       <div className="mx-auto max-w-[880px]">
         <header className="mb-6 flex items-center justify-between gap-4">
           <div>
@@ -165,7 +165,7 @@ export function SettingsClient({
           />
         </SettingsBlock>
       </div>
-    </main>
+    </div>
   )
 }
 
