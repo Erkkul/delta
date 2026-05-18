@@ -23,9 +23,23 @@ describe("createProduct", () => {
       expect.objectContaining({
         name: "Miel de printemps",
         stock: 0,
+        low_stock_threshold: null,
         status: "active",
         labels: [],
       }),
+    )
+  })
+
+  it("propage le seuil d'alerte stock quand renseigné", async () => {
+    const adapter = makeAdapter()
+    await createProduct(
+      { ...VALID_INPUT, low_stock_threshold: 5 },
+      OWNER_ID,
+      adapter,
+    )
+    expect(adapter.create).toHaveBeenCalledWith(
+      OWNER_ID,
+      expect.objectContaining({ low_stock_threshold: 5 }),
     )
   })
 

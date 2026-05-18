@@ -10,6 +10,7 @@ import {
   type ProductPackaging,
   type ProductStatus,
 } from "@delta/contracts/product"
+import { getStockDisplayState } from "@delta/core/product"
 import Link from "next/link"
 
 import { formatEuros } from "./format"
@@ -23,6 +24,9 @@ import { formatEuros } from "./format"
  * Au MVP de KAN-20, les compteurs « Envies » / « Vendus » de la maquette
  * ne sont pas câblés (KAN-30 wishlist + KAN-19 ventes) — on ne les rend
  * pas pour éviter d'introduire des `—` non informatifs.
+ *
+ * KAN-22 : badge `epuise` quand `stock = 0 && status = 'active'` (dérivé,
+ * pas une valeur enum) ; libellé stock barré pour `empty`, orange pour `low`.
  */
 export type ProductCardItem = {
   id: string
@@ -31,6 +35,7 @@ export type ProductCardItem = {
   packaging: ProductPackaging
   unit_price_cents: number
   stock: number
+  low_stock_threshold: number | null
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus
@@ -42,16 +47,27 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
   const packagingLabel = PRODUCT_PACKAGING_FR[product.packaging]
   const unitShort = PRODUCT_PACKAGING_UNIT_SHORT[product.packaging]
 
+  const stockState = getStockDisplayState({
+    stock: product.stock,
+    low_stock_threshold: product.low_stock_threshold,
+    status: product.status,
+  })
   const stockLabel =
-    product.stock === 0
-      ? "Stock épuisé"
-      : `${product.stock} en stock`
+    stockState.kind === "empty"
+      ? "Épuisé"
+      : stockState.kind === "low"
+        ? `⚠ ${product.stock} en stock`
+        : `${product.stock} en stock`
   const stockClass =
-    product.stock === 0
-      ? "text-cream-500"
-      : product.stock <= 5
+    stockState.kind === "empty"
+      ? "text-cream-500 line-through"
+      : stockState.kind === "low"
         ? "text-orange-500"
         : "text-cream-700"
+
+  const displayStatus: ProductStatus | "sold_out" = stockState.showSoldOutBadge
+    ? "sold_out"
+    : product.status
 
   const availabilityLabel = formatAvailability(
     product.availability_from,
@@ -77,13 +93,13 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
           {emoji}
         </span>
         <span
-          className={`absolute left-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-pill border px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider ${statusBadgeClass(product.status)}`}
+          className={`absolute left-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-pill border px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider ${statusBadgeClass(displayStatus)}`}
         >
           <span
             aria-hidden="true"
-            className={`inline-block h-1.5 w-1.5 rounded-full ${statusDotClass(product.status)}`}
+            className={`inline-block h-1.5 w-1.5 rounded-full ${statusDotClass(displayStatus)}`}
           />
-          {PRODUCT_STATUS_FR[product.status]}
+          {statusBadgeLabel(displayStatus)}
         </span>
       </div>
       <div className="flex flex-1 flex-col p-4">
@@ -114,10 +130,19 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
   )
 }
 
-function statusBadgeClass(status: ProductStatus): string {
+type DisplayStatus = ProductStatus | "sold_out"
+
+function statusBadgeLabel(status: DisplayStatus): string {
+  if (status === "sold_out") return "Épuisé"
+  return PRODUCT_STATUS_FR[status]
+}
+
+function statusBadgeClass(status: DisplayStatus): string {
   switch (status) {
     case "active":
       return "border-green-200 bg-green-100 text-green-800"
+    case "sold_out":
+      return "border-orange-200 bg-orange-50 text-orange-600"
     case "draft":
       return "border-cream-300 bg-cream-100 text-cream-700"
     case "disabled":
@@ -125,10 +150,12 @@ function statusBadgeClass(status: ProductStatus): string {
   }
 }
 
-function statusDotClass(status: ProductStatus): string {
+function statusDotClass(status: DisplayStatus): string {
   switch (status) {
     case "active":
       return "bg-green-600"
+    case "sold_out":
+      return "bg-orange-500"
     case "draft":
       return "bg-cream-500"
     case "disabled":

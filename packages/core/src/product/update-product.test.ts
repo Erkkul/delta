@@ -84,6 +84,40 @@ describe("updateProduct", () => {
     expect(adapter.update).toHaveBeenCalledWith(PRODUCT_ID, OWNER_ID, {})
   })
 
+  it("met à jour le seuil d'alerte stock vers une valeur entière", async () => {
+    const adapter = makeAdapter()
+    await updateProduct(
+      PRODUCT_ID,
+      { low_stock_threshold: 5 },
+      OWNER_ID,
+      adapter,
+    )
+    expect(adapter.update).toHaveBeenCalledWith(PRODUCT_ID, OWNER_ID, {
+      low_stock_threshold: 5,
+    })
+  })
+
+  it("permet de réinitialiser le seuil d'alerte stock via null", async () => {
+    const adapter = makeAdapter()
+    await updateProduct(
+      PRODUCT_ID,
+      { low_stock_threshold: null },
+      OWNER_ID,
+      adapter,
+    )
+    expect(adapter.update).toHaveBeenCalledWith(PRODUCT_ID, OWNER_ID, {
+      low_stock_threshold: null,
+    })
+  })
+
+  it("ne touche pas le seuil d'alerte stock si absent du patch", async () => {
+    const adapter = makeAdapter()
+    await updateProduct(PRODUCT_ID, { stock: 12 }, OWNER_ID, adapter)
+    expect(adapter.update).toHaveBeenCalledWith(PRODUCT_ID, OWNER_ID, {
+      stock: 12,
+    })
+  })
+
   it("passe les labels au repo", async () => {
     const adapter = makeAdapter({
       findById: vi

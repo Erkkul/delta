@@ -74,6 +74,41 @@ describe("ProductCreateInput", () => {
     expect(r.success).toBe(false)
   })
 
+  it("accepte un seuil d'alerte stock null", () => {
+    const r = ProductCreateInput.safeParse({
+      ...VALID,
+      low_stock_threshold: null,
+    })
+    expect(r.success).toBe(true)
+  })
+
+  it("accepte un seuil d'alerte stock entier ≥ 0", () => {
+    expect(
+      ProductCreateInput.safeParse({ ...VALID, low_stock_threshold: 0 })
+        .success,
+    ).toBe(true)
+    expect(
+      ProductCreateInput.safeParse({ ...VALID, low_stock_threshold: 5 })
+        .success,
+    ).toBe(true)
+  })
+
+  it("refuse un seuil d'alerte stock négatif", () => {
+    const r = ProductCreateInput.safeParse({
+      ...VALID,
+      low_stock_threshold: -1,
+    })
+    expect(r.success).toBe(false)
+  })
+
+  it("refuse un seuil d'alerte stock non entier", () => {
+    const r = ProductCreateInput.safeParse({
+      ...VALID,
+      low_stock_threshold: 3.5,
+    })
+    expect(r.success).toBe(false)
+  })
+
   it("refuse une catégorie hors enum", () => {
     const r = ProductCreateInput.safeParse({
       ...VALID,

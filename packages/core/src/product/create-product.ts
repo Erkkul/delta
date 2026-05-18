@@ -46,6 +46,7 @@ export async function createProduct(
     packaging: data.packaging,
     unit_price_cents: data.unit_price_cents,
     stock: data.stock,
+    low_stock_threshold: data.low_stock_threshold ?? null,
     availability_from: data.availability_from ?? null,
     availability_to: data.availability_to ?? null,
     status: data.status,

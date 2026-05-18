@@ -8,24 +8,28 @@
 
 ## Tâches
 
-- [ ] Étendre `ProductCreateInput` (`packages/contracts/src/product/create.ts`) avec `low_stock_threshold: z.number().int().min(0).nullable().optional()`.
-- [ ] Étendre `ProductUpdateInput` (`packages/contracts/src/product/update.ts`) idem.
-- [ ] Ajouter cas de test `low_stock_threshold` dans `packages/contracts/src/product/create.test.ts` et `update.test.ts` (null, 0, 5, négatif refusé, float refusé).
-- [ ] Propager `low_stock_threshold` dans `createProduct` et `updateProduct` (`packages/core/src/product/`) + tests unit (couvrir null par défaut, valeur explicite, réinitialisation via PATCH).
-- [ ] Vérifier que `productsRepo` (`packages/db/src/products/`) mappe bien `low_stock_threshold` en `create` et `update` (types déjà exposés via `packages/db/src/types.ts:281,301,316` — purement vérification, à corriger si manquant).
-- [ ] Vérifier que l'adapter web (`apps/web/lib/products/adapters.ts`) propage le champ dans les deux sens (lecture déjà câblée KAN-20 ligne 28 ; écriture à confirmer).
-- [ ] Créer `apps/web/lib/products/stock-display.ts` : helper pur `getStockDisplayState(product) → { kind: 'ok' | 'low' | 'empty' }` + types exportés.
-- [ ] Créer `apps/web/lib/products/stock-display.test.ts` : 5+ scénarios (ok, low avec stock = threshold, low avec stock < threshold, empty + active, empty + draft, threshold null).
-- [ ] Modifier `apps/web/components/producer/catalogue/product-form.tsx` :
-  - Retirer `disabled`, `readOnly`, la classe `opacity-50` et le libellé « (Bientôt — KAN-22) » du champ « Seuil d'alerte stock ».
-  - Ajouter `lowStockThreshold` au state local + reset, et inclure dans le payload PATCH/POST (avec normalisation `"" → null`).
-  - Mettre à jour le commentaire en tête (« 4. Stock et fenêtre de disponibilité (low_stock_threshold désactivé) » → version sans cette mention).
-- [ ] Modifier le composant card de catalogue (`apps/web/components/producer/catalogue/product-card.tsx` ou nom équivalent) : consommer `getStockDisplayState`, basculer le badge `status-badge` vers `epuise` quand le helper renvoie `empty` + `status === 'active'`, basculer la ligne `product-stock` vers `low` / `empty` selon le `kind`.
-- [ ] Modifier `<ProductFormPreview />` (composant preview de PR-05) : afficher le badge stock dérivé et une note secondaire orange « Ce produit apparaîtra comme épuisé » quand `stock === 0 && status === 'active'`.
-- [ ] Vérifier que les fixtures de test repo / core qui créent un produit acceptent `low_stock_threshold` (ajustement minimal des `test-helpers.ts` si besoin — ligne 19 référence déjà `low_stock_threshold: null`).
-- [ ] (Optionnel) Mettre à jour le snapshot du commentaire SQL `COMMENT ON COLUMN public.products.low_stock_threshold` si la mention « UI désactivée au MVP de KAN-20 » devient trompeuse. Décision : laisser tel quel pour éviter une migration de doc — la mention historique est inoffensive et le commentaire reste juste sur la cible KAN-56 (notif delivery).
-- [ ] Mettre à jour `produit/jira_mapping.md` : ligne de KAN-22 dans la table « Catalogue Jira complet » + cellule « Tickets liés » du PR-05 dans le parcours Producteur — ajouter mention `[Cadrage tech](specs/KAN-22/)` ; ajuster la ligne « État au YYYY-MM-DD » si nécessaire.
-- [ ] Mettre à jour `ARCHITECTURE.md` §18 (journal) avec une entrée datée résumant la livraison KAN-22 (au moment du merge implémentation, pas du cadrage).
+- [x] Étendre `ProductCreateInput` (`packages/contracts/src/product/create.ts`) avec `low_stock_threshold: z.number().int().min(0).nullable().optional()`.
+- [x] Étendre `ProductUpdateInput` (`packages/contracts/src/product/update.ts`) idem.
+- [x] Ajouter cas de test `low_stock_threshold` dans `packages/contracts/src/product/create.test.ts` et `update.test.ts` (null, 0, 5, négatif refusé, float refusé).
+- [x] Propager `low_stock_threshold` dans `createProduct` et `updateProduct` (`packages/core/src/product/`) + tests unit (couvrir null par défaut, valeur explicite, réinitialisation via PATCH).
+- [x] Vérifier que `productsRepo` (`packages/db/src/products/`) mappe bien `low_stock_threshold` en `create` et `update` — OK, `ProductInsert` / `ProductUpdate` (`types.ts:281,301,316`) exposent déjà le champ ; pas de modification repo nécessaire.
+- [x] Vérifier que l'adapter web (`apps/web/lib/products/adapters.ts`) propage le champ — manquait en écriture (`create()`), corrigé.
+- [x] Créer le helper pur `getStockDisplayState(product) → { kind, showSoldOutBadge }` — **placé dans `packages/core/src/product/stock-display.ts`** (et non `apps/web/lib/products/` comme initialement prévu) car (1) `apps/web` n'a pas vitest configuré, (2) la logique est pure et indépendante de React, (3) cohérent pattern « core porte les helpers métier purs ». Export via `packages/core/src/product/index.ts`.
+- [x] Tests du helper : `packages/core/src/product/stock-display.test.ts`, 8 scénarios (ok, low stock<seuil, low stock=seuil inclusif, empty + active, empty + draft, empty + disabled, threshold null, threshold 0).
+- [x] Modifier `apps/web/components/producer/catalogue/product-form.tsx` :
+  - Retiré `disabled`, `readOnly`, classe `opacity-50`, libellé « (Bientôt — KAN-22) » du champ « Seuil d'alerte stock ».
+  - Ajouté `lowStockThreshold` au state local + champ dans le payload PATCH/POST avec normalisation `"" → null`.
+  - Validation locale : entier ≥ 0 sinon erreur inline « Le seuil d'alerte stock doit être un nombre entier ≥ 0 ».
+  - Mis à jour le commentaire de tête de fichier (« 4. Stock, seuil d'alerte et fenêtre de disponibilité »).
+- [x] Modifier `<ProductCard />` (`apps/web/components/producer/catalogue/product-card.tsx`) : consommer `getStockDisplayState`, ajouter un type interne `DisplayStatus = ProductStatus | 'sold_out'`, basculer badge + libellé stock selon `kind`.
+- [x] Modifier `<ProductFormPreview />` : props étendues avec `stock` et `status`, badge orange « Épuisé » en haut à droite + avertissement secondaire orange sous le bloc conseil quand `stock === 0 && status === 'active'`.
+- [x] Vérifier `test-helpers.ts` (`packages/core/src/product/test-helpers.ts`) — `low_stock_threshold: null` déjà présent (ligne 19), aucune modif nécessaire.
+- [x] Étendre `ProductCardItem` (type) et la page édition (`apps/web/app/producer/catalogue/[id]/page.tsx`) + le client liste (`catalogue-client.tsx`) pour transporter `low_stock_threshold`.
+- [x] Mettre à jour `ARCHITECTURE.md` §18 — entrée 1.24 datée 2026-05-18.
+- [ ] Mettre à jour `produit/jira_mapping.md` (statut KAN-22 → `Examiner` au merge implémentation) — fait par le commit de mapping post-merge selon le cas B de CLAUDE.md, pas ici.
+- [ ] (Différé KAN-56) Émission de l'event Inngest `product.stock_low` + consumer email/in-app/push.
+
+> Note : le commentaire SQL `COMMENT ON COLUMN public.products.low_stock_threshold` mentionne « UI désactivée au MVP de KAN-20 » — laissé tel quel comme prévu dans la spec (la mention historique est inoffensive et reste juste sur la cible KAN-56).
 
 ## Checklist pre-merge
 
