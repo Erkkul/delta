@@ -78,7 +78,7 @@ Dans cet ordre :
 7. Ouvrir la PR « specs KAN-XXX » via `create_pull_request`
 8. **Activer l'auto-merge squash** via `enable_pr_auto_merge(merge_method: "SQUASH")`. Si l'option repo est désactivée ou si la branche est protégée d'une manière incompatible, le signaler en chat sans bloquer.
 9. **Souscrire à l'activité PR** via `subscribe_pr_activity` pour traiter le post-merge dans la même session.
-10. Au reçu de l'event de merge : appliquer le cas A de la règle « Après merge d'une PR KAN-XXX sur `main` » (transition `21`, commit mapping, `unsubscribe_pr_activity`).
+10. Au reçu de l'event de merge : appliquer le cas A complet de la règle « Après merge d'une PR KAN-XXX sur `main` » — transition `21`, PR mapping avec auto-merge, `unsubscribe_pr_activity`, puis **enchaînement automatique sur le skill `implement` avec l'argument `KAN-XXX`** (checkout main + nouvelle branche `claude/kan-XXX-<slug>` + Skill tool). Pas de confirmation chat.
 
 ## Règles strictes
 
