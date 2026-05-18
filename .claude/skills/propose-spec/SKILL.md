@@ -1,6 +1,6 @@
 ---
 name: propose-spec
-description: Cadrage technique d'une feature Jira KAN du projet Delta. Génère trois specs courtes (proposal.md, design.md, tasks.md) à partir d'un ticket, met à jour Jira (commentaire + lien + transition To Do) et synchronise produit/jira_mapping.md. Déclenche dès que l'utilisateur tape /propose KAN-XXX, demande à "cadrer", "framer", "spécifier" ou "préparer techniquement" un ticket KAN, veut traduire une feature produit en brief technique, ou cherche à passer du produit à la tech avant d'attaquer le dev. Active aussi sur "écris les specs tech de KAN-XX", "génère le cadrage de KAN-XX", "prépare KAN-XX pour le dev". Toute demande de cadrage technique sur un ticket KAN doit déclencher ce skill, même si le mot "spec" n'est pas prononcé.
+description: Cadrage technique d'une feature Jira KAN du projet Delta. Génère trois specs courtes (proposal.md, design.md, tasks.md) à partir d'un ticket, met à jour Jira (commentaire + lien), synchronise produit/jira_mapping.md, ouvre la PR cadrage avec auto-merge squash et déclenche la transition Ideas → À faire au merge. Déclenche dès que l'utilisateur tape /propose KAN-XXX, demande à "cadrer", "framer", "spécifier" ou "préparer techniquement" un ticket KAN, veut traduire une feature produit en brief technique, ou cherche à passer du produit à la tech avant d'attaquer le dev. Active aussi sur "écris les specs tech de KAN-XX", "génère le cadrage de KAN-XX", "prépare KAN-XX pour le dev". Toute demande de cadrage technique sur un ticket KAN doit déclencher ce skill, même si le mot "spec" n'est pas prononcé.
 ---
 
 # propose-spec — Cadrage technique d'une feature Jira KAN
@@ -59,24 +59,26 @@ Pré-remplir les sections évidentes (liens, références) ; laisser les section
 
 Afficher les trois fichiers en blocs Markdown distincts. Demander une validation explicite (`ok`, `valide`, ou `corrige X puis valide`). N'écrire aucun fichier tant que la validation n'est pas obtenue. Si l'utilisateur demande des corrections, les appliquer en mémoire et redemander.
 
-### 5. Après validation : écrire et synchroniser
+### 5. Après validation : écrire, pousser, ouvrir la PR avec auto-merge
 
-Dans cet ordre exact :
+Dans cet ordre :
 
 1. Créer `specs/KAN-XXX/` à la racine du repo Delta
 2. Écrire les trois fichiers
 3. Mettre à jour Jira :
    - **Commentaire** : `Cadrage technique disponible : specs/KAN-XXX/proposal.md, design.md, tasks.md`
    - **Description** : ajouter en bas une section `## Cadrage technique` listant les trois chemins (Markdown). Ne **jamais** copier le contenu des specs dans Jira — uniquement les liens. Source de vérité = repo.
-4. Transitionner le ticket vers `To Do` :
-   - `getTransitionsForJiraIssue` pour récupérer les transitions disponibles
-   - Si une transition vers le statut `To Do` (ou son équivalent dans le workflow KAN) existe, l'appliquer
-   - Si le ticket est déjà à un statut plus avancé (`In Progress`, `Done`, etc.), ne rien faire et le signaler en chat
-5. Mettre à jour `produit/jira_mapping.md` :
+   - **Ne pas transitionner le ticket à ce stade** — il reste en `Ideas` jusqu'au merge de la PR cadrage. La transition `Ideas → À faire` (id `21`) est déclenchée par l'event de merge (cf. CLAUDE.md § « Après merge d'une PR KAN-XXX sur `main` »).
+4. Mettre à jour `produit/jira_mapping.md` :
    - Localiser le ticket dans les tables de parcours (Producteur / Acheteur / Rameneur / Transverse)
    - Ajouter ou mettre à jour une mention `[Cadrage tech](specs/KAN-XXX/)` dans la cellule du ticket
    - Si le ticket est transverse (apparaît dans plusieurs tables), mettre à jour partout
-6. Commit Git unique : `[KAN-XXX] ouverture cadrage`
+5. Commit Git unique : `[KAN-XXX] ouverture cadrage`
+6. Push de la branche `claude/propose-kan-XXX-<slug>` vers `origin`
+7. Ouvrir la PR « specs KAN-XXX » via `create_pull_request`
+8. **Activer l'auto-merge squash** via `enable_pr_auto_merge(merge_method: "SQUASH")`. Si l'option repo est désactivée ou si la branche est protégée d'une manière incompatible, le signaler en chat sans bloquer.
+9. **Souscrire à l'activité PR** via `subscribe_pr_activity` pour traiter le post-merge dans la même session.
+10. Au reçu de l'event de merge : appliquer le cas A de la règle « Après merge d'une PR KAN-XXX sur `main` » (transition `21`, commit mapping, `unsubscribe_pr_activity`).
 
 ## Règles strictes
 
@@ -102,7 +104,7 @@ Si le cadrage révèle une décision structurante (changement de stack, nouvelle
 - **Ticket sans description Jira** : utiliser `(à préciser — voir maquette + PRD)` comme `{{DESCRIPTION_BRIEF}}`. Le cadrage devient un brouillon à compléter.
 - **Pas de maquette** : `(non disponible)`. Le signaler en fin de chat si l'écran devrait en avoir une.
 - **Ticket transverse** : mettre à jour toutes les tables concernées du mapping.
-- **Statut non transitionable vers To Do** : ne pas tenter, signaler le statut courant. Le reste du workflow (fichiers, mapping, commit) reste fait.
+- **Ticket déjà au-delà de `Ideas` (`À faire`, `Wip`, etc.)** : ne pas tenter de revenir en arrière. Signaler le statut courant en chat. Le reste du workflow (fichiers, mapping, commit, PR, auto-merge, souscription) reste fait.
 
 ## Templates
 

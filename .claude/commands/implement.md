@@ -25,8 +25,21 @@ specs/KAN-XX/.
    stack, dérogation à une règle ARCHITECTURE.md), ajouter une entrée au
    journal §18 d'ARCHITECTURE.md dans le même commit que le code
    concerné.
-6. À la fin : ouvrir une PR via gh, description listant les subtasks Jira
-   couvertes et les tâches tasks.md cochées.
+6. **Au premier push sur `claude/kan-XX-<slug>`** :
+   - Transitionner le ticket Jira `À faire` → `Wip` (transition id `31`).
+   - Ouvrir la PR « implémentation KAN-XX » via `create_pull_request`
+     (description : subtasks Jira couvertes + tâches `tasks.md` cochées).
+   - Activer l'auto-merge squash via
+     `enable_pr_auto_merge(merge_method: "SQUASH")`. Si l'option repo est
+     désactivée, le signaler sans bloquer.
+   - Souscrire à l'activité PR via `subscribe_pr_activity`.
+7. Continuer à pousser des commits sur la branche au fil de
+   l'implémentation — la PR se met à jour automatiquement et l'auto-merge
+   attend la CI verte.
+8. Au reçu de l'event de merge : appliquer le cas B de CLAUDE.md
+   § « Après merge d'une PR KAN-XXX sur `main` » — transition
+   `Wip → Examiner` (id `41`, **jamais Terminé**), commit mapping,
+   `unsubscribe_pr_activity`.
 
 ## Conventions
 - Format de commit : `[KAN-XX] verbe + objet`. Pas de préfixe
