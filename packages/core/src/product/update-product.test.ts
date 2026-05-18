@@ -5,13 +5,13 @@ import {
   ProductValidationError,
 } from "../errors"
 
-import { updateProduct } from "./update-product"
 import {
   OWNER_ID,
   PRODUCT_ID,
   makeAdapter,
   makeProduct,
 } from "./test-helpers"
+import { updateProduct } from "./update-product"
 
 describe("updateProduct", () => {
   it("met à jour le prix", async () => {

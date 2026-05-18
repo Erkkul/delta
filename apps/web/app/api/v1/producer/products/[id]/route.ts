@@ -10,8 +10,8 @@ import {
 } from "@delta/core/errors"
 import { type NextRequest, NextResponse } from "next/server"
 
-import { getProductAdapter } from "@/lib/products/adapters"
 import { getRoleChecker } from "@/lib/producer/adapters"
+import { getProductAdapter } from "@/lib/products/adapters"
 import { serializeError } from "@/lib/serialize-error"
 import { getServerSupabase } from "@/lib/supabase/server"
 
