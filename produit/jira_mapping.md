@@ -9,7 +9,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 - **13 épics** (KAN-1, KAN-4 → KAN-15) — un épic par grand domaine fonctionnel
 - **50 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-158 sous les autres épics — voir tables par épic ci-dessous)
 - **Subtasks** : voir le catalogue par épic ci-dessous. Le mapping peut être incomplet pour les subtasks les plus récentes — Jira fait foi pour la liste exhaustive.
-- État au 2026-05-18 : KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *Terminé* (mergé sur `main` — PR #10, cadrage `specs/KAN-16/`) ; KAN-17 *Terminé* (mergé sur `main` — PR #18, cadrage `specs/KAN-17/`) ; KAN-18 *Terminé* (mergé sur `main` — PR #21, cadrage `specs/KAN-18/`) ; KAN-158 *Terminé* (mergé sur `main` — PR #15, cadrage `specs/KAN-158/`) ; KAN-19 *Examiner* (mergé sur `main` — PR #25, cadrage `specs/KAN-19/`) ; KAN-20 *Examiner* (mergé sur `main` — PR #30, cadrage `specs/KAN-20/`) ; KAN-21 *Examiner* (mergé sur `main` — PR #34, cadrage `specs/KAN-21/`) ; KAN-22 *Examiner* (mergé sur `main` — PR #38, cadrage `specs/KAN-22/`) ; autres *Ideas*
+- État au 2026-05-18 : KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *Terminé* (mergé sur `main` — PR #10, cadrage `specs/KAN-16/`) ; KAN-17 *Terminé* (mergé sur `main` — PR #18, cadrage `specs/KAN-17/`) ; KAN-18 *Terminé* (mergé sur `main` — PR #21, cadrage `specs/KAN-18/`) ; KAN-158 *Terminé* (mergé sur `main` — PR #15, cadrage `specs/KAN-158/`) ; KAN-19 *Examiner* (mergé sur `main` — PR #25, cadrage `specs/KAN-19/`) ; KAN-20 *Examiner* (mergé sur `main` — PR #30, cadrage `specs/KAN-20/`) ; KAN-21 *Examiner* (mergé sur `main` — PR #34, cadrage `specs/KAN-21/`) ; KAN-22 *Examiner* (mergé sur `main` — PR #38, cadrage `specs/KAN-22/`) ; KAN-23 *Ideas* (cadrage en cours, `specs/KAN-23/`) ; autres *Ideas*
 - **Maquettes (2026-05-14)** : les 35 écrans des 3 parcours (Producteur, Acheteur, Rameneur) du sitemap PRD §10 sont maquettés. Restent à maquetter : transverses **TR-02** (centre notifications) et **TR-04** (signalement / litige) ; **TR-03** est couvert par `rm-09-chat.html`. Index navigable de toutes les maquettes : `design/maquettes/index.html`
 
 ## Convention de référencement
@@ -30,7 +30,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | PR-01 Inscription / connexion | `pr-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
 | PR-02 Onboarding Stripe Connect | `pr-02-onboarding-stripe.html` | KAN-16 (Onboarding Stripe Connect) — [Cadrage tech](specs/KAN-16/) | KAN-62, KAN-158 (polish UX restricted) |
 | PR-03 Dashboard | `pr-03-dashboard.html` | KAN-18 (Tableau de bord producteur) — [Cadrage tech](specs/KAN-18/) | KAN-56 |
-| PR-04 Catalogue produits | `pr-04-catalogue.html` | KAN-20 (Création & édition produit) — [Cadrage tech](specs/KAN-20/) | KAN-23 (Statuts produit) |
+| PR-04 Catalogue produits | `pr-04-catalogue.html` | KAN-20 (Création & édition produit) — [Cadrage tech](specs/KAN-20/) | KAN-23 (Statuts produit) — [Cadrage tech](specs/KAN-23/) |
 | PR-05 Création / édition produit | `pr-05-edition-produit.html` | KAN-20 (Création & édition produit) — [Cadrage tech](specs/KAN-20/) | KAN-21 (Photos) — [Cadrage tech](specs/KAN-21/), KAN-22 (Stock) — [Cadrage tech](specs/KAN-22/), KAN-24 (Labels & catégories) |
 | PR-06 Récupération à venir | `pr-06-recuperation.html` | KAN-46 (QR Pickup), KAN-47 (Checklist remise producteur) | KAN-45 |
 | PR-07 Historique ventes | `pr-07-historique-ventes.html` | KAN-19 (Historique ventes) — [Cadrage tech](specs/KAN-19/) | KAN-36 (Factures PDF) |
@@ -120,7 +120,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-20 | Feature | Examiner | Création & édition produit — [Cadrage tech](specs/KAN-20/) — mergé sur main (PR #30) |
 | KAN-21 | Feature | Examiner | Gestion photos — [Cadrage tech](specs/KAN-21/) — mergé sur main (PR #34) |
 | KAN-22 | Feature | Examiner | Stock & alertes — [Cadrage tech](specs/KAN-22/) — mergé sur main (PR #38) |
-| KAN-23 | Feature | Ideas | Statuts produit |
+| KAN-23 | Feature | Ideas | Statuts produit — [Cadrage tech](specs/KAN-23/) |
 | KAN-24 | Feature | Ideas | Labels & catégories |
 
 ### KAN-6 — Profil Acheteur
