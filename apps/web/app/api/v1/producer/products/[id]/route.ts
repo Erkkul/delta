@@ -1,11 +1,13 @@
 import {
   PRODUCT_ERROR_CODES,
   type ProductSnapshot,
+  type ProductStatus,
 } from "@delta/contracts/product"
 import { product as coreProduct } from "@delta/core"
 import {
   ProductAlreadyDeletedError,
   ProductNotFoundError,
+  ProductTransitionInvalidError,
   ProductValidationError,
 } from "@delta/core/errors"
 import { type NextRequest, NextResponse } from "next/server"
@@ -82,9 +84,21 @@ export async function GET(_req: NextRequest, ctx: Params) {
 }
 
 /**
- * PATCH /api/v1/producer/products/[id] (KAN-20 — KAN-70).
+ * PATCH /api/v1/producer/products/[id] (KAN-20 — KAN-70, étendu KAN-23).
  *
  * Patch partiel du produit. Body validé par `ProductUpdateInput`.
+ *
+ * KAN-23 : si le body contient `status` ET que le statut diffère du
+ * courant, on applique d'abord les autres champs via `updateProduct`,
+ * puis on délègue la transition à `transitionProductStatus` (qui valide
+ * les préconditions). Cet ordre garantit que les préconditions sont
+ * vérifiées sur l'état **post-update** (sinon publier en remplissant
+ * description + photos dans la même requête échouerait).
+ *
+ * En cas d'échec de la transition (préconditions manquantes), les autres
+ * champs sont déjà persistés — c'est le comportement attendu (l'utilisateur
+ * conserve ses modifications, il doit juste corriger les préconditions
+ * manquantes).
  *
  * Codes : 200 / 400 / 401 / 403 / 404
  */
@@ -120,18 +134,50 @@ export async function PATCH(req: NextRequest, ctx: Params) {
     )
   }
 
+  // Si `status` est présent dans le body, on l'extrait pour le router
+  // séparément via `transitionProductStatus` (KAN-23). Sinon, le PATCH
+  // resterait un update naïf qui contournerait les préconditions.
+  const adapter = getProductAdapter(supabase)
+  const bodyRecord = body as Record<string, unknown>
+  const requestedStatus =
+    typeof bodyRecord["status"] === "string"
+      ? (bodyRecord["status"] as ProductStatus)
+      : null
+  const updateBody: Record<string, unknown> = { ...bodyRecord }
+  if (requestedStatus !== null) {
+    delete updateBody["status"]
+  }
+
   try {
-    const updated = await coreProduct.updateProduct(
+    let current = await coreProduct.updateProduct(
       id,
-      body,
+      updateBody,
       user.id,
-      getProductAdapter(supabase),
+      adapter,
     )
-    return NextResponse.json(toSnapshot(updated), { status: 200 })
+
+    if (requestedStatus !== null && requestedStatus !== current.status) {
+      const today = new Date().toISOString().slice(0, 10)
+      current = await coreProduct.transitionProductStatus(
+        id,
+        requestedStatus,
+        user.id,
+        today,
+        adapter,
+      )
+    }
+
+    return NextResponse.json(toSnapshot(current), { status: 200 })
   } catch (err) {
     if (err instanceof ProductValidationError) {
       return NextResponse.json(
         { error: "Validation échouée.", code: err.code, issues: err.issues },
+        { status: 400 },
+      )
+    }
+    if (err instanceof ProductTransitionInvalidError) {
+      return NextResponse.json(
+        { error: err.message, code: err.code, details: err.details },
         { status: 400 },
       )
     }

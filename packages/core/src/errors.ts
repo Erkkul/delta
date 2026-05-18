@@ -360,6 +360,43 @@ export class ProductPhotoPathRejectedError extends Error {
   }
 }
 
+// ─── Product status transitions (KAN-23) ─────────────────────────────────
+
+/**
+ * Transition de statut produit refusée (KAN-23).
+ *
+ * Deux cas :
+ *   - Transition hors graphe (`active → active`, statut inconnu, etc.) :
+ *     `details.reason = "invalid_transition"`, `details.missing = []`.
+ *   - Préconditions de publication manquantes (`* → active`) :
+ *     `details.reason = "missing_preconditions"`, `details.missing` liste
+ *     les clés (`name`, `description`, `price`, `stock`, `photos`,
+ *     `availability`).
+ *
+ * Mapping HTTP : 400. L'UI affiche un message ciblé via `details.missing`.
+ */
+export class ProductTransitionInvalidError extends Error {
+  readonly code = "PRODUCT_TRANSITION_INVALID" as const
+
+  constructor(
+    public readonly details: {
+      reason: "invalid_transition" | "missing_preconditions"
+      missing: ReadonlyArray<
+        | "name"
+        | "description"
+        | "price"
+        | "stock"
+        | "photos"
+        | "availability"
+      >
+    },
+    message = "Transition de statut refusée.",
+  ) {
+    super(message)
+    this.name = "ProductTransitionInvalidError"
+  }
+}
+
 export type ProductErrorCode =
   | ProductValidationError["code"]
   | ProductNotFoundError["code"]
@@ -370,3 +407,4 @@ export type ProductErrorCode =
   | ProductPhotoInvalidReorderError["code"]
   | ProductPhotoMimeRejectedError["code"]
   | ProductPhotoPathRejectedError["code"]
+  | ProductTransitionInvalidError["code"]

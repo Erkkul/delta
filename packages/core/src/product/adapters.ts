@@ -78,9 +78,12 @@ export type ProductCreate = {
 /**
  * Query de listing owner — passée au repo. `q` est transformé en
  * `websearch_to_tsquery` côté SQL.
+ *
+ * `'sold_out'` (KAN-23) est un filtre dérivé : traduit côté repo en
+ * `WHERE status = 'active' AND stock = 0`. Pas une valeur d'enum DB.
  */
 export type ProductListQueryFilters = {
-  status: "all" | ProductStatus
+  status: "all" | ProductStatus | "sold_out"
   q: string | null
   limit: number
   cursor: string | null

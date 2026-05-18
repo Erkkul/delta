@@ -21,6 +21,12 @@ describe("ProductListQuery", () => {
     expect(ProductListQuery.safeParse({ status: "all" }).success).toBe(true)
   })
 
+  it("accepte le filtre dérivé sold_out (KAN-23)", () => {
+    expect(ProductListQuery.safeParse({ status: "sold_out" }).success).toBe(
+      true,
+    )
+  })
+
   it("refuse un status hors whitelist", () => {
     expect(
       ProductListQuery.safeParse({ status: "archived" }).success,
