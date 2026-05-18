@@ -10,6 +10,7 @@ import {
   PRODUCT_STATUSES,
   type ProductCategory,
   type ProductPackaging,
+  type ProductPhotoEntry,
   type ProductSnapshot,
   type ProductStatus,
 } from "@delta/contracts/product"
@@ -31,15 +32,17 @@ import {
   formatEurosInput,
   parseEurosToCents,
 } from "./format"
+import { ProductPhotoUploader } from "./photo-uploader"
 import { ProductDeleteConfirm } from "./product-delete-confirm"
 import { ProductFormPreview } from "./product-form-preview"
 
 /**
- * Formulaire création / édition produit (KAN-20 — PR-05).
+ * Formulaire création / édition produit (KAN-20 + KAN-21 — PR-05).
  *
  * Sections cohérentes avec la maquette PR-05 :
  *   1. Identité (nom, catégorie, description)
- *   2. Photos — désactivée au MVP (overlay « Bientôt — KAN-21 »)
+ *   2. Photos (KAN-21) — `<ProductPhotoUploader />` en mode `edit`,
+ *      placeholder « Enregistrez d'abord » en mode `new`
  *   3. Prix et conditionnement (toggle « prix voisin tout compris » retiré
  *      cf. spec)
  *   4. Stock et fenêtre de disponibilité (low_stock_threshold désactivé)
@@ -47,7 +50,9 @@ import { ProductFormPreview } from "./product-form-preview"
  *
  * Modes :
  *   - `new` : POST /api/v1/producer/products → redirige vers /producer/catalogue/[id]
- *   - `edit` : PATCH /api/v1/producer/products/[id] + bouton supprimer
+ *   - `edit` : PATCH /api/v1/producer/products/[id] + bouton supprimer.
+ *     Les photos sont écrites par les endpoints dédiés `/photos*`, pas par
+ *     ce PATCH — la clé `photos` est retirée du body avant envoi.
  */
 
 type Mode = "new" | "edit"
@@ -63,6 +68,7 @@ export type ProductFormInitial = {
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus
+  photos: ProductPhotoEntry[]
 }
 
 const DEFAULT_INITIAL: ProductFormInitial = {
@@ -75,6 +81,7 @@ const DEFAULT_INITIAL: ProductFormInitial = {
   availability_from: null,
   availability_to: null,
   status: "active",
+  photos: [],
 }
 
 export function ProductForm({
@@ -108,6 +115,7 @@ export function ProductForm({
     start.availability_to ?? "",
   )
   const [status, setStatus] = useState<ProductStatus>(start.status)
+  const [photos, setPhotos] = useState<ProductPhotoEntry[]>(start.photos)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -293,40 +301,19 @@ export function ProductForm({
             </Field>
           </Section>
 
-          {/* Section 2 : Photos — DÉSACTIVÉE au MVP */}
-          <Section
-            number={2}
-            title="Photos du produit"
-            disabledBanner="Bientôt — KAN-21"
-          >
-            <p className="mb-3 text-[11.5px] text-cream-500">
-              Une à 4 photos. La première sera utilisée comme couverture.
-              Format paysage de préférence.
-            </p>
-            <div className="grid grid-cols-2 gap-3 opacity-50">
-              {[0, 1].map((i) => (
-                <div
-                  key={i}
-                  className="flex aspect-[4/3] cursor-not-allowed flex-col items-center justify-center gap-1.5 rounded-md border-2 border-dashed border-cream-300 bg-cream-50 px-2 text-center text-xs text-cream-500"
-                >
-                  <svg
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    className="h-5 w-5"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <span>Ajouter une photo</span>
-                </div>
-              ))}
-            </div>
+          {/* Section 2 : Photos (KAN-21) */}
+          <Section number={2} title="Photos du produit">
+            {mode === "edit" && initial?.id ? (
+              <ProductPhotoUploader
+                productId={initial.id}
+                photos={photos}
+                onPhotosChange={setPhotos}
+              />
+            ) : (
+              <p className="text-[12px] italic text-cream-500">
+                Enregistrez d&apos;abord le produit pour ajouter des photos.
+              </p>
+            )}
           </Section>
 
           {/* Section 3 : Prix et conditionnement */}
@@ -550,6 +537,7 @@ export function ProductForm({
           unitPriceCents={parsedPriceCents}
           producerName={producerName}
           producerCity={producerCity}
+          coverPhotoUrl={photos[0]?.url ?? null}
         />
       </div>
 

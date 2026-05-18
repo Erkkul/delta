@@ -32,7 +32,13 @@ describe("ProductSnapshot", () => {
       ProductSnapshot.safeParse({
         ...(SAMPLE as Record<string, unknown>),
         labels: ["Bio AB"],
-        photos: [{ url: "https://example.com/photo.jpg", alt: "miel" }],
+        photos: [
+          {
+            url: "https://example.com/photo.jpg",
+            path: "uid/pid/abc.jpg",
+            alt: "miel",
+          },
+        ],
       }).success,
     ).toBe(true)
   })
@@ -41,7 +47,16 @@ describe("ProductSnapshot", () => {
     expect(
       ProductSnapshot.safeParse({
         ...(SAMPLE as Record<string, unknown>),
-        photos: [{ alt: "miel" }],
+        photos: [{ alt: "miel", path: "uid/pid/abc.jpg" }],
+      }).success,
+    ).toBe(false)
+  })
+
+  it("refuse une photo sans path (KAN-21 — anti-orphelin DELETE)", () => {
+    expect(
+      ProductSnapshot.safeParse({
+        ...(SAMPLE as Record<string, unknown>),
+        photos: [{ url: "https://example.com/photo.jpg" }],
       }).success,
     ).toBe(false)
   })

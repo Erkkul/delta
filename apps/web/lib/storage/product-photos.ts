@@ -1,10 +1,11 @@
+import { randomBytes } from "node:crypto"
+
 import {
   type ProductPhotoMime,
   type ProductPhotoUploadInput,
   type ProductPhotoUploadOutput,
 } from "@delta/contracts/product"
 import { type SupabaseClient } from "@supabase/supabase-js"
-import { randomBytes } from "node:crypto"
 
 /**
  * Helper Storage pour le bucket `product-photos` (KAN-21).
