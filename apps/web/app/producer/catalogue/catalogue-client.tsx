@@ -53,13 +53,23 @@ export function CatalogueClient({
       active: items.filter((p) => p.status === "active").length,
       draft: items.filter((p) => p.status === "draft").length,
       disabled: items.filter((p) => p.status === "disabled").length,
+      // KAN-23 : statut dérivé. Cohérent avec `getStockDisplayState` côté
+      // card (KAN-22) — un produit n'est « épuisé » que s'il est publié.
+      sold_out: items.filter((p) => p.status === "active" && p.stock === 0)
+        .length,
     }
   }, [items])
 
   const filtered: ProductCardItem[] = useMemo(() => {
     const needle = q.trim().toLowerCase()
     return items
-      .filter((p) => status === "all" || p.status === status)
+      .filter((p) => {
+        if (status === "all") return true
+        if (status === "sold_out") {
+          return p.status === "active" && p.stock === 0
+        }
+        return p.status === status
+      })
       .filter((p) =>
         needle === ""
           ? true

@@ -14,9 +14,14 @@ import {
   type ProductSnapshot,
   type ProductStatus,
 } from "@delta/contracts/product"
+import {
+  PUBLISH_PRECONDITION_FR,
+  getPublishPreconditions,
+  type PublishPrecondition,
+} from "@delta/core/product"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState, type FormEvent } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
 
 /**
  * Classes utilitaires partagées par tous les champs du formulaire
@@ -98,6 +103,7 @@ export function ProductForm({
   producerCity: string | null
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const start = initial ?? DEFAULT_INITIAL
 
   const [name, setName] = useState(start.name)
@@ -127,6 +133,23 @@ export function ProductForm({
   const [error, setError] = useState<string | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  // Préconditions de publication mises en avant (KAN-23) quand l'API a
+  // rejeté la transition vers `active` à la dernière soumission.
+  const [serverMissing, setServerMissing] = useState<
+    ReadonlyArray<PublishPrecondition>
+  >([])
+  const visibilityRef = useRef<HTMLDivElement | null>(null)
+
+  // KAN-23 : si l'URL contient `?focus=publish` (arrivée depuis un toast
+  // d'erreur précondition côté card), scroller sur la section 5 + bloc
+  // d'aide ouvert.
+  useEffect(() => {
+    if (searchParams?.get("focus") !== "publish") return
+    visibilityRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    })
+  }, [searchParams])
 
   const parsedPriceCents = parseEurosToCents(priceInput)
   const parsedStock = (() => {
@@ -138,6 +161,35 @@ export function ProductForm({
     const n = Number.parseInt(lowStockThreshold, 10)
     return Number.isFinite(n) && n >= 0 ? n : "invalid"
   })()
+
+  // Préconditions calculées en live à partir du state local (KAN-23).
+  // Pure ; ne déclenche aucun appel réseau. Utilisée pour le bloc
+  // « Pour publier, il faut » sous le radio `Actif`.
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const preconditions = useMemo(
+    () =>
+      getPublishPreconditions(
+        {
+          name,
+          description:
+            description.trim().length > 0 ? description.trim() : null,
+          unit_price_cents: parsedPriceCents ?? 0,
+          stock: parsedStock ?? 0,
+          photos,
+          availability_to: availabilityTo || null,
+        },
+        today,
+      ),
+    [
+      name,
+      description,
+      parsedPriceCents,
+      parsedStock,
+      photos,
+      availabilityTo,
+      today,
+    ],
+  )
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -198,13 +250,37 @@ export function ProductForm({
       if (!res.ok) {
         const payload = (await res.json().catch(() => ({}))) as {
           error?: string
+          code?: string
           issues?: Array<{ message: string }>
+          details?: {
+            reason?: "missing_preconditions" | "invalid_transition"
+            missing?: ReadonlyArray<PublishPrecondition>
+          }
+        }
+        // KAN-23 : préconditions de publication manquantes → on highlight
+        // la section visibilité au lieu d'afficher un message neutre.
+        if (
+          payload.code === "PRODUCT_TRANSITION_INVALID" &&
+          payload.details?.reason === "missing_preconditions" &&
+          payload.details.missing
+        ) {
+          setServerMissing(payload.details.missing)
+          visibilityRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          })
+          throw new Error(
+            "Impossible de publier ce produit. Complétez les éléments listés ci-dessous.",
+          )
         }
         const fallback = "L'enregistrement a échoué."
         const issueMsg = payload.issues?.[0]?.message
         throw new Error(issueMsg ?? payload.error ?? fallback)
       }
 
+      // Succès : la transition (s'il y en a eu une) a réussi → on nettoie
+      // les préconditions précédentes mises en avant.
+      setServerMissing([])
       const saved = (await res.json()) as ProductSnapshot
       if (mode === "new") {
         router.push(`/producer/catalogue/${saved.id}`)
@@ -457,44 +533,62 @@ export function ProductForm({
           </Section>
 
           {/* Section 5 : Visibilité */}
-          <Section number={5} title="Visibilité">
-            <div className="grid gap-3 tablet:grid-cols-3">
-              {PRODUCT_STATUSES.map((s) => {
-                const active = s === status
-                return (
-                  <button
-                    type="button"
-                    key={s}
-                    onClick={() => setStatus(s)}
-                    aria-pressed={active}
-                    className={`relative rounded-md border-[1.5px] px-3 py-3.5 text-center transition-colors ${
-                      active
-                        ? "border-green-600 bg-green-50 shadow-card"
-                        : "border-cream-200 bg-cream-50 hover:border-green-300 hover:bg-green-50"
-                    }`}
-                  >
-                    {active ? (
-                      <span
-                        aria-hidden="true"
-                        className="absolute right-1.5 top-1.5 grid h-4 w-4 place-items-center rounded-full bg-green-600 text-[10px] font-bold text-white"
-                      >
-                        ✓
-                      </span>
-                    ) : null}
-                    <div className="mb-1 text-2xl leading-none" aria-hidden="true">
-                      {iconForStatus(s)}
-                    </div>
-                    <div className="text-sm font-semibold text-cream-950">
-                      {PRODUCT_STATUS_FR[s]}
-                    </div>
-                    <div className="mt-0.5 text-[10.5px] leading-snug text-cream-500">
-                      {descForStatus(s)}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </Section>
+          <div ref={visibilityRef}>
+            <Section number={5} title="Visibilité">
+              <div className="grid gap-3 tablet:grid-cols-3">
+                {PRODUCT_STATUSES.map((s) => {
+                  const active = s === status
+                  return (
+                    <button
+                      type="button"
+                      key={s}
+                      onClick={() => setStatus(s)}
+                      aria-pressed={active}
+                      className={`relative rounded-md border-[1.5px] px-3 py-3.5 text-center transition-colors ${
+                        active
+                          ? "border-green-600 bg-green-50 shadow-card"
+                          : "border-cream-200 bg-cream-50 hover:border-green-300 hover:bg-green-50"
+                      }`}
+                    >
+                      {active ? (
+                        <span
+                          aria-hidden="true"
+                          className="absolute right-1.5 top-1.5 grid h-4 w-4 place-items-center rounded-full bg-green-600 text-[10px] font-bold text-white"
+                        >
+                          ✓
+                        </span>
+                      ) : null}
+                      <div className="mb-1 text-2xl leading-none" aria-hidden="true">
+                        {iconForStatus(s)}
+                      </div>
+                      <div className="text-sm font-semibold text-cream-950">
+                        {PRODUCT_STATUS_FR[s]}
+                      </div>
+                      <div className="mt-0.5 text-[10.5px] leading-snug text-cream-500">
+                        {descForStatus(s)}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* KAN-23 : préconditions de publication. Affichées quand le
+                  producteur sélectionne `Actif` et qu'il manque encore
+                  quelque chose, ou quand le serveur a rejeté la dernière
+                  soumission pour préconditions manquantes. */}
+              {status === "active" &&
+              (!preconditions.ok || serverMissing.length > 0) ? (
+                <PublishPreconditionsList
+                  missing={
+                    serverMissing.length > 0
+                      ? serverMissing
+                      : preconditions.missing
+                  }
+                  highlight={serverMissing.length > 0}
+                />
+              ) : null}
+            </Section>
+          </div>
 
           {/* Sticky actions */}
           <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-cream-200 bg-white px-5 py-3.5 shadow-elevated">
@@ -632,6 +726,78 @@ function Field({
 
 function Required() {
   return <span className="text-earth-500">*</span>
+}
+
+/**
+ * Liste cochée « Pour publier, il faut » (KAN-23). Affichée dans la section
+ * Visibilité du formulaire PR-05 quand le producteur sélectionne `Actif`
+ * sans remplir toutes les préconditions, ou quand le serveur a rejeté la
+ * dernière soumission. `highlight=true` (cas serveur) bascule le titre +
+ * la bordure en orange pour signaler clairement la cause du refus.
+ */
+const PRECONDITION_ORDER: ReadonlyArray<PublishPrecondition> = [
+  "name",
+  "description",
+  "price",
+  "stock",
+  "photos",
+  "availability",
+]
+
+function PublishPreconditionsList({
+  missing,
+  highlight,
+}: {
+  missing: ReadonlyArray<PublishPrecondition>
+  highlight: boolean
+}) {
+  const missingSet = new Set(missing)
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={`mt-4 rounded-md border p-3.5 ${
+        highlight
+          ? "border-orange-200 bg-orange-50"
+          : "border-cream-200 bg-cream-50"
+      }`}
+    >
+      <div
+        className={`mb-2 text-[12px] font-bold uppercase tracking-wider ${
+          highlight ? "text-orange-600" : "text-cream-700"
+        }`}
+      >
+        {highlight
+          ? "Préconditions manquantes pour publier"
+          : "Pour publier, il faut"}
+      </div>
+      <ul className="space-y-1.5">
+        {PRECONDITION_ORDER.map((key) => {
+          const ok = !missingSet.has(key)
+          return (
+            <li
+              key={key}
+              className="flex items-center gap-2 text-[13px] text-cream-800"
+            >
+              <span
+                aria-hidden="true"
+                className={`grid h-4 w-4 place-items-center rounded-full text-[10px] font-bold ${
+                  ok
+                    ? "bg-green-600 text-white"
+                    : "border border-cream-300 bg-white text-transparent"
+                }`}
+              >
+                ✓
+              </span>
+              <span className={ok ? "text-cream-600" : "font-medium"}>
+                {PUBLISH_PRECONDITION_FR[key]}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
 }
 
 function iconForStatus(s: ProductStatus): string {
