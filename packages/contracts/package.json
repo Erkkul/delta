@@ -9,7 +9,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./auth": "./src/auth/index.ts",
-    "./producer": "./src/producer/index.ts"
+    "./producer": "./src/producer/index.ts",
+    "./product": "./src/product/index.ts"
   },
   "scripts": {
     "lint": "eslint .",
