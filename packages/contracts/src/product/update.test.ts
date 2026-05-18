@@ -48,6 +48,33 @@ describe("ProductUpdateInput", () => {
     expect(ProductUpdateInput.safeParse({ stock: -1 }).success).toBe(false)
   })
 
+  it("accepte la réinitialisation du seuil d'alerte stock via null", () => {
+    expect(
+      ProductUpdateInput.safeParse({ low_stock_threshold: null }).success,
+    ).toBe(true)
+  })
+
+  it("accepte un seuil d'alerte stock entier ≥ 0", () => {
+    expect(
+      ProductUpdateInput.safeParse({ low_stock_threshold: 5 }).success,
+    ).toBe(true)
+    expect(
+      ProductUpdateInput.safeParse({ low_stock_threshold: 0 }).success,
+    ).toBe(true)
+  })
+
+  it("refuse un seuil d'alerte stock négatif", () => {
+    expect(
+      ProductUpdateInput.safeParse({ low_stock_threshold: -1 }).success,
+    ).toBe(false)
+  })
+
+  it("refuse un seuil d'alerte stock non entier", () => {
+    expect(
+      ProductUpdateInput.safeParse({ low_stock_threshold: 3.5 }).success,
+    ).toBe(false)
+  })
+
   it("refuse une fenêtre incohérente (to < from)", () => {
     expect(
       ProductUpdateInput.safeParse({

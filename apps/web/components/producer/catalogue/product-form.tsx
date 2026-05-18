@@ -45,7 +45,7 @@ import { ProductFormPreview } from "./product-form-preview"
  *      placeholder « Enregistrez d'abord » en mode `new`
  *   3. Prix et conditionnement (toggle « prix voisin tout compris » retiré
  *      cf. spec)
- *   4. Stock et fenêtre de disponibilité (low_stock_threshold désactivé)
+ *   4. Stock, seuil d'alerte et fenêtre de disponibilité
  *   5. Visibilité (active / draft / disabled)
  *
  * Modes :
@@ -65,6 +65,7 @@ export type ProductFormInitial = {
   packaging: ProductPackaging
   unit_price_cents: number | null
   stock: number
+  low_stock_threshold: number | null
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus
@@ -78,6 +79,7 @@ const DEFAULT_INITIAL: ProductFormInitial = {
   packaging: "pot_250g",
   unit_price_cents: null,
   stock: 0,
+  low_stock_threshold: null,
   availability_from: null,
   availability_to: null,
   status: "active",
@@ -108,6 +110,11 @@ export function ProductForm({
       : "",
   )
   const [stock, setStock] = useState<string>(start.stock.toString())
+  const [lowStockThreshold, setLowStockThreshold] = useState<string>(
+    start.low_stock_threshold != null
+      ? start.low_stock_threshold.toString()
+      : "",
+  )
   const [availabilityFrom, setAvailabilityFrom] = useState<string>(
     start.availability_from ?? "",
   )
@@ -126,6 +133,11 @@ export function ProductForm({
     const n = Number.parseInt(stock, 10)
     return Number.isFinite(n) && n >= 0 ? n : null
   })()
+  const parsedLowStockThreshold = (() => {
+    if (lowStockThreshold.trim() === "") return null
+    const n = Number.parseInt(lowStockThreshold, 10)
+    return Number.isFinite(n) && n >= 0 ? n : "invalid"
+  })()
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -141,6 +153,10 @@ export function ProductForm({
     }
     if (parsedStock == null) {
       setError("Le stock doit être un nombre entier ≥ 0.")
+      return
+    }
+    if (parsedLowStockThreshold === "invalid") {
+      setError("Le seuil d'alerte stock doit être un nombre entier ≥ 0.")
       return
     }
     if (
@@ -161,6 +177,7 @@ export function ProductForm({
         packaging,
         unit_price_cents: parsedPriceCents,
         stock: parsedStock,
+        low_stock_threshold: parsedLowStockThreshold,
         availability_from: availabilityFrom || null,
         availability_to: availabilityTo || null,
         status,
@@ -394,21 +411,23 @@ export function ProductForm({
                 </div>
               </Field>
               <Field
-                label={
-                  <>
-                    Seuil d&apos;alerte stock{" "}
-                    <span className="text-cream-400">(Bientôt — KAN-22)</span>
-                  </>
-                }
-                helper="Notification quand stock ≤ ce seuil."
+                label="Seuil d'alerte stock"
+                helper="Vous serez prévenu quand le stock atteint ce seuil. Laissez vide pour désactiver."
               >
-                <input
-                  className="form-input opacity-50"
-                  type="number"
-                  disabled
-                  placeholder="—"
-                  readOnly
-                />
+                <div className="relative">
+                  <input
+                    className={INPUT_CLASS}
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={lowStockThreshold}
+                    placeholder="ex : 5"
+                    onChange={(e) => setLowStockThreshold(e.target.value)}
+                  />
+                  <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-cream-500">
+                    {unitShort}
+                  </span>
+                </div>
               </Field>
             </div>
 
@@ -538,6 +557,8 @@ export function ProductForm({
           producerName={producerName}
           producerCity={producerCity}
           coverPhotoUrl={photos[0]?.url ?? null}
+          stock={parsedStock}
+          status={status}
         />
       </div>
 

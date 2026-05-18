@@ -16,6 +16,7 @@ type Item = Pick<
   | "packaging"
   | "unit_price_cents"
   | "stock"
+  | "low_stock_threshold"
   | "availability_from"
   | "availability_to"
   | "status"
@@ -71,6 +72,7 @@ export function CatalogueClient({
         packaging: p.packaging,
         unit_price_cents: p.unit_price_cents,
         stock: p.stock,
+        low_stock_threshold: p.low_stock_threshold,
         availability_from: p.availability_from,
         availability_to: p.availability_to,
         status: p.status,

@@ -114,6 +114,7 @@ export default async function EditProductPage({
               packaging: product.packaging,
               unit_price_cents: product.unit_price_cents,
               stock: product.stock,
+              low_stock_threshold: product.low_stock_threshold,
               availability_from: product.availability_from,
               availability_to: product.availability_to,
               status: product.status,

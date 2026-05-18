@@ -60,6 +60,8 @@ export async function updateProduct(
   if (data.unit_price_cents !== undefined)
     patch.unit_price_cents = data.unit_price_cents
   if (data.stock !== undefined) patch.stock = data.stock
+  if ("low_stock_threshold" in data)
+    patch.low_stock_threshold = data.low_stock_threshold ?? null
   if ("availability_from" in data)
     patch.availability_from = data.availability_from ?? null
   if ("availability_to" in data)

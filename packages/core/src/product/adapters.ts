@@ -49,6 +49,7 @@ export type ProductPatch = {
   packaging?: ProductPackaging
   unit_price_cents?: number
   stock?: number
+  low_stock_threshold?: number | null
   availability_from?: string | null
   availability_to?: string | null
   status?: ProductStatus
@@ -67,6 +68,7 @@ export type ProductCreate = {
   packaging: ProductPackaging
   unit_price_cents: number
   stock: number
+  low_stock_threshold: number | null
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus

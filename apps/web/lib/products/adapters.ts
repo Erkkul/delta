@@ -60,6 +60,7 @@ export function getProductAdapter(client: Client): ProductAdapter {
         packaging: input.packaging,
         unit_price_cents: input.unit_price_cents,
         stock: input.stock,
+        low_stock_threshold: input.low_stock_threshold,
         availability_from: input.availability_from,
         availability_to: input.availability_to,
         status: input.status,

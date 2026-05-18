@@ -7,6 +7,7 @@ import {
   PRODUCT_PACKAGING_UNIT_SHORT,
   type ProductCategory,
   type ProductPackaging,
+  type ProductStatus,
 } from "@delta/contracts/product"
 
 import { formatEuros } from "./format"
@@ -17,6 +18,7 @@ import { formatEuros } from "./format"
  *
  * KAN-21 : `coverPhotoUrl` (= `photos[0]?.url`) remplace l'emoji fallback
  * quand au moins une photo est uploadée.
+ * KAN-22 : avertissement orange « épuisé » quand `stock === 0 && status === 'active'`.
  */
 export function ProductFormPreview({
   name,
@@ -26,6 +28,8 @@ export function ProductFormPreview({
   producerName,
   producerCity,
   coverPhotoUrl,
+  stock,
+  status,
 }: {
   name: string
   category: ProductCategory
@@ -34,12 +38,15 @@ export function ProductFormPreview({
   producerName: string
   producerCity: string | null
   coverPhotoUrl: string | null
+  stock: number | null
+  status: ProductStatus
 }) {
   const emoji = PRODUCT_CATEGORY_EMOJI[category]
   const categoryLabel = PRODUCT_CATEGORY_FR[category]
   const packagingLabel = PRODUCT_PACKAGING_FR[packaging]
   const unitShort = PRODUCT_PACKAGING_UNIT_SHORT[packaging]
   const displayName = name.trim().length === 0 ? "Nom du produit" : name
+  const showSoldOutNotice = stock === 0 && status === "active"
 
   return (
     <aside className="hidden tablet:block">
@@ -73,6 +80,15 @@ export function ProductFormPreview({
               <span className="absolute left-2 top-2 rounded-pill bg-earth-100/90 px-2 py-0.5 text-[10px] font-semibold text-earth-800">
                 {emoji} {categoryLabel}
               </span>
+              {showSoldOutNotice ? (
+                <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-pill border border-orange-200 bg-orange-50/95 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-600">
+                  <span
+                    aria-hidden="true"
+                    className="inline-block h-1.5 w-1.5 rounded-full bg-orange-500"
+                  />
+                  Épuisé
+                </span>
+              ) : null}
             </div>
             <div className="p-3">
               <div className="truncate font-display text-sm font-semibold text-cream-950">
@@ -107,6 +123,12 @@ export function ProductFormPreview({
             <strong className="text-green-800">2,5×</strong> plus
             d&apos;envies qu&apos;une photo générique.
           </p>
+          {showSoldOutNotice ? (
+            <p className="mt-2 text-[11px] font-medium text-orange-600">
+              Ce produit apparaîtra comme épuisé aux acheteurs tant que le
+              stock reste à 0.
+            </p>
+          ) : null}
           <p className="mt-2 text-[11px] text-cream-500">
             Unité : {unitShort}
           </p>

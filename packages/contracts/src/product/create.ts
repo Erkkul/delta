@@ -42,6 +42,12 @@ export const ProductCreateInput = z
       .int("Le stock doit être un entier.")
       .min(0, "Le stock ne peut pas être négatif.")
       .default(0),
+    low_stock_threshold: z
+      .number()
+      .int("Le seuil doit être un entier.")
+      .min(0, "Le seuil ne peut pas être négatif.")
+      .nullable()
+      .optional(),
     availability_from: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Date attendue au format AAAA-MM-JJ.")
