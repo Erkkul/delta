@@ -214,7 +214,7 @@ Pour préparer techniquement une feature Jira KAN avant de coder, utiliser le sk
 | Étape | Slug branche | Action agent | Transition Jira |
 |---|---|---|---|
 | Fin de `/propose KAN-XX` | `claude/propose-kan-XX-<slug>` | Push, ouvre PR « specs KAN-XX », **active GitHub auto-merge squash**, souscrit à l'activité PR | aucune (reste `Ideas`) |
-| Merge PR cadrage (CI verte → auto-merge) | — | Event merge → transition + commit mapping, désabonne | `Ideas` → `À faire` (id `21`) |
+| Merge PR cadrage (CI verte → auto-merge) | — | Event merge → cas A : transition + PR mapping + désabonne + **enchaîne `/implement KAN-XX` automatiquement** | `Ideas` → `À faire` (id `21`) |
 | 1er push sur `claude/kan-XX-<slug>` (début `/implement KAN-XX`) | `claude/kan-XX-<slug>` | Push, ouvre PR « implémentation KAN-XX », **active GitHub auto-merge squash**, souscrit | `À faire` → `Wip` (id `31`) |
 | Merge PR implémentation (CI verte → auto-merge) | — | Event merge → transition + commit mapping, désabonne | `Wip` → `Examiner` (id `41`) |
 | Validation produit / QA | — | Humain (jamais automatique) | `Examiner` → `Terminé` (id `51`) |
@@ -222,6 +222,7 @@ Pour préparer techniquement une feature Jira KAN avant de coder, utiliser le sk
 **Conséquences pratiques :**
 - L'agent active `enable_pr_auto_merge(squash)` à la création de chaque PR (cadrage et implémentation). Prérequis repo : « Allow auto-merge » activé dans `Settings → General → Pull Requests`. Si l'auto-merge ne peut pas être activé (option repo désactivée, branche protégée incompatible), l'agent le signale en chat et laisse la PR en merge manuel.
 - L'agent souscrit à l'activité PR (`subscribe_pr_activity`) au moment où il pousse la PR, pour traiter le post-merge dans la même session : transition Jira + commit mapping + désabonnement. Si la session se termine avant le merge, le post-merge est ramassé par la session suivante via la règle « Après merge d'une PR KAN-XXX sur `main` ».
+- **Chaînage automatique cadrage → implémentation** : à la réception de l'event de merge de la PR cadrage (que la session soit l'agent initial ou un agent de rattrapage), le cas A inclut l'invocation directe du skill `implement` avec `KAN-XX`. Pas de confirmation chat. L'utilisateur peut interrompre à tout moment.
 - La transition `Wip` est **déclenchée au premier push** sur `claude/kan-XX-<slug>`, pas au démarrage du skill `/implement`. Tant que rien n'est poussé, le ticket reste en `À faire`.
 - Quand l'environnement remote démarre une session `/implement KAN-XX`, le harness doit l'ouvrir sur `claude/kan-XX-<slug>`, **pas** sur la branche `claude/propose-kan-XX-*` du cadrage. Si la session démarre par erreur sur la branche propose alors que le cadrage est déjà mergé, **créer une nouvelle branche locale `claude/kan-XX-<slug>` depuis main et y placer tous les commits d'implémentation** avant le `git push`.
 - La transition vers `Terminé` (id `51`) est **toujours manuelle** : produit ou QA valide en aval. L'agent ne déclenche jamais cette transition.
@@ -236,15 +237,22 @@ La cible visée est l'auto-merge GitHub : à la création de chaque PR (cadrage 
 2. Mettre à jour `produit/jira_mapping.md` :
    - Ligne du ticket dans la table « Catalogue Jira complet » de l'épic concerné : statut passe à `À faire`, mention `[Cadrage tech](specs/KAN-XX/)` déjà présente.
    - Ligne « État au YYYY-MM-DD » de la « Vue d'ensemble » : sortir le ticket du bloc « *Ideas* » et le mentionner en `À faire (cadrage)`.
-3. Commit dédié : `Mapping Jira : KAN-XX en À faire (merge cadrage PR #N)`.
+3. Commit dédié sur branche `claude/mapping-kan-XX-a-faire`, push, ouvrir PR mapping avec auto-merge squash. Titre/message : `Mapping Jira : KAN-XX en À faire (merge cadrage PR #N)`. (Main étant protégé, la PR mapping est obligatoire.)
 4. `unsubscribe_pr_activity` sur la PR cadrage.
+5. **Enchaîner automatiquement sur `/implement KAN-XX`** dans la même session, sans demander de confirmation :
+   - `git checkout main && git pull origin main`
+   - Créer la branche `claude/kan-XX-<slug>` depuis `main`
+   - Invoquer le skill `implement` avec l'argument `KAN-XX` (via Skill tool)
+   - L'utilisateur peut interrompre à tout moment dans le chat (« stop », « on s'arrête au cadrage »)
+
+Ce chaînage s'applique **aussi aux sessions de rattrapage** qui détectent un cadrage mergé non-suivi d'implémentation : la session de rattrapage exécute le cas A complet, y compris l'étape 5. La cohérence prime sur la surprise — relire `produit/jira_mapping.md` + état Jira renseigne toujours sur l'étape en cours.
 
 **Cas B — PR implémentation `claude/kan-XX-*` mergée :**
 1. Transitionner le ticket Jira `Wip` → `Examiner` (transition id `41`). **Ne jamais transitionner vers `Terminé` automatiquement** — c'est une validation produit / QA manuelle.
 2. Mettre à jour `produit/jira_mapping.md` :
    - Ligne du ticket dans la table « Catalogue Jira complet » : statut passe à `Examiner`, mention `— mergé sur main (PR #N)` entre tirets.
    - Ligne « État au YYYY-MM-DD » : mise à jour avec le nouveau statut.
-3. Commit dédié : `Mapping Jira : KAN-XX en Examiner (merge PR #N)`.
+3. Commit dédié sur branche `claude/mapping-kan-XX-examiner`, push, ouvrir PR mapping avec auto-merge squash. Titre/message : `Mapping Jira : KAN-XX en Examiner (merge PR #N)`.
 4. `unsubscribe_pr_activity` sur la PR implémentation.
 
 **Si la session a été perdue avant l'event de merge** (timeout, redémarrage harness), la session suivante détecte le décalage en relisant `produit/jira_mapping.md` vs l'état Jira et applique le cas A ou B correspondant.
