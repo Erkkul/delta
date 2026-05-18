@@ -29,7 +29,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 |-------|----------|-------------------------------|--------------|
 | PR-01 Inscription / connexion | `pr-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
 | PR-02 Onboarding Stripe Connect | `pr-02-onboarding-stripe.html` | KAN-16 (Onboarding Stripe Connect) — [Cadrage tech](specs/KAN-16/) | KAN-62, KAN-158 (polish UX restricted) |
-| PR-03 Dashboard | `pr-03-dashboard.html` | KAN-18 (Tableau de bord producteur) | KAN-56 |
+| PR-03 Dashboard | `pr-03-dashboard.html` | KAN-18 (Tableau de bord producteur) — [Cadrage tech](specs/KAN-18/) | KAN-56 |
 | PR-04 Catalogue produits | `pr-04-catalogue.html` | KAN-20 (Création & édition produit) | KAN-23 (Statuts produit) |
 | PR-05 Création / édition produit | `pr-05-edition-produit.html` | KAN-20 (Création & édition produit) | KAN-21 (Photos), KAN-22 (Stock), KAN-24 (Labels & catégories) |
 | PR-06 Récupération à venir | `pr-06-recuperation.html` | KAN-46 (QR Pickup), KAN-47 (Checklist remise producteur) | KAN-45 |
@@ -103,7 +103,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-4 | Epic | Ideas | Profil Producteur |
 | KAN-16 | Feature | Terminé | Onboarding Stripe Connect — [Cadrage tech](specs/KAN-16/) — mergé sur main (PR #10) |
 | KAN-17 | Feature | Terminé | Informations profil & ferme — [Cadrage tech](specs/KAN-17/) — mergé sur main (PR #18) |
-| KAN-18 | Feature | Ideas | Tableau de bord producteur |
+| KAN-18 | Feature | À faire | Tableau de bord producteur — [Cadrage tech](specs/KAN-18/) |
 | KAN-19 | Feature | Ideas | Historique ventes |
 | KAN-158 | Feature | Terminé | Polish UX onboarding producteur — état Stripe restricted (KYC incomplet) — [Cadrage tech](specs/KAN-158/) — mergé sur main (PR #15) |
 | KAN-62 | Subtask | Ideas | Connecter son compte bancaire via Stripe Connect (KYC léger + IBAN) — parent KAN-16 |
