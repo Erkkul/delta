@@ -28,6 +28,12 @@ export type Database = {
         Update: never
         Relationships: []
       }
+      products: {
+        Row: ProductRow
+        Insert: ProductInsert
+        Update: ProductUpdate
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -46,6 +52,9 @@ export type Database = {
       producer_stripe_status: ProducerStripeStatus
       producer_label: ProducerLabel
       weekday: Weekday
+      product_category: ProductCategory
+      product_packaging: ProductPackaging
+      product_status: ProductStatus
     }
     CompositeTypes: Record<string, never>
   }
@@ -223,4 +232,86 @@ export type StripeWebhookEventInsert = {
   event_id: string
   event_type: string
   payload: Record<string, unknown>
+}
+
+// ─── Products (KAN-20) ───────────────────────────────────────────────────
+
+export type ProductCategory =
+  | "miel_et_ruche"
+  | "fruits"
+  | "legumes"
+  | "cereales_legumineuses"
+  | "conserves_confitures"
+  | "pain_biscuits"
+  | "huiles"
+  | "boissons_non_alcoolisees"
+
+export type ProductPackaging =
+  | "pot_250g"
+  | "pot_500g"
+  | "pot_1kg"
+  | "bouteille_50cl"
+  | "bouteille_75cl"
+  | "sachet_500g"
+  | "carton_6"
+  | "au_kilo"
+
+export type ProductStatus = "active" | "draft" | "disabled"
+
+export type ProductPhoto = {
+  url: string
+  alt?: string
+}
+
+export type ProductRow = {
+  id: string
+  producer_user_id: string
+  name: string
+  description: string | null
+  category: ProductCategory
+  packaging: ProductPackaging
+  unit_price_cents: number
+  stock: number
+  low_stock_threshold: number | null
+  availability_from: string | null
+  availability_to: string | null
+  status: ProductStatus
+  // text[] au MVP de KAN-20 — swap vers product_label[] par KAN-24.
+  labels: string[]
+  photos: ProductPhoto[]
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export type ProductInsert = {
+  producer_user_id: string
+  name: string
+  description?: string | null
+  category: ProductCategory
+  packaging: ProductPackaging
+  unit_price_cents: number
+  stock?: number
+  low_stock_threshold?: number | null
+  availability_from?: string | null
+  availability_to?: string | null
+  status?: ProductStatus
+  labels?: string[]
+  photos?: ProductPhoto[]
+}
+
+export type ProductUpdate = {
+  name?: string
+  description?: string | null
+  category?: ProductCategory
+  packaging?: ProductPackaging
+  unit_price_cents?: number
+  stock?: number
+  low_stock_threshold?: number | null
+  availability_from?: string | null
+  availability_to?: string | null
+  status?: ProductStatus
+  labels?: string[]
+  photos?: ProductPhoto[]
+  deleted_at?: string | null
 }

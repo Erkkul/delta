@@ -229,3 +229,70 @@ export type ProducerProfileErrorCode =
   | PhotoLimitReachedError["code"]
   | PhotoMimeRejectedError["code"]
   | RateLimitedError["code"]
+
+// ─── Product catalogue (KAN-20) ──────────────────────────────────────────
+
+/**
+ * Erreur de validation métier pour le CRUD catalogue (KAN-20). Calque
+ * d'`AuthValidationError` / `ProducerValidationError` côté payload.
+ * Mapping HTTP : 400.
+ */
+export class ProductValidationError extends Error {
+  readonly code = "PRODUCT_VALIDATION_FAILED" as const
+
+  constructor(
+    message: string,
+    public readonly issues: ReadonlyArray<{ path: string; message: string }>,
+  ) {
+    super(message)
+    this.name = "ProductValidationError"
+  }
+}
+
+/**
+ * Produit introuvable (id inconnu OU appartenant à un autre user — la RLS
+ * masque les deux cas indifféremment). Mapping HTTP : 404.
+ */
+export class ProductNotFoundError extends Error {
+  readonly code = "PRODUCT_NOT_FOUND" as const
+
+  constructor() {
+    super("Produit introuvable.")
+    this.name = "ProductNotFoundError"
+  }
+}
+
+/**
+ * Action tentée sur un produit dont le user n'est pas le owner. En pratique,
+ * la RLS renvoie une 404 (anti-énumération) ; ce code reste utilisé pour les
+ * tests unitaires côté core et pour les futurs callers admin / staff.
+ * Mapping HTTP : 403.
+ */
+export class ProductForbiddenError extends Error {
+  readonly code = "PRODUCT_FORBIDDEN" as const
+
+  constructor() {
+    super("Vous n'êtes pas propriétaire de ce produit.")
+    this.name = "ProductForbiddenError"
+  }
+}
+
+/**
+ * Suppression d'un produit déjà soft-deleted. Idempotence applicative :
+ * on lève une erreur typée plutôt que de laisser le PATCH retomber sur
+ * `not found`. Mapping HTTP : 409.
+ */
+export class ProductAlreadyDeletedError extends Error {
+  readonly code = "PRODUCT_ALREADY_DELETED" as const
+
+  constructor() {
+    super("Ce produit est déjà supprimé.")
+    this.name = "ProductAlreadyDeletedError"
+  }
+}
+
+export type ProductErrorCode =
+  | ProductValidationError["code"]
+  | ProductNotFoundError["code"]
+  | ProductForbiddenError["code"]
+  | ProductAlreadyDeletedError["code"]
