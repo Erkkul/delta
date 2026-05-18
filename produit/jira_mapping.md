@@ -9,7 +9,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 - **13 épics** (KAN-1, KAN-4 → KAN-15) — un épic par grand domaine fonctionnel
 - **50 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-158 sous les autres épics — voir tables par épic ci-dessous)
 - **Subtasks** : voir le catalogue par épic ci-dessous. Le mapping peut être incomplet pour les subtasks les plus récentes — Jira fait foi pour la liste exhaustive.
-- État au 2026-05-18 : KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *Terminé* (mergé sur `main` — PR #10, cadrage `specs/KAN-16/`) ; KAN-17 *Terminé* (mergé sur `main` — PR #18, cadrage `specs/KAN-17/`) ; KAN-18 *Terminé* (mergé sur `main` — PR #21, cadrage `specs/KAN-18/`) ; KAN-158 *Terminé* (mergé sur `main` — PR #15, cadrage `specs/KAN-158/`) ; KAN-19 *Examiner* (mergé sur `main` — PR #25, cadrage `specs/KAN-19/`) ; KAN-20 *Examiner* (mergé sur `main` — PR #30, cadrage `specs/KAN-20/`) ; KAN-21 *Ideas* (cadrage en cours — `specs/KAN-21/`) ; autres *Ideas*
+- État au 2026-05-18 : KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *Terminé* (mergé sur `main` — PR #10, cadrage `specs/KAN-16/`) ; KAN-17 *Terminé* (mergé sur `main` — PR #18, cadrage `specs/KAN-17/`) ; KAN-18 *Terminé* (mergé sur `main` — PR #21, cadrage `specs/KAN-18/`) ; KAN-158 *Terminé* (mergé sur `main` — PR #15, cadrage `specs/KAN-158/`) ; KAN-19 *Examiner* (mergé sur `main` — PR #25, cadrage `specs/KAN-19/`) ; KAN-20 *Examiner* (mergé sur `main` — PR #30, cadrage `specs/KAN-20/`) ; KAN-21 *À faire (cadrage)* (cadrage mergé sur `main` — PR #32, `specs/KAN-21/`) ; autres *Ideas*
 - **Maquettes (2026-05-14)** : les 35 écrans des 3 parcours (Producteur, Acheteur, Rameneur) du sitemap PRD §10 sont maquettés. Restent à maquetter : transverses **TR-02** (centre notifications) et **TR-04** (signalement / litige) ; **TR-03** est couvert par `rm-09-chat.html`. Index navigable de toutes les maquettes : `design/maquettes/index.html`
 
 ## Convention de référencement
@@ -118,7 +118,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 |--------|------|--------|--------|
 | KAN-5 | Epic | Ideas | Catalogue |
 | KAN-20 | Feature | Examiner | Création & édition produit — [Cadrage tech](specs/KAN-20/) — mergé sur main (PR #30) |
-| KAN-21 | Feature | Ideas | Gestion photos — [Cadrage tech](specs/KAN-21/) |
+| KAN-21 | Feature | À faire | Gestion photos — [Cadrage tech](specs/KAN-21/) |
 | KAN-22 | Feature | Ideas | Stock & alertes |
 | KAN-23 | Feature | Ideas | Statuts produit |
 | KAN-24 | Feature | Ideas | Labels & catégories |
