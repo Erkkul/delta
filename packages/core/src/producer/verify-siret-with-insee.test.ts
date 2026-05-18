@@ -25,6 +25,18 @@ function pendingProducer(overrides: Partial<Producer> = {}): Producer {
     payouts_enabled: false,
     charges_enabled: false,
     requirements_currently_due: [],
+    display_name: null,
+    public_description: null,
+    profile_photo_url: null,
+    farm_photos: [],
+    labels: [],
+    pickup_public_zone: null,
+    pickup_address: null,
+    pickup_days: [],
+    pickup_hours_start: null,
+    pickup_hours_end: null,
+    paused: false,
+    paused_at: null,
     ...overrides,
   }
 }
@@ -82,6 +94,9 @@ describe("verifySiretWithInsee", () => {
       setSiretVerificationResult,
       setStripeAccount: vi.fn(),
       applyStripeAccountUpdate: vi.fn(),
+      updateProfile: vi.fn(),
+      setPauseState: vi.fn(),
+      setPickupLocation: vi.fn(),
       // Méthode `findById` non listée dans ProducerAdapter — exposée par cast
       // typé côté use case (cf. verify-siret-with-insee.ts).
       findById: vi.fn().mockResolvedValue(pendingProducer()),
@@ -107,6 +122,9 @@ describe("verifySiretWithInsee", () => {
       setSiretVerificationResult,
       setStripeAccount: vi.fn(),
       applyStripeAccountUpdate: vi.fn(),
+      updateProfile: vi.fn(),
+      setPauseState: vi.fn(),
+      setPickupLocation: vi.fn(),
       findById: vi.fn().mockResolvedValue(pendingProducer()),
       fetchSiretRecord: vi.fn().mockResolvedValue({
         siret: "78945612300012",
@@ -131,6 +149,9 @@ describe("verifySiretWithInsee", () => {
       setSiretVerificationResult,
       setStripeAccount: vi.fn(),
       applyStripeAccountUpdate: vi.fn(),
+      updateProfile: vi.fn(),
+      setPauseState: vi.fn(),
+      setPickupLocation: vi.fn(),
       findById: vi.fn().mockResolvedValue(pendingProducer()),
       fetchSiretRecord: vi.fn().mockResolvedValue(null),
     } as never)
@@ -151,6 +172,9 @@ describe("verifySiretWithInsee", () => {
       setSiretVerificationResult,
       setStripeAccount: vi.fn(),
       applyStripeAccountUpdate: vi.fn(),
+      updateProfile: vi.fn(),
+      setPauseState: vi.fn(),
+      setPickupLocation: vi.fn(),
       findById: vi
         .fn()
         .mockResolvedValue(pendingProducer({ siret_status: "verified" })),
@@ -170,6 +194,9 @@ describe("verifySiretWithInsee", () => {
         setSiretVerificationResult: vi.fn(),
         setStripeAccount: vi.fn(),
         applyStripeAccountUpdate: vi.fn(),
+        updateProfile: vi.fn(),
+        setPauseState: vi.fn(),
+        setPickupLocation: vi.fn(),
         findById: vi.fn().mockResolvedValue(pendingProducer()),
         fetchSiretRecord: vi.fn().mockRejectedValue(new Error("INSEE 503")),
       } as never),

@@ -2,10 +2,13 @@ import { type SupabaseClient } from "@supabase/supabase-js"
 
 import {
   type Database,
+  type FarmPhoto,
   type ProducerInsert,
+  type ProducerLabel,
   type ProducerRow,
   type ProducerSiretStatus,
   type ProducerStripeStatus,
+  type Weekday,
 } from "../types"
 
 type Client = SupabaseClient<Database>
@@ -167,6 +170,100 @@ export const producersRepo = {
       .eq("stripe_account_id", stripeAccountId)
       .select("*")
       .maybeSingle()
+    if (error) throw error
+    return data ?? null
+  },
+
+  // ─── KAN-17 — Profil & ferme ──────────────────────────────────────────
+
+  /**
+   * Met à jour les champs publics (nom, description, photos, labels) et
+   * l'adresse de récupération. Patch partiel — seules les clés présentes
+   * sont écrites. La colonne `pickup_location` (geography) n'est pas
+   * touchée ici, elle passe par `setPickupLocationViaRpc` ci-dessous.
+   *
+   * Caller : client utilisateur (RLS `producers_update_self`).
+   */
+  async updateProfile(
+    client: Client,
+    userId: string,
+    patch: {
+      display_name?: string | null
+      public_description?: string | null
+      profile_photo_url?: string | null
+      farm_photos?: FarmPhoto[]
+      labels?: ProducerLabel[]
+      pickup_public_zone?: string | null
+      pickup_address?: string | null
+      pickup_days?: Weekday[]
+      pickup_hours_start?: string | null
+      pickup_hours_end?: string | null
+    },
+  ): Promise<ProducerRow> {
+    const { data, error } = await client
+      .from("producers")
+      .update(patch)
+      .eq("user_id", userId)
+      .select("*")
+      .single()
+    if (error) throw error
+    return data
+  },
+
+  /**
+   * Bascule le flag `paused` et synchronise `paused_at`. Side-effect produits
+   * : invisibilité côté catalogue acheteur (gating RLS, KAN-20).
+   *
+   * Caller : client utilisateur (RLS `producers_update_self`).
+   */
+  async setPaused(
+    client: Client,
+    userId: string,
+    paused: boolean,
+  ): Promise<ProducerRow> {
+    const { data, error } = await client
+      .from("producers")
+      .update({
+        paused,
+        paused_at: paused ? new Date().toISOString() : null,
+      })
+      .eq("user_id", userId)
+      .select("*")
+      .single()
+    if (error) throw error
+    return data
+  },
+
+  /**
+   * Met à jour la colonne `pickup_location` (PostGIS geography) via la RPC
+   * `set_pickup_location` (cf. migration KAN-17). Si les deux args sont
+   * null, réinitialise la position. SECURITY INVOKER → seul le owner peut
+   * éditer sa row (RLS appliquée).
+   */
+  async setPickupLocationViaRpc(
+    client: Client,
+    longitude: number | null,
+    latitude: number | null,
+  ): Promise<void> {
+    const { error } = await client.rpc("set_pickup_location", {
+      p_longitude: longitude,
+      p_latitude: latitude,
+    })
+    if (error) throw error
+  },
+
+  /**
+   * Révèle l'adresse exacte d'un producteur si le caller est autorisé
+   * (owner ou rameneur en mission active). Wrap la RPC SECURITY DEFINER
+   * `reveal_pickup_address`. Retourne null si non autorisé.
+   */
+  async revealPickupAddress(
+    client: Client,
+    producerId: string,
+  ): Promise<string | null> {
+    const { data, error } = await client.rpc("reveal_pickup_address", {
+      producer_id: producerId,
+    })
     if (error) throw error
     return data ?? null
   },

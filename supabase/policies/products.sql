@@ -7,10 +7,11 @@
 -- de visibilité catalogue exigé par KAN-16, pour que KAN-20 l'intègre dans
 -- sa propre migration / fichier de policies.
 --
--- Règle (cf. décision produit 2026-05-03 + specs/KAN-16/design.md) :
+-- Règle (cf. décision produit 2026-05-03 + specs/KAN-16/design.md + KAN-17) :
 -- Un produit n'est visible côté catalogue acheteur QUE si son producteur a :
 --   - siret_status = 'verified'
 --   - payouts_enabled = true
+--   - paused = false                   -- ajouté par KAN-17 (toggle "Boutique en pause")
 --   - deleted_at IS NULL
 -- Le producteur lui-même voit toujours ses propres produits indépendamment
 -- de ces conditions (pour pouvoir configurer son catalogue avant validation).
@@ -36,6 +37,7 @@
 --         WHERE p.user_id = public.products.producer_user_id
 --           AND p.siret_status = 'verified'
 --           AND p.payouts_enabled = true
+--           AND p.paused = false
 --           AND p.deleted_at IS NULL
 --       )
 --     );

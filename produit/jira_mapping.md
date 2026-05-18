@@ -102,7 +102,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 |--------|------|--------|--------|
 | KAN-4 | Epic | Ideas | Profil Producteur |
 | KAN-16 | Feature | Terminé | Onboarding Stripe Connect — [Cadrage tech](specs/KAN-16/) — mergé sur main (PR #10) |
-| KAN-17 | Feature | À faire | Informations profil & ferme — [Cadrage tech](specs/KAN-17/) |
+| KAN-17 | Feature | Wip | Informations profil & ferme — [Cadrage tech](specs/KAN-17/) |
 | KAN-18 | Feature | Ideas | Tableau de bord producteur |
 | KAN-19 | Feature | Ideas | Historique ventes |
 | KAN-158 | Feature | Terminé | Polish UX onboarding producteur — état Stripe restricted (KYC incomplet) — [Cadrage tech](specs/KAN-158/) — mergé sur main (PR #15) |

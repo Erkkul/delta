@@ -104,7 +104,7 @@ Le **rameneur est l'initiateur** de la transaction, pas le système. Il déclare
 - **Décisions** : datées en ISO (YYYY-MM-DD), une ligne par décision avec contexte court.
 - **Versions** : pas de suffixe `_v1` sur les fichiers vivants. Si un document est figé (ex: PRD à un instant T), créer un dossier `archives/` plutôt que renommer.
 - **Messages de commit** : phrase courte en français, forme "Verbe + objet" sans préfixe conventionnel (`feat:`, `chore:`, etc.). Exemples : `Ajout du fichier DESIGN.md`, `Mise à jour de CLAUDE.md`, `Archivage des user stories`.
-- **Branches** : format `claude/kan-<numéro>-<slug-fr-court>` (ex : `claude/kan-2-refonte-auth-desktop`, `claude/kan-3-flow-connexion`). Le numéro du ticket Jira KAN concerné est obligatoire dans le nom de la branche. Pour un travail transverse à plusieurs tickets, choisir le ticket principal et le mentionner. Pour un travail sans ticket (refacto, doc), utiliser `claude/<slug-fr-court>` sans préfixe `kan-`.
+- **Branches** : format `claude/kan-<numéro>-<slug-fr-court>` (ex : `claude/kan-2-refonte-auth-desktop`, `claude/kan-3-flow-connexion`). Le numéro du ticket Jira KAN concerné est obligatoire dans le nom de la branche. Pour un travail transverse à plusieurs tickets, choisir le ticket principal et le mentionner. Pour un travail sans ticket (refacto, doc), utiliser `claude/<slug-fr-court>` sans préfixe `kan-`. **Cadrage et implémentation vivent sur deux branches distinctes** : `/propose KAN-XX` pousse sur `claude/propose-kan-XX-<slug>` (PR « specs »), `/implement KAN-XX` pousse sur `claude/kan-XX-<slug>` (PR « implémentation »). Voir le workflow « Cadrage → implémentation : deux branches, deux PRs » ci-dessous.
 - **Responsive obligatoire** : toute maquette ou écran doit être conçu pour desktop ET mobile. Pas de mobile-first ni de desktop-first — les deux déclinaisons sont livrées systématiquement. Les breakpoints de référence sont définis dans `DESIGN.md`.
 - **Configuration Claude versionnée** : `.claude/skills/`, `.claude/commands/`, `.claude/prompts/` et `.mcp.json` sont versionnés (conventions partagées entre devs et agents). Restent locaux : `.claude/settings.local.json` (préférences perso, permissions ad-hoc) et `.claude/worktrees/` (artefacts éphémères). Les secrets référencés par `.mcp.json` (ex : `SUPABASE_ACCESS_TOKEN`) ne vivent jamais dans le fichier — uniquement dans le shell utilisateur.
 
@@ -206,6 +206,21 @@ Pour préparer techniquement une feature Jira KAN avant de coder, utiliser le sk
 - Option A retenue : Jira reste maître des tâches livrables (subtasks). `tasks.md` ne contient que des tâches techniques internes (setup, refacto, migrations, helpers) qui n'ont pas vocation à être trackées comme livrables produit.
 - Pas de slug dans le nom du dossier : `specs/KAN-XXX/`, pas `specs/KAN-XXX-slug/`.
 - Définition complète et workflow : `.claude/skills/propose-spec/SKILL.md`.
+
+### Cadrage → implémentation : deux branches, deux PRs — règle impérative
+`/propose KAN-XX` et `/implement KAN-XX` produisent du contenu **différent en nature** (cadrage docs vs code applicatif). Pour pouvoir reviewer / merger l'un sans bloquer l'autre, ils vivent sur deux branches distinctes et ouvrent deux PRs séparées :
+
+| Étape | Slug branche | Contenu typique | PR |
+|---|---|---|---|
+| `/propose KAN-XX` | `claude/propose-kan-XX-<slug>` | `specs/KAN-XX/{proposal,design,tasks}.md`, MAJ mapping, transition Jira `To Do` | « specs KAN-XX » |
+| `/implement KAN-XX` | `claude/kan-XX-<slug>` | Migrations, contracts, core, API, UI, tests, transition Jira `Wip` | « implémentation KAN-XX » |
+
+**Conséquences pratiques :**
+- Quand l'environnement remote démarre une session `/implement KAN-XX`, le harness doit l'ouvrir sur `claude/kan-XX-<slug>`, **pas** sur la branche `claude/propose-kan-XX-*` du cadrage. Si la session démarre par erreur sur la branche propose alors que le cadrage est déjà mergé, **créer une nouvelle branche locale `claude/kan-XX-<slug>` depuis main et y placer tous les commits d'implémentation** avant le `git push`.
+- Le ticket Jira passe en `To Do` à la fin de `/propose`, puis en `Wip` à la fin de `/implement` (transitions `21` puis `31` dans le workflow KAN, cf. `getTransitionsForJiraIssue`).
+- Le ticket Jira passe en `Terminé` quand la PR d'implémentation est mergée (cf. section « Après merge d'une feature sur `main` »). La PR de cadrage est `merge` aussi, mais elle ne déclenche pas la transition `Terminé` — son merge n'est qu'une étape intermédiaire.
+
+**Origine de la règle :** observée sur KAN-17 (2026-05-17) — `/propose` et `/implement` ont tourné sur la même branche `claude/propose-kan-17-lWOkr`, le cadrage a été mergé via PR #17 dès qu'il a été poussé, puis les 6 commits d'implémentation suivants ont été pushés sur la même branche sans nouvelle PR. Résultat : implémentation invisible sur `main` jusqu'à ouverture manuelle d'une seconde PR depuis une nouvelle branche.
 
 ### Après merge d'une feature sur `main` — règle impérative
 Quand une PR portant une feature KAN-XXX est mergée sur `main` (origin), le ticket Jira correspondant doit être basculé en **Terminé** et le mapping mis à jour, **sans attendre**. Sinon la vue Jira reste désynchronisée du repo et la prochaine session ne sait plus ce qui est livré.

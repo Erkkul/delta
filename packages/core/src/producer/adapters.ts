@@ -10,9 +10,12 @@
  */
 
 import {
+  type FarmPhoto,
   type LegalForm,
+  type ProducerLabel,
   type SiretStatus,
   type StripeAccountStatus,
+  type Weekday,
 } from "@delta/contracts/producer"
 
 /**
@@ -24,6 +27,7 @@ import {
 export type Producer = {
   id: string
   user_id: string
+  // KAN-16 : SIRET
   siret: string | null
   legal_name: string | null
   legal_form: string | null
@@ -31,11 +35,46 @@ export type Producer = {
   siret_status: SiretStatus
   siret_verified_at: string | null
   siret_rejection_reason: string | null
+  // KAN-16 : Stripe
   stripe_account_id: string | null
   stripe_status: StripeAccountStatus
   payouts_enabled: boolean
   charges_enabled: boolean
   requirements_currently_due: string[]
+  // KAN-17 : profil public
+  display_name: string | null
+  public_description: string | null
+  profile_photo_url: string | null
+  farm_photos: FarmPhoto[]
+  labels: ProducerLabel[]
+  // KAN-17 : adresse de récupération (pickup_address sensible)
+  pickup_public_zone: string | null
+  pickup_address: string | null
+  pickup_days: Weekday[]
+  pickup_hours_start: string | null
+  pickup_hours_end: string | null
+  // KAN-17 : exploitation
+  paused: boolean
+  paused_at: string | null
+}
+
+/**
+ * Patch de mise à jour partielle du profil producteur (KAN-17). Les
+ * coordonnées (`pickup_longitude` / `pickup_latitude`) sont passées au
+ * `GeocodeAdapter` plutôt qu'à l'update direct — la `pickup_location`
+ * (geography) ne traverse pas le mapping ORM.
+ */
+export type ProducerProfilePatch = {
+  display_name?: string | null
+  public_description?: string | null
+  profile_photo_url?: string | null
+  farm_photos?: FarmPhoto[]
+  labels?: ProducerLabel[]
+  pickup_public_zone?: string | null
+  pickup_address?: string | null
+  pickup_days?: Weekday[]
+  pickup_hours_start?: string | null
+  pickup_hours_end?: string | null
 }
 
 // ─── Producteurs ─────────────────────────────────────────────────────────
@@ -72,6 +111,50 @@ export type ProducerAdapter = {
       requirements_currently_due: string[]
     },
   ): Promise<Producer | null>
+  // KAN-17 — Profil & ferme
+  /**
+   * Met à jour les champs publics et l'adresse de récupération. Patch
+   * partiel ; seules les clés présentes sont écrites en DB. Retourne la
+   * row à jour.
+   */
+  updateProfile(
+    userId: string,
+    patch: ProducerProfilePatch,
+  ): Promise<Producer>
+  /**
+   * Met à jour `paused` (+ `paused_at` si passage à true). Retourne la
+   * row à jour.
+   */
+  setPauseState(userId: string, paused: boolean): Promise<Producer>
+  /**
+   * Met à jour la colonne PostGIS `pickup_location` via RPC dédiée. Les
+   * deux args nuls réinitialisent la position. Idempotent.
+   */
+  setPickupLocation(
+    longitude: number | null,
+    latitude: number | null,
+  ): Promise<void>
+}
+
+// ─── Géocodage (API Adresse Gouv.fr) ─────────────────────────────────────
+
+export type GeocodeResult = {
+  longitude: number
+  latitude: number
+  /** Score de pertinence retourné par l'API Adresse (0..1). */
+  score: number
+  /** Label normalisé renvoyé par l'API (ex. « 234 Route du Bocage 27000 Évreux »). */
+  label: string
+}
+
+export type GeocodeAdapter = {
+  /**
+   * Géocode une adresse texte. Retourne `null` si l'API ne trouve aucune
+   * réponse pertinente (score < seuil interne) ou si l'API est
+   * indisponible. L'erreur AddressGeocodeFailedError n'est levée par le
+   * core que si le caller exige strictement un géocodage réussi.
+   */
+  geocodeAddress(address: string): Promise<GeocodeResult | null>
 }
 
 // ─── Rôles utilisateur ───────────────────────────────────────────────────

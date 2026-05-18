@@ -3,10 +3,14 @@
 import {
   SIRET_DECLARATION_ERROR_CODES,
   STRIPE_ONBOARDING_LINK_ERROR_CODES,
+  type FarmPhoto,
+  type ProducerLabel,
+  type ProducerProfileSnapshot,
   type SiretDeclarationErrorCode,
   type SiretStatus,
   type StripeAccountStatus,
   type StripeOnboardingLinkErrorCode,
+  type Weekday,
 } from "@delta/contracts/producer"
 import {
   groupRequirementsByLabel,
@@ -25,7 +29,23 @@ import {
 } from "@delta/ui-web"
 import { useState } from "react"
 
+import { ProducerProfileForm } from "@/components/producer/producer-profile-form"
+
 export type ProducerOnboardingState = {
+  // KAN-17 — profil public
+  display_name: string | null
+  public_description: string | null
+  profile_photo_url: string | null
+  farm_photos: FarmPhoto[]
+  labels: ProducerLabel[]
+  pickup_public_zone: string | null
+  pickup_address: string | null
+  pickup_days: Weekday[]
+  pickup_hours_start: string | null
+  pickup_hours_end: string | null
+  paused: boolean
+  paused_at: string | null
+  // KAN-16 — SIRET / Stripe
   siret_status: SiretStatus
   stripe_status: StripeAccountStatus
   payouts_enabled: boolean
@@ -36,7 +56,7 @@ export type ProducerOnboardingState = {
   requirements_currently_due: string[]
 }
 
-type WizardPhase = "siret" | "stripe" | "done"
+type WizardPhase = "profile" | "siret" | "stripe" | "done"
 
 export function ProducerOnboardingClient({
   initialState,
@@ -57,6 +77,13 @@ export function ProducerOnboardingClient({
       steps={steps}
       roleLabel="Espace producteur"
     >
+      {phase === "profile" ? (
+        <ProducerProfileForm
+          mode="wizard"
+          initial={toProfileSnapshot(initialState)}
+          onSaved={() => setPhase("siret")}
+        />
+      ) : null}
       {phase === "siret" ? (
         <SiretForm
           onSubmit={submitSiret}
@@ -72,6 +99,33 @@ export function ProducerOnboardingClient({
       {phase === "done" ? <DonePanel /> : null}
     </OnboardingWizardShell>
   )
+}
+
+function toProfileSnapshot(
+  state: ProducerOnboardingState,
+): ProducerProfileSnapshot {
+  return {
+    // `id` n'est pas connu côté wizard initial (la row est créée à la
+    // 1ère soumission SIRET — KAN-16). Le formulaire en mode wizard ne s'en
+    // sert pas (pas de preview affichée), on injecte un placeholder UUID
+    // zero pour respecter le contract.
+    id: "00000000-0000-0000-0000-000000000000",
+    display_name: state.display_name,
+    public_description: state.public_description,
+    profile_photo_url: state.profile_photo_url,
+    farm_photos: state.farm_photos,
+    labels: state.labels,
+    pickup_public_zone: state.pickup_public_zone,
+    pickup_address: state.pickup_address,
+    pickup_days: state.pickup_days,
+    pickup_hours_start: state.pickup_hours_start,
+    pickup_hours_end: state.pickup_hours_end,
+    paused: state.paused,
+    paused_at: state.paused_at,
+    siret_status: state.siret_status,
+    stripe_status: state.stripe_status,
+    payouts_enabled: state.payouts_enabled,
+  }
 }
 
 /**
@@ -104,6 +158,12 @@ function StripeStep({
 
 function initialPhase(state: ProducerOnboardingState): WizardPhase {
   if (state.payouts_enabled) return "done"
+  // KAN-17 — étape 1 : profil ferme. On la considère "remplie" dès que le
+  // nom commercial est saisi (les autres champs publics sont optionnels au
+  // wizard).
+  if (!state.display_name || state.display_name.trim().length === 0) {
+    return "profile"
+  }
   if (state.siret_status === "not_submitted") return "siret"
   return "stripe"
 }
@@ -112,12 +172,18 @@ function buildSteps(
   phase: WizardPhase,
   state: ProducerOnboardingState,
 ): WizardStep[] {
+  const profileDone =
+    state.display_name !== null && state.display_name.trim().length > 0
   return [
     {
       id: "profil",
       title: "Profil de la ferme",
-      meta: "Bientôt — KAN-17",
-      status: "pending",
+      meta: profileDone ? "Validé" : "Nom + zone publique",
+      status: profileDone
+        ? "done"
+        : phase === "profile"
+          ? "current"
+          : "pending",
     },
     {
       id: "siret",

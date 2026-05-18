@@ -164,3 +164,68 @@ export type ProducerErrorCode =
   | StripeAccountAlreadyEnabledError["code"]
   | StripeUpstreamError["code"]
   | RateLimitedError["code"]
+
+// ─── Producer profile (KAN-17) ───────────────────────────────────────────
+
+/**
+ * Le profil producteur n'existe pas encore (row absente). Cas typique : un
+ * user vient de sélectionner le rôle producteur mais n'a pas encore validé
+ * l'étape SIRET. Mapping HTTP : 404.
+ */
+export class ProducerProfileNotFoundError extends Error {
+  readonly code = "PRODUCER_PROFILE_NOT_FOUND" as const
+
+  constructor() {
+    super("Aucun profil producteur trouvé pour cet utilisateur.")
+    this.name = "ProducerProfileNotFoundError"
+  }
+}
+
+/**
+ * Le géocodage de l'adresse de récupération a échoué (API Adresse
+ * indisponible OU score < seuil). Au MVP : non-bloquant côté core (le texte
+ * est tout de même persisté, la position reste null). Cette erreur n'est
+ * levée que si le caller exige strictement un géocodage réussi.
+ */
+export class AddressGeocodeFailedError extends Error {
+  readonly code = "PRODUCER_ADDRESS_GEOCODE_FAILED" as const
+
+  constructor(message = "Impossible de géocoder cette adresse.") {
+    super(message)
+    this.name = "AddressGeocodeFailedError"
+  }
+}
+
+/**
+ * Le quota de photos de ferme (3 max) est atteint. Mapping HTTP : 409.
+ */
+export class PhotoLimitReachedError extends Error {
+  readonly code = "PRODUCER_PHOTO_LIMIT_REACHED" as const
+
+  constructor() {
+    super("Limite de 3 photos de ferme atteinte.")
+    this.name = "PhotoLimitReachedError"
+  }
+}
+
+/**
+ * Le MIME type uploadé n'est pas dans la whitelist (jpeg/png/webp). Mapping
+ * HTTP : 400.
+ */
+export class PhotoMimeRejectedError extends Error {
+  readonly code = "PRODUCER_PHOTO_MIME_REJECTED" as const
+
+  constructor(mime: string) {
+    super(`Type d'image non supporté : ${mime}.`)
+    this.name = "PhotoMimeRejectedError"
+  }
+}
+
+export type ProducerProfileErrorCode =
+  | ProducerValidationError["code"]
+  | ProducerRoleForbiddenError["code"]
+  | ProducerProfileNotFoundError["code"]
+  | AddressGeocodeFailedError["code"]
+  | PhotoLimitReachedError["code"]
+  | PhotoMimeRejectedError["code"]
+  | RateLimitedError["code"]
