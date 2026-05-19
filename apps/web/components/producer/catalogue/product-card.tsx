@@ -41,6 +41,8 @@ export type ProductCardItem = {
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus
+  /** URL publique de la photo de couverture (`photos[0].url`) — KAN-21. */
+  coverPhotoUrl: string | null
 }
 
 export function ProductCard({ product }: { product: ProductCardItem }) {
@@ -146,11 +148,23 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
       className={`group flex flex-col overflow-hidden rounded-lg border border-cream-200 bg-white transition-all hover:-translate-y-0.5 hover:border-green-300 hover:shadow-elevated ${dimClass}`}
     >
       <div
-        className={`relative flex h-[150px] items-center justify-center bg-gradient-to-br ${gradientForCategory(product.category)}`}
+        className={`relative flex h-[150px] items-center justify-center overflow-hidden bg-gradient-to-br ${gradientForCategory(product.category)}`}
       >
-        <span className="select-none text-6xl opacity-70" aria-hidden="true">
-          {emoji}
-        </span>
+        {product.coverPhotoUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={product.coverPhotoUrl}
+            alt={product.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span
+            className="select-none text-6xl opacity-70"
+            aria-hidden="true"
+          >
+            {emoji}
+          </span>
+        )}
         <span
           className={`absolute left-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-pill border px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider ${statusBadgeClass(displayStatus)}`}
         >

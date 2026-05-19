@@ -20,6 +20,7 @@ type Item = Pick<
   | "availability_from"
   | "availability_to"
   | "status"
+  | "photos"
 >
 
 /**
@@ -86,6 +87,7 @@ export function CatalogueClient({
         availability_from: p.availability_from,
         availability_to: p.availability_to,
         status: p.status,
+        coverPhotoUrl: p.photos[0]?.url ?? null,
       }))
   }, [items, status, q])
 
