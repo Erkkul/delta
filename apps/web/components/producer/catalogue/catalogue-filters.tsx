@@ -3,13 +3,14 @@
 import { type ProductStatus } from "@delta/contracts/product"
 import { useEffect, useState } from "react"
 
-type Filter = "all" | ProductStatus
+type Filter = "all" | ProductStatus | "sold_out"
 
 const FILTERS: Array<{ key: Filter; label: string }> = [
   { key: "all", label: "Tous" },
   { key: "active", label: "Actifs" },
   { key: "draft", label: "Brouillons" },
   { key: "disabled", label: "Désactivés" },
+  { key: "sold_out", label: "Épuisés" },
 ]
 
 /**
@@ -48,6 +49,13 @@ export function CatalogueFilters({
     <div className="mb-5 flex flex-wrap items-center gap-2">
       {FILTERS.map((f) => {
         const active = f.key === status
+        // Le filtre « Épuisés » (KAN-23) prend une couleur orange en actif
+        // pour rester cohérent avec le badge `epuise` de la carte (KAN-22).
+        // Inactif : style neutre identique aux autres tabs.
+        const isSoldOut = f.key === "sold_out"
+        const activeClass = isSoldOut
+          ? "inline-flex h-9 items-center gap-1.5 rounded-pill border border-orange-500 bg-orange-500 px-4 text-sm font-semibold text-white transition-colors"
+          : "inline-flex h-9 items-center gap-1.5 rounded-pill border border-green-700 bg-green-700 px-4 text-sm font-semibold text-white transition-colors"
         return (
           <button
             key={f.key}
@@ -55,7 +63,7 @@ export function CatalogueFilters({
             onClick={() => onStatusChange(f.key)}
             className={
               active
-                ? "inline-flex h-9 items-center gap-1.5 rounded-pill border border-green-700 bg-green-700 px-4 text-sm font-semibold text-white transition-colors"
+                ? activeClass
                 : "inline-flex h-9 items-center gap-1.5 rounded-pill border border-cream-200 bg-white px-4 text-sm font-medium text-cream-700 transition-colors hover:border-green-300 hover:bg-green-50 hover:text-green-700"
             }
           >

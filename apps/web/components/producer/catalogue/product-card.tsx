@@ -12,6 +12,8 @@ import {
 } from "@delta/contracts/product"
 import { getStockDisplayState } from "@delta/core/product"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 
 import { formatEuros } from "./format"
 
@@ -42,6 +44,23 @@ export type ProductCardItem = {
 }
 
 export function ProductCard({ product }: { product: ProductCardItem }) {
+  const router = useRouter()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [pending, setPending] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+
+  // Click outside → ferme le menu
+  useEffect(() => {
+    if (!menuOpen) return
+    function onClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [menuOpen])
+
   const emoji = PRODUCT_CATEGORY_EMOJI[product.category]
   const categoryLabel = PRODUCT_CATEGORY_FR[product.category]
   const packagingLabel = PRODUCT_PACKAGING_FR[product.packaging]
@@ -52,6 +71,46 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
     low_stock_threshold: product.low_stock_threshold,
     status: product.status,
   })
+
+  async function transitionTo(target: ProductStatus, e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    setMenuOpen(false)
+    setPending(true)
+    try {
+      const res = await fetch(
+        `/api/v1/producer/products/${product.id}/status`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ status: target }),
+        },
+      )
+      if (res.ok) {
+        router.refresh()
+        return
+      }
+      const payload = (await res.json().catch(() => ({}))) as {
+        code?: string
+        details?: { reason?: string }
+      }
+      // Précondition manquante → ouvrir l'édition avec focus=publish.
+      // Les autres erreurs sont rares (rôle / réseau / 5xx) et tombent
+      // dans le fallback alert.
+      if (
+        payload.code === "PRODUCT_TRANSITION_INVALID" &&
+        payload.details?.reason === "missing_preconditions"
+      ) {
+        router.push(`/producer/catalogue/${product.id}?focus=publish`)
+        return
+      }
+      window.alert("Impossible de modifier le statut. Réessayez plus tard.")
+    } catch {
+      window.alert("Impossible de modifier le statut. Réessayez plus tard.")
+    } finally {
+      setPending(false)
+    }
+  }
   const stockLabel =
     stockState.kind === "empty"
       ? "Épuisé"
@@ -101,6 +160,65 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
           />
           {statusBadgeLabel(displayStatus)}
         </span>
+        {/* Menu kebab (KAN-23 — KAN-76) */}
+        <div ref={menuRef} className="absolute right-2 top-2">
+          <button
+            type="button"
+            aria-label="Actions sur ce produit"
+            aria-expanded={menuOpen}
+            disabled={pending}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setMenuOpen((v) => !v)
+            }}
+            className="grid h-7.5 w-7.5 min-h-[30px] min-w-[30px] place-items-center rounded-md bg-white/90 text-cream-700 backdrop-blur transition-colors hover:bg-white hover:text-green-700 disabled:opacity-50"
+          >
+            <svg
+              width={16}
+              height={16}
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle cx={5} cy={12} r={2} />
+              <circle cx={12} cy={12} r={2} />
+              <circle cx={19} cy={12} r={2} />
+            </svg>
+          </button>
+          {menuOpen ? (
+            <div className="absolute right-0 top-9 z-20 min-w-[180px] rounded-md border border-cream-200 bg-white py-1 shadow-elevated">
+              {getQuickActions(product.status).map((a) =>
+                a.kind === "divider" ? (
+                  <div
+                    key={a.id}
+                    className="my-1 h-px bg-cream-100"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={(e) => {
+                      void transitionTo(a.target, e)
+                    }}
+                    className="block w-full px-3 py-2 text-left text-sm text-cream-800 transition-colors hover:bg-green-50 hover:text-green-800"
+                  >
+                    {a.label}
+                  </button>
+                ),
+              )}
+              <div className="my-1 h-px bg-cream-100" aria-hidden="true" />
+              <Link
+                href={`/producer/catalogue/${product.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="block w-full px-3 py-2 text-left text-sm text-cream-800 transition-colors hover:bg-green-50 hover:text-green-800"
+              >
+                Modifier la fiche
+              </Link>
+            </div>
+          ) : null}
+        </div>
       </div>
       <div className="flex flex-1 flex-col p-4">
         <div className="font-display text-[15px] font-bold leading-tight text-cream-950">
@@ -131,6 +249,70 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
 }
 
 type DisplayStatus = ProductStatus | "sold_out"
+
+type QuickAction =
+  | { kind: "divider"; id: string }
+  | {
+      kind: "action"
+      id: string
+      label: string
+      target: ProductStatus
+    }
+
+/**
+ * Actions affichées dans le menu kebab selon le statut courant (KAN-23).
+ * Trois max + ouverture de la fiche (séparée). Pour `sold_out`, on s'aligne
+ * sur le statut DB sous-jacent (toujours `active`).
+ */
+function getQuickActions(status: ProductStatus): QuickAction[] {
+  switch (status) {
+    case "active":
+      return [
+        {
+          kind: "action",
+          id: "to-draft",
+          label: "Mettre en brouillon",
+          target: "draft",
+        },
+        {
+          kind: "action",
+          id: "to-disabled",
+          label: "Désactiver",
+          target: "disabled",
+        },
+      ]
+    case "draft":
+      return [
+        {
+          kind: "action",
+          id: "to-active",
+          label: "Publier",
+          target: "active",
+        },
+        {
+          kind: "action",
+          id: "to-disabled",
+          label: "Désactiver",
+          target: "disabled",
+        },
+      ]
+    case "disabled":
+      return [
+        {
+          kind: "action",
+          id: "to-active",
+          label: "Réactiver",
+          target: "active",
+        },
+        {
+          kind: "action",
+          id: "to-draft",
+          label: "Mettre en brouillon",
+          target: "draft",
+        },
+      ]
+  }
+}
 
 function statusBadgeLabel(status: DisplayStatus): string {
   if (status === "sold_out") return "Épuisé"

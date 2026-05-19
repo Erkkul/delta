@@ -111,6 +111,8 @@ export const PRODUCT_ERROR_CODES = {
   PhotoInvalidReorder: "PRODUCT_PHOTO_INVALID_REORDER",
   PhotoMimeRejected: "PRODUCT_PHOTO_MIME_REJECTED",
   PhotoPathRejected: "PRODUCT_PHOTO_PATH_REJECTED",
+  // ─── KAN-23 (Statuts produit) ─────────────────────────────────────────
+  TransitionInvalid: "PRODUCT_TRANSITION_INVALID",
   Unknown: "PRODUCT_UNKNOWN",
 } as const
 export type ProductErrorCode =

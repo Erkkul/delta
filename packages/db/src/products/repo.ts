@@ -11,7 +11,7 @@ import {
 type Client = SupabaseClient<Database>
 
 export type ProductsListFilters = {
-  status: "all" | ProductStatus
+  status: "all" | ProductStatus | "sold_out"
   q: string | null
   limit: number
   cursor: string | null
@@ -92,7 +92,12 @@ export const productsRepo = {
       // limit + 1 pour détecter si une page suivante existe
       .limit(filters.limit + 1)
 
-    if (filters.status !== "all") {
+    if (filters.status === "sold_out") {
+      // Statut dérivé (KAN-23) : produits publiés dont le stock est à 0.
+      // Pas une valeur de l'enum `product_status` — cohérent avec le helper
+      // d'affichage `getStockDisplayState` (KAN-22).
+      query = query.eq("status", "active").eq("stock", 0)
+    } else if (filters.status !== "all") {
       query = query.eq("status", filters.status)
     }
     if (filters.cursor) {
