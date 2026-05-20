@@ -55,6 +55,7 @@ export type Database = {
       product_category: ProductCategory
       product_packaging: ProductPackaging
       product_status: ProductStatus
+      product_label: ProductLabel
     }
     CompositeTypes: Record<string, never>
   }
@@ -258,6 +259,14 @@ export type ProductPackaging =
 
 export type ProductStatus = "active" | "draft" | "disabled"
 
+export type ProductLabel =
+  | "bio_ab"
+  | "demeter"
+  | "nature_et_progres"
+  | "label_rouge"
+  | "hve_3"
+  | "producteur_fermier"
+
 /**
  * Photo produit (KAN-21). `path` est le chemin canonique dans le bucket
  * `product-photos` (`{user_id}/{product_id}/<random8>.<ext>`) — stocké en plus
@@ -282,8 +291,7 @@ export type ProductRow = {
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus
-  // text[] au MVP de KAN-20 — swap vers product_label[] par KAN-24.
-  labels: string[]
+  labels: ProductLabel[]
   photos: ProductPhoto[]
   created_at: string
   updated_at: string
@@ -302,7 +310,7 @@ export type ProductInsert = {
   availability_from?: string | null
   availability_to?: string | null
   status?: ProductStatus
-  labels?: string[]
+  labels?: ProductLabel[]
   photos?: ProductPhoto[]
 }
 
@@ -317,7 +325,7 @@ export type ProductUpdate = {
   availability_from?: string | null
   availability_to?: string | null
   status?: ProductStatus
-  labels?: string[]
+  labels?: ProductLabel[]
   photos?: ProductPhoto[]
   deleted_at?: string | null
 }

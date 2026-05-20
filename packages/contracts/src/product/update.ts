@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import {
   ProductCategory,
+  ProductLabel,
   ProductPackaging,
   ProductStatus,
 } from "./shared"
@@ -56,10 +57,7 @@ export const ProductUpdateInput = z
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Date attendue au format AAAA-MM-JJ.")
       .nullable()
       .optional(),
-    labels: z
-      .array(z.string().trim().min(1).max(40))
-      .max(10)
-      .optional(),
+    labels: z.array(ProductLabel).max(10).optional(),
     status: ProductStatus.optional(),
   })
   .strict()

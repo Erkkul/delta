@@ -82,6 +82,36 @@ export const PRODUCT_PACKAGING_UNIT_SHORT: Record<ProductPackaging, string> = {
   au_kilo: "kg",
 }
 
+/**
+ * Whitelist `product_label` (KAN-24). Union pertinente des labels de la
+ * maquette PR-05 (Bio AB / Demeter / Nature & Progrès / Label Rouge) et de
+ * `PRODUCER_LABELS` (profil producteur). Enum **distinct** de `ProducerLabel` :
+ * un label produit (certification du produit) n'est pas une certification de
+ * ferme, même si les valeurs se recouvrent. Miroir du type Postgres
+ * `product_label` (migration `*_product_labels_enum.sql`). Toute modification
+ * ici doit être accompagnée d'un `ALTER TYPE … ADD VALUE …`.
+ */
+export const PRODUCT_LABELS = [
+  "bio_ab",
+  "demeter",
+  "nature_et_progres",
+  "label_rouge",
+  "hve_3",
+  "producteur_fermier",
+] as const
+export const ProductLabel = z.enum(PRODUCT_LABELS)
+export type ProductLabel = z.infer<typeof ProductLabel>
+
+/** Libellés FR à afficher dans les chips (form PR-05, cards PR-04/PR-05). */
+export const PRODUCT_LABEL_FR: Record<ProductLabel, string> = {
+  bio_ab: "Bio AB",
+  demeter: "Demeter",
+  nature_et_progres: "Nature & Progrès",
+  label_rouge: "Label Rouge",
+  hve_3: "HVE niveau 3",
+  producteur_fermier: "Producteur fermier",
+}
+
 export const PRODUCT_STATUSES = ["active", "draft", "disabled"] as const
 export const ProductStatus = z.enum(PRODUCT_STATUSES)
 export type ProductStatus = z.infer<typeof ProductStatus>

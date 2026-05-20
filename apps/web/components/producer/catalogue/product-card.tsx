@@ -3,10 +3,12 @@
 import {
   PRODUCT_CATEGORY_EMOJI,
   PRODUCT_CATEGORY_FR,
+  PRODUCT_LABEL_FR,
   PRODUCT_PACKAGING_FR,
   PRODUCT_PACKAGING_UNIT_SHORT,
   PRODUCT_STATUS_FR,
   type ProductCategory,
+  type ProductLabel,
   type ProductPackaging,
   type ProductStatus,
 } from "@delta/contracts/product"
@@ -41,6 +43,7 @@ export type ProductCardItem = {
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus
+  labels: ProductLabel[]
   /** URL publique de la photo de couverture (`photos[0].url`) — KAN-21. */
   coverPhotoUrl: string | null
 }
@@ -241,6 +244,18 @@ export function ProductCard({ product }: { product: ProductCardItem }) {
         <div className="mt-1 text-xs text-cream-500">
           {emoji} {categoryLabel} · {packagingLabel}
         </div>
+        {product.labels.length > 0 ? (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {product.labels.map((l) => (
+              <span
+                key={l}
+                className="rounded-pill bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700"
+              >
+                {PRODUCT_LABEL_FR[l]}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <div className="mt-2.5 flex items-baseline justify-between rounded-md bg-cream-50 px-3 py-2">
           <span className="font-display text-lg font-bold text-green-700">
             {formatEuros(product.unit_price_cents)}

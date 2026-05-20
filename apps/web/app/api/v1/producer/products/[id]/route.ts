@@ -280,7 +280,7 @@ function toSnapshot(p: {
   availability_from: string | null
   availability_to: string | null
   status: ProductSnapshot["status"]
-  labels: string[]
+  labels: ProductSnapshot["labels"]
   photos: ProductSnapshot["photos"]
   created_at: string
   updated_at: string

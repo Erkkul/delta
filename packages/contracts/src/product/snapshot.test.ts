@@ -31,7 +31,7 @@ describe("ProductSnapshot", () => {
     expect(
       ProductSnapshot.safeParse({
         ...(SAMPLE as Record<string, unknown>),
-        labels: ["Bio AB"],
+        labels: ["bio_ab", "label_rouge"],
         photos: [
           {
             url: "https://example.com/photo.jpg",

@@ -3,9 +3,11 @@
 import {
   PRODUCT_CATEGORY_EMOJI,
   PRODUCT_CATEGORY_FR,
+  PRODUCT_LABEL_FR,
   PRODUCT_PACKAGING_FR,
   PRODUCT_PACKAGING_UNIT_SHORT,
   type ProductCategory,
+  type ProductLabel,
   type ProductPackaging,
   type ProductStatus,
 } from "@delta/contracts/product"
@@ -30,6 +32,7 @@ export function ProductFormPreview({
   coverPhotoUrl,
   stock,
   status,
+  labels,
 }: {
   name: string
   category: ProductCategory
@@ -40,6 +43,7 @@ export function ProductFormPreview({
   coverPhotoUrl: string | null
   stock: number | null
   status: ProductStatus
+  labels: ProductLabel[]
 }) {
   const emoji = PRODUCT_CATEGORY_EMOJI[category]
   const categoryLabel = PRODUCT_CATEGORY_FR[category]
@@ -97,6 +101,18 @@ export function ProductFormPreview({
               <div className="mt-0.5 text-[11.5px] text-cream-600">
                 {producerName}
               </div>
+              {labels.length > 0 ? (
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  {labels.map((l) => (
+                    <span
+                      key={l}
+                      className="rounded-pill bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700"
+                    >
+                      {PRODUCT_LABEL_FR[l]}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               <div className="mt-2 flex items-baseline justify-between">
                 <span className="text-[11px] text-cream-500">
                   {producerCity ? `📍 ${producerCity}` : null}

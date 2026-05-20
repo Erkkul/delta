@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import {
   ProductCategory,
+  ProductLabel,
   ProductPackaging,
   ProductStatus,
 } from "./shared"
@@ -14,8 +15,7 @@ import {
  * dates sont indépendamment nullables, mais l'ordre est vérifié quand
  * elles sont toutes deux fournies).
  *
- * Labels : `string[]` simple au MVP de KAN-20. KAN-24 swap vers une enum
- * `product_label` dédiée (cf. ARCHITECTURE.md §18 entrée 1.22).
+ * Labels : whitelist `product_label` (KAN-24), max 10 valeurs distinctes.
  */
 export const ProductCreateInput = z
   .object({
@@ -58,14 +58,8 @@ export const ProductCreateInput = z
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Date attendue au format AAAA-MM-JJ.")
       .nullable()
       .optional(),
-    // Labels stockés en text[] au MVP — la whitelist enum sera ajoutée
-    // par KAN-24 (cf. ARCHITECTURE.md §18 entrée 1.22). On accepte des
-    // chaînes simples bornées en longueur pour éviter les payloads
-    // pathologiques.
-    labels: z
-      .array(z.string().trim().min(1).max(40))
-      .max(10)
-      .optional(),
+    // Labels / certifications produit : whitelist `product_label` (KAN-24).
+    labels: z.array(ProductLabel).max(10).optional(),
     status: ProductStatus.default("active"),
   })
   .strict()

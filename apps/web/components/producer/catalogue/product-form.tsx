@@ -3,12 +3,15 @@
 import {
   PRODUCT_CATEGORIES,
   PRODUCT_CATEGORY_FR,
+  PRODUCT_LABELS,
+  PRODUCT_LABEL_FR,
   PRODUCT_PACKAGINGS,
   PRODUCT_PACKAGING_FR,
   PRODUCT_PACKAGING_UNIT_SHORT,
   PRODUCT_STATUS_FR,
   PRODUCT_STATUSES,
   type ProductCategory,
+  type ProductLabel,
   type ProductPackaging,
   type ProductPhotoEntry,
   type ProductSnapshot,
@@ -74,6 +77,7 @@ export type ProductFormInitial = {
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus
+  labels: ProductLabel[]
   photos: ProductPhotoEntry[]
 }
 
@@ -88,6 +92,7 @@ const DEFAULT_INITIAL: ProductFormInitial = {
   availability_from: null,
   availability_to: null,
   status: "active",
+  labels: [],
   photos: [],
 }
 
@@ -128,7 +133,14 @@ export function ProductForm({
     start.availability_to ?? "",
   )
   const [status, setStatus] = useState<ProductStatus>(start.status)
+  const [labels, setLabels] = useState<ProductLabel[]>(start.labels)
   const [photos, setPhotos] = useState<ProductPhotoEntry[]>(start.photos)
+
+  function toggleLabel(l: ProductLabel) {
+    setLabels((prev) =>
+      prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l],
+    )
+  }
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -233,6 +245,7 @@ export function ProductForm({
         availability_from: availabilityFrom || null,
         availability_to: availabilityTo || null,
         status,
+        labels,
       }
 
       const url =
@@ -369,6 +382,38 @@ export function ProductForm({
                   </option>
                 ))}
               </select>
+            </Field>
+
+            <Field
+              label={
+                <>
+                  Labels / certifications{" "}
+                  <span className="text-cream-400">(optionnel)</span>
+                </>
+              }
+              helper="Sélectionnez les certifications qui s'appliquent à ce produit."
+              className="mt-5"
+            >
+              <div className="flex flex-wrap gap-1.5">
+                {PRODUCT_LABELS.map((l) => {
+                  const active = labels.includes(l)
+                  return (
+                    <button
+                      type="button"
+                      key={l}
+                      aria-pressed={active}
+                      onClick={() => toggleLabel(l)}
+                      className={`rounded-pill border px-3 py-1.5 text-xs font-medium ${
+                        active
+                          ? "border-green-600 bg-green-100 text-green-800"
+                          : "border-cream-300 bg-cream-50 text-cream-700 hover:border-green-600 hover:text-green-700"
+                      }`}
+                    >
+                      {PRODUCT_LABEL_FR[l]}
+                    </button>
+                  )
+                })}
+              </div>
             </Field>
 
             <Field
@@ -653,6 +698,7 @@ export function ProductForm({
           coverPhotoUrl={photos[0]?.url ?? null}
           stock={parsedStock}
           status={status}
+          labels={labels}
         />
       </div>
 
