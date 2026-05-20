@@ -3,6 +3,7 @@ import { z } from "zod"
 import { ProductPhotoEntry } from "./photos"
 import {
   ProductCategory,
+  ProductLabel,
   ProductPackaging,
   ProductStatus,
 } from "./shared"
@@ -19,10 +20,9 @@ export const ProductPhoto = ProductPhotoEntry
 export type ProductPhoto = z.infer<typeof ProductPhoto>
 
 /**
- * Snapshot complet d'un produit renvoyé par `GET`, `POST` et `PATCH`. Inclut
- * les colonnes préparées pour KAN-21 (photos) et KAN-24 (labels) — vides au
- * MVP de KAN-20 mais déjà exposées pour ne pas casser les consumers au moment
- * du câblage.
+ * Snapshot complet d'un produit renvoyé par `GET`, `POST` et `PATCH`. Les
+ * labels (KAN-24) sont une whitelist `product_label` ; les photos (KAN-21) un
+ * tableau jsonb borné à 4 entrées.
  */
 export const ProductSnapshot = z.object({
   id: z.string().uuid(),
@@ -37,7 +37,7 @@ export const ProductSnapshot = z.object({
   availability_from: z.string().nullable(),
   availability_to: z.string().nullable(),
   status: ProductStatus,
-  labels: z.array(z.string()),
+  labels: z.array(ProductLabel),
   photos: z.array(ProductPhoto),
   created_at: z.string(),
   updated_at: z.string(),

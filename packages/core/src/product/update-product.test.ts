@@ -122,16 +122,16 @@ describe("updateProduct", () => {
     const adapter = makeAdapter({
       findById: vi
         .fn()
-        .mockResolvedValue(makeProduct({ labels: ["Bio AB"] })),
+        .mockResolvedValue(makeProduct({ labels: ["bio_ab"] })),
     })
     await updateProduct(
       PRODUCT_ID,
-      { labels: ["Bio AB", "Demeter"] },
+      { labels: ["bio_ab", "demeter"] },
       OWNER_ID,
       adapter,
     )
     expect(adapter.update).toHaveBeenCalledWith(PRODUCT_ID, OWNER_ID, {
-      labels: ["Bio AB", "Demeter"],
+      labels: ["bio_ab", "demeter"],
     })
   })
 })

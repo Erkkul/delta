@@ -28,6 +28,22 @@ describe("ProductUpdateInput", () => {
     ).toBe(true)
   })
 
+  it("accepte des labels de la whitelist", () => {
+    expect(
+      ProductUpdateInput.safeParse({ labels: ["bio_ab", "demeter"] }).success,
+    ).toBe(true)
+  })
+
+  it("accepte la réinitialisation des labels via []", () => {
+    expect(ProductUpdateInput.safeParse({ labels: [] }).success).toBe(true)
+  })
+
+  it("refuse un label hors whitelist", () => {
+    expect(
+      ProductUpdateInput.safeParse({ labels: ["not-a-label"] }).success,
+    ).toBe(false)
+  })
+
   it("refuse un nom vide", () => {
     expect(ProductUpdateInput.safeParse({ name: "" }).success).toBe(false)
   })

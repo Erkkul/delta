@@ -1,5 +1,6 @@
 import {
   type ProductCategory,
+  type ProductLabel,
   type ProductPackaging,
   type ProductPhoto,
   type ProductPhotoEntry,
@@ -31,7 +32,7 @@ export type Product = {
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus
-  labels: string[]
+  labels: ProductLabel[]
   photos: ProductPhoto[]
   created_at: string
   updated_at: string
@@ -53,7 +54,7 @@ export type ProductPatch = {
   availability_from?: string | null
   availability_to?: string | null
   status?: ProductStatus
-  labels?: string[]
+  labels?: ProductLabel[]
 }
 
 /**
@@ -72,7 +73,7 @@ export type ProductCreate = {
   availability_from: string | null
   availability_to: string | null
   status: ProductStatus
-  labels: string[]
+  labels: ProductLabel[]
 }
 
 /**

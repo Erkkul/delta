@@ -27,7 +27,7 @@ describe("ProductCreateInput", () => {
       stock: 24,
       availability_from: "2026-04-15",
       availability_to: "2026-06-30",
-      labels: ["Bio AB"],
+      labels: ["bio_ab", "demeter"],
       status: "draft",
     })
     expect(r.success).toBe(true)
@@ -160,10 +160,36 @@ describe("ProductCreateInput", () => {
     expect(r.success).toBe(false)
   })
 
+  it("accepte des labels de la whitelist", () => {
+    const r = ProductCreateInput.safeParse({
+      ...VALID,
+      labels: ["bio_ab", "label_rouge", "producteur_fermier"],
+    })
+    expect(r.success).toBe(true)
+  })
+
+  it("accepte une liste de labels vide", () => {
+    const r = ProductCreateInput.safeParse({ ...VALID, labels: [] })
+    expect(r.success).toBe(true)
+  })
+
+  it("refuse un label hors whitelist", () => {
+    const r = ProductCreateInput.safeParse({
+      ...VALID,
+      labels: ["bio_ab", "not-a-label"],
+    })
+    expect(r.success).toBe(false)
+  })
+
+  it("refuse un label en texte libre (ancien format)", () => {
+    const r = ProductCreateInput.safeParse({ ...VALID, labels: ["Bio AB"] })
+    expect(r.success).toBe(false)
+  })
+
   it("refuse plus de 10 labels", () => {
     const r = ProductCreateInput.safeParse({
       ...VALID,
-      labels: Array.from({ length: 11 }, (_, i) => `label-${i}`),
+      labels: Array.from({ length: 11 }, () => "bio_ab"),
     })
     expect(r.success).toBe(false)
   })
