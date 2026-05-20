@@ -31,7 +31,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | PR-02 Onboarding Stripe Connect | `pr-02-onboarding-stripe.html` | KAN-16 (Onboarding Stripe Connect) — [Cadrage tech](specs/KAN-16/) | KAN-62, KAN-158 (polish UX restricted) |
 | PR-03 Dashboard | `pr-03-dashboard.html` | KAN-18 (Tableau de bord producteur) — [Cadrage tech](specs/KAN-18/) | KAN-56 |
 | PR-04 Catalogue produits | `pr-04-catalogue.html` | KAN-20 (Création & édition produit) — [Cadrage tech](specs/KAN-20/) | KAN-23 (Statuts produit) — [Cadrage tech](specs/KAN-23/) |
-| PR-05 Création / édition produit | `pr-05-edition-produit.html` | KAN-20 (Création & édition produit) — [Cadrage tech](specs/KAN-20/) | KAN-21 (Photos) — [Cadrage tech](specs/KAN-21/), KAN-22 (Stock) — [Cadrage tech](specs/KAN-22/), KAN-24 (Labels & catégories) |
+| PR-05 Création / édition produit | `pr-05-edition-produit.html` | KAN-20 (Création & édition produit) — [Cadrage tech](specs/KAN-20/) | KAN-21 (Photos) — [Cadrage tech](specs/KAN-21/), KAN-22 (Stock) — [Cadrage tech](specs/KAN-22/), KAN-24 (Labels & catégories) — [Cadrage tech](specs/KAN-24/) |
 | PR-06 Récupération à venir | `pr-06-recuperation.html` | KAN-46 (QR Pickup), KAN-47 (Checklist remise producteur) | KAN-45 |
 | PR-07 Historique ventes | `pr-07-historique-ventes.html` | KAN-19 (Historique ventes) — [Cadrage tech](specs/KAN-19/) | KAN-36 (Factures PDF) |
 | PR-08 Profil public producteur | `pr-08-profil-public.html` | KAN-17 (Informations profil & ferme) — [Cadrage tech](specs/KAN-17/) | KAN-53 (Profils publics & avis), KAN-63, KAN-64, KAN-65, KAN-66 |
@@ -121,7 +121,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-21 | Feature | Examiner | Gestion photos — [Cadrage tech](specs/KAN-21/) — mergé sur main (PR #34) |
 | KAN-22 | Feature | Examiner | Stock & alertes — [Cadrage tech](specs/KAN-22/) — mergé sur main (PR #38) |
 | KAN-23 | Feature | Examiner | Statuts produit — [Cadrage tech](specs/KAN-23/) — mergé sur main (PR #42) |
-| KAN-24 | Feature | Ideas | Labels & catégories |
+| KAN-24 | Feature | Ideas | Labels & catégories — [Cadrage tech](specs/KAN-24/) |
 
 ### KAN-6 — Profil Acheteur
 
