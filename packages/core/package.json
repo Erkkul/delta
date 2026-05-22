@@ -13,7 +13,8 @@
     "./product": "./src/product/index.ts",
     "./errors": "./src/errors.ts",
     "./rate-limit": "./src/rate-limit/index.ts",
-    "./navigation": "./src/navigation/index.ts"
+    "./navigation": "./src/navigation/index.ts",
+    "./buyer-profile": "./src/buyer-profile/index.ts"
   },
   "scripts": {
     "lint": "eslint .",

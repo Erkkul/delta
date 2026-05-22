@@ -3,18 +3,15 @@
 import { useEffect, useRef, useState } from "react"
 
 /**
- * Autocomplétion API Adresse Gouv.fr (KAN-17).
+ * Autocomplétion API Adresse Gouv.fr (composant partagé `forms/`).
  *
  * Endpoint public sans clé. Debounce 350 ms, 5 suggestions max. Le caller
  * fournit la valeur courante (champ contrôlé) et reçoit en callback
- * l'adresse retenue + ses coordonnées WGS84 quand le user clique sur une
- * suggestion.
+ * l'adresse retenue + ses coordonnées WGS84 et (commune / code postal)
+ * quand le user clique sur une suggestion.
  *
- * Réutilisable : la convention `apps/web/components/forms/AddressAutocomplete.tsx`
- * a été infléchie ici en `producer/` car le composant n'a pas d'autres
- * consommateurs au MVP. À déplacer vers `apps/web/components/forms/` quand
- * KAN-25 (onboarding acheteur) ou KAN-41 (déclaration trajet rameneur) le
- * reprendront.
+ * Consommateurs : profil producteur (KAN-17), onboarding & zone acheteur
+ * (KAN-25). À réutiliser par la déclaration de trajet rameneur (KAN-41).
  */
 
 const API_BASE = "https://api-adresse.data.gouv.fr/search/"
@@ -26,11 +23,15 @@ export type AddressSuggestion = {
   longitude: number
   latitude: number
   score: number
+  /** Commune (`properties.city`), si fournie par l'API. */
+  city: string | null
+  /** Code postal (`properties.postcode`), si fourni par l'API. */
+  postcode: string | null
 }
 
 type AdresseGouvFeature = {
   geometry: { coordinates: [number, number] }
-  properties: { label: string; score: number }
+  properties: { label: string; score: number; city?: string; postcode?: string }
 }
 
 export type AddressAutocompleteProps = {
@@ -79,6 +80,8 @@ export function AddressAutocomplete({
             longitude: f.geometry.coordinates[0],
             latitude: f.geometry.coordinates[1],
             score: f.properties.score,
+            city: f.properties.city ?? null,
+            postcode: f.properties.postcode ?? null,
           }))
           setSuggestions(list)
           setOpen(list.length > 0)

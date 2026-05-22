@@ -8,13 +8,16 @@
 
 ## Tâches
 
-- [ ] Migration `supabase/migrations/<ts>_create_buyer_profiles.sql` : table + index GIST + trigger updated_at + RLS forcée (idempotente, rollback documenté).
-- [ ] Miroir RLS dans `supabase/policies/buyer_profiles.sql`.
-- [ ] Régénérer `packages/db/src/types.ts` (types Supabase) après migration.
-- [ ] Promouvoir `apps/web/components/producer/address-autocomplete.tsx` → `apps/web/components/forms/address-autocomplete.tsx` (ou `packages/ui-web`) et mettre à jour l'import côté producteur (KAN-17).
-- [ ] Helper PostGIS d'upsert point dans `packages/db` (`ST_SetSRID(ST_MakePoint(lng,lat),4326)`).
-- [ ] Schéma `BuyerProfileInput` dans `packages/contracts`.
-- [ ] Remplacer le stub `/onboarding/[role]` pour `acheteur` par le vrai écran (cf. specs/KAN-2/tasks.md).
+- [x] Migration `supabase/migrations/20260522120000_create_buyer_profiles.sql` : table + index GIST + trigger updated_at + RLS forcée + RPC `set_buyer_location` (idempotente, rollback documenté).
+- [x] Miroir RLS dans `supabase/policies/buyer_profiles.sql`.
+- [x] Déclarer `buyer_profiles` + RPC `set_buyer_location` dans `packages/db/src/types.ts` (types maintenus à la main, cf. en-tête du fichier).
+- [x] Promouvoir `apps/web/components/producer/address-autocomplete.tsx` → `apps/web/components/forms/address-autocomplete.tsx` et mettre à jour l'import côté producteur (KAN-17). Extension : exposition `city` / `postcode`.
+- [x] Helper PostGIS d'upsert point via RPC dans `packages/db` (`buyerProfilesRepo.setLocationViaRpc`).
+- [x] Schéma `BuyerProfileUpsertInput` + `BuyerProfileSnapshot` dans `packages/contracts/buyer-profile`.
+- [x] Use case `upsertBuyerProfile` + adapters dans `packages/core/buyer-profile`.
+- [x] Route handler `GET`/`PUT /api/v1/me/buyer-profile`.
+- [x] Écran onboarding `/onboarding/acheteur` (supersede le stub `[role]` pour `acheteur`) + page paramètres `/acheteur/profil`.
+- [ ] Rebrancher l'atterrissage post-onboarding sur l'accueil acheteur AC-03 quand KAN-28 le livrera (actuellement `/acheteur/profil`).
 
 ## Checklist pre-merge
 

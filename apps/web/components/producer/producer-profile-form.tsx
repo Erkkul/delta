@@ -13,9 +13,11 @@ import {
 } from "@delta/contracts/producer"
 import { useMemo, useState, type FormEvent } from "react"
 
-import { AddressAutocomplete } from "./address-autocomplete"
+
 import { PhotoUploader } from "./photo-uploader"
 import { ProducerPublicCardPreview } from "./producer-public-card-preview"
+
+import { AddressAutocomplete } from "@/components/forms/address-autocomplete"
 
 /**
  * ProducerProfileForm (KAN-17) — formulaire d'édition des champs publics

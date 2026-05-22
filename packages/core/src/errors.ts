@@ -408,3 +408,39 @@ export type ProductErrorCode =
   | ProductPhotoMimeRejectedError["code"]
   | ProductPhotoPathRejectedError["code"]
   | ProductTransitionInvalidError["code"]
+
+// ─── Buyer profile (KAN-25) ──────────────────────────────────────────────
+
+/**
+ * Erreur de validation métier pour le profil acheteur (KAN-25). Calque
+ * d'`AuthValidationError` côté payload. Mapping HTTP : 400.
+ */
+export class BuyerValidationError extends Error {
+  readonly code = "BUYER_VALIDATION_FAILED" as const
+
+  constructor(
+    message: string,
+    public readonly issues: ReadonlyArray<{ path: string; message: string }>,
+  ) {
+    super(message)
+    this.name = "BuyerValidationError"
+  }
+}
+
+/**
+ * Action acheteur tentée par un user qui n'a pas le rôle `acheteur` dans
+ * `users.roles`. Mapping HTTP : 403.
+ */
+export class BuyerRoleForbiddenError extends Error {
+  readonly code = "BUYER_ROLE_FORBIDDEN" as const
+
+  constructor() {
+    super("Le rôle acheteur est requis pour cette action.")
+    this.name = "BuyerRoleForbiddenError"
+  }
+}
+
+export type BuyerErrorCode =
+  | BuyerValidationError["code"]
+  | BuyerRoleForbiddenError["code"]
+  | RateLimitedError["code"]
