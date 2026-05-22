@@ -46,6 +46,7 @@ function makeProfile(overrides: Partial<BuyerProfile> = {}): BuyerProfile {
 function makeDeps(
   overrides: Partial<Parameters<typeof upsertBuyerProfile>[2]> = {},
 ) {
+  const findByUserId = vi.fn().mockResolvedValue(makeProfile())
   const upsert = vi
     .fn()
     .mockImplementation((_uid: string, patch: Partial<BuyerProfile>) =>
@@ -61,6 +62,7 @@ function makeDeps(
   const hasBuyerRole = vi.fn().mockResolvedValue(true)
 
   return {
+    findByUserId,
     hasBuyerRole,
     upsert,
     setLocation,
