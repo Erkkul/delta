@@ -9,7 +9,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 - **13 épics** (KAN-1, KAN-4 → KAN-15) — un épic par grand domaine fonctionnel
 - **50 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-158 sous les autres épics — voir tables par épic ci-dessous)
 - **Subtasks** : voir le catalogue par épic ci-dessous. Le mapping peut être incomplet pour les subtasks les plus récentes — Jira fait foi pour la liste exhaustive.
-- État au 2026-05-20 : KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *Terminé* (mergé sur `main` — PR #10, cadrage `specs/KAN-16/`) ; KAN-17 *Terminé* (mergé sur `main` — PR #18, cadrage `specs/KAN-17/`) ; KAN-18 *Terminé* (mergé sur `main` — PR #21, cadrage `specs/KAN-18/`) ; KAN-158 *Terminé* (mergé sur `main` — PR #15, cadrage `specs/KAN-158/`) ; KAN-19 *Examiner* (mergé sur `main` — PR #25, cadrage `specs/KAN-19/`) ; KAN-20 *Examiner* (mergé sur `main` — PR #30, cadrage `specs/KAN-20/`) ; KAN-21 *Examiner* (mergé sur `main` — PR #34, cadrage `specs/KAN-21/`) ; KAN-22 *Examiner* (mergé sur `main` — PR #38, cadrage `specs/KAN-22/`) ; KAN-23 *Examiner* (mergé sur `main` — PR #42, cadrage `specs/KAN-23/`) ; KAN-24 *Examiner* (mergé sur `main` — PR #49, cadrage `specs/KAN-24/`) ; autres *Ideas*
+- État au 2026-05-22 : KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *Terminé* (mergé sur `main` — PR #10, cadrage `specs/KAN-16/`) ; KAN-17 *Terminé* (mergé sur `main` — PR #18, cadrage `specs/KAN-17/`) ; KAN-18 *Terminé* (mergé sur `main` — PR #21, cadrage `specs/KAN-18/`) ; KAN-158 *Terminé* (mergé sur `main` — PR #15, cadrage `specs/KAN-158/`) ; KAN-19 *Examiner* (mergé sur `main` — PR #25, cadrage `specs/KAN-19/`) ; KAN-20 *Examiner* (mergé sur `main` — PR #30, cadrage `specs/KAN-20/`) ; KAN-21 *Examiner* (mergé sur `main` — PR #34, cadrage `specs/KAN-21/`) ; KAN-22 *Examiner* (mergé sur `main` — PR #38, cadrage `specs/KAN-22/`) ; KAN-23 *Examiner* (mergé sur `main` — PR #42, cadrage `specs/KAN-23/`) ; KAN-24 *Examiner* (mergé sur `main` — PR #49, cadrage `specs/KAN-24/`) ; KAN-25 *Ideas* (cadrage ouvert — `specs/KAN-25/`, PR cadrage en cours) ; autres *Ideas*
 - **Maquettes (2026-05-14)** : les 35 écrans des 3 parcours (Producteur, Acheteur, Rameneur) du sitemap PRD §10 sont maquettés. Restent à maquetter : transverses **TR-02** (centre notifications) et **TR-04** (signalement / litige) ; **TR-03** est couvert par `rm-09-chat.html`. Index navigable de toutes les maquettes : `design/maquettes/index.html`
 
 ## Convention de référencement
@@ -42,7 +42,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
 | AC-01 Inscription / connexion | `ac-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
-| AC-02 Onboarding | `ac-02-onboarding.html` | KAN-25 (Onboarding & zone), KAN-26 (Préférences catégories) | — |
+| AC-02 Onboarding | `ac-02-onboarding.html` | KAN-25 (Onboarding & zone), KAN-26 (Préférences catégories) | [Cadrage KAN-25](specs/KAN-25/) |
 | AC-03 Accueil | `ac-03-accueil.html` | KAN-28 (Catalogue filtré) | — |
 | AC-04 Catalogue parcourable | `ac-04-catalogue.html` | KAN-28 (Catalogue filtré) | KAN-29 (Zone non couverte) |
 | AC-05 Fiche produit | `ac-05-fiche-produit.html` | KAN-28 (Catalogue filtré) | KAN-30 (Wishlist privée) |
@@ -54,7 +54,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | AC-08bis Profil public producteur | `ac-08bis-profil-producteur.html` | KAN-53 (Profils publics & avis) | — |
 | AC-09 Historique commandes | `ac-09-historique.html` | KAN-27 (Historique commandes) | KAN-36 (Factures PDF) |
 | AC-10 Évaluation post-livraison | `ac-10-evaluation.html` | KAN-52 (Notation post-livraison) | — |
-| AC-11 Profil + paramètres | `ac-11-profil.html` | KAN-26 (Préférences catégories), KAN-25 (Onboarding & zone) | — |
+| AC-11 Profil + paramètres | `ac-11-profil.html` | KAN-26 (Préférences catégories), KAN-25 (Onboarding & zone) | [Cadrage KAN-25](specs/KAN-25/) |
 | AC-12 Zone non couverte | `ac-12-zone-non-couverte.html` | KAN-29 (Zone non couverte & liste d'attente) | — |
 
 ### Parcours Rameneur (§10.4 PRD)
@@ -128,7 +128,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | Ticket | Type | Statut | Résumé |
 |--------|------|--------|--------|
 | KAN-6 | Epic | Ideas | Profil Acheteur |
-| KAN-25 | Feature | Ideas | Onboarding & zone |
+| KAN-25 | Feature | Ideas | Onboarding & zone — [Cadrage tech](specs/KAN-25/) |
 | KAN-26 | Feature | Ideas | Préférences catégories |
 | KAN-27 | Feature | Ideas | Historique commandes |
 
