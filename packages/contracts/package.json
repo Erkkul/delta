@@ -10,7 +10,8 @@
     ".": "./src/index.ts",
     "./auth": "./src/auth/index.ts",
     "./producer": "./src/producer/index.ts",
-    "./product": "./src/product/index.ts"
+    "./product": "./src/product/index.ts",
+    "./buyer-profile": "./src/buyer-profile/index.ts"
   },
   "scripts": {
     "lint": "eslint .",

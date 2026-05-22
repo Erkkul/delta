@@ -34,6 +34,12 @@ export type Database = {
         Update: ProductUpdate
         Relationships: []
       }
+      buyer_profiles: {
+        Row: BuyerProfileRow
+        Insert: BuyerProfileInsert
+        Update: BuyerProfileUpdate
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -42,6 +48,10 @@ export type Database = {
         Returns: string | null
       }
       set_pickup_location: {
+        Args: { p_longitude: number | null; p_latitude: number | null }
+        Returns: undefined
+      }
+      set_buyer_location: {
         Args: { p_longitude: number | null; p_latitude: number | null }
         Returns: undefined
       }
@@ -327,5 +337,38 @@ export type ProductUpdate = {
   status?: ProductStatus
   labels?: ProductLabel[]
   photos?: ProductPhoto[]
+  deleted_at?: string | null
+}
+
+// ─── Buyer profiles (KAN-25) ─────────────────────────────────────────────
+// La colonne `location` (geography Point) n'est jamais lue/écrite via
+// supabase-js en direct : écriture via la RPC set_buyer_location, et elle
+// n'est pas projetée dans les SELECT applicatifs (donc absente de la Row).
+
+export type BuyerProfileRow = {
+  user_id: string
+  display_name: string | null
+  address_label: string | null
+  city: string | null
+  postcode: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export type BuyerProfileInsert = {
+  user_id: string
+  display_name?: string | null
+  address_label?: string | null
+  city?: string | null
+  postcode?: string | null
+  deleted_at?: string | null
+}
+
+export type BuyerProfileUpdate = {
+  display_name?: string | null
+  address_label?: string | null
+  city?: string | null
+  postcode?: string | null
   deleted_at?: string | null
 }
