@@ -42,7 +42,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | Écran | Maquette | Ticket(s) Jira principal(aux) | Tickets liés |
 |-------|----------|-------------------------------|--------------|
 | AC-01 Inscription / connexion | `ac-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
-| AC-02 Onboarding | `ac-02-onboarding.html` | KAN-25 (Onboarding & zone), KAN-26 (Préférences catégories) | [Cadrage KAN-25](specs/KAN-25/) |
+| AC-02 Onboarding | `ac-02-onboarding.html` | KAN-25 (Onboarding & zone), KAN-26 (Préférences catégories) | [Cadrage KAN-25](specs/KAN-25/), [Cadrage KAN-26](specs/KAN-26/) |
 | AC-03 Accueil | `ac-03-accueil.html` | KAN-28 (Catalogue filtré) | — |
 | AC-04 Catalogue parcourable | `ac-04-catalogue.html` | KAN-28 (Catalogue filtré) | KAN-29 (Zone non couverte) |
 | AC-05 Fiche produit | `ac-05-fiche-produit.html` | KAN-28 (Catalogue filtré) | KAN-30 (Wishlist privée) |
@@ -54,7 +54,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | AC-08bis Profil public producteur | `ac-08bis-profil-producteur.html` | KAN-53 (Profils publics & avis) | — |
 | AC-09 Historique commandes | `ac-09-historique.html` | KAN-27 (Historique commandes) | KAN-36 (Factures PDF) |
 | AC-10 Évaluation post-livraison | `ac-10-evaluation.html` | KAN-52 (Notation post-livraison) | — |
-| AC-11 Profil + paramètres | `ac-11-profil.html` | KAN-26 (Préférences catégories), KAN-25 (Onboarding & zone) | [Cadrage KAN-25](specs/KAN-25/) |
+| AC-11 Profil + paramètres | `ac-11-profil.html` | KAN-26 (Préférences catégories), KAN-25 (Onboarding & zone) | [Cadrage KAN-25](specs/KAN-25/), [Cadrage KAN-26](specs/KAN-26/) |
 | AC-12 Zone non couverte | `ac-12-zone-non-couverte.html` | KAN-29 (Zone non couverte & liste d'attente) | — |
 
 ### Parcours Rameneur (§10.4 PRD)
@@ -129,7 +129,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 |--------|------|--------|--------|
 | KAN-6 | Epic | Ideas | Profil Acheteur |
 | KAN-25 | Feature | Examiner | Onboarding & zone — [Cadrage tech](specs/KAN-25/) — mergé sur main (PR #53) |
-| KAN-26 | Feature | Ideas | Préférences catégories |
+| KAN-26 | Feature | Ideas | Préférences catégories — [Cadrage tech](specs/KAN-26/) |
 | KAN-27 | Feature | Ideas | Historique commandes |
 
 ### KAN-7 — Wishlist & Matching
