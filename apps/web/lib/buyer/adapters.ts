@@ -1,4 +1,5 @@
 import {
+  type BuyerCategoriesAdapter,
   type BuyerProfile,
   type BuyerProfileAdapter,
   type BuyerProfilePatch,
@@ -27,6 +28,7 @@ function toBuyerProfile(row: BuyerProfileRow, hasLocation: boolean): BuyerProfil
     city: row.city,
     postcode: row.postcode,
     has_location: hasLocation,
+    preferred_categories: row.preferred_categories,
   }
 }
 
@@ -72,6 +74,27 @@ export function getBuyerProfileAdapter(client: Client): BuyerProfileAdapter {
 
     async setLocation(longitude, latitude) {
       await buyerProfilesRepo.setLocationViaRpc(client, longitude, latitude)
+    },
+  }
+}
+
+/**
+ * Implémentation de `BuyerCategoriesAdapter` (KAN-26). Upsert idempotent de
+ * `preferred_categories` : crée la row acheteur si absente, sinon met à jour,
+ * sans jamais toucher la zone. Recalcule `has_location` après coup (la
+ * geography n'est pas projetée par le repo).
+ */
+export function getBuyerCategoriesAdapter(
+  client: Client,
+): BuyerCategoriesAdapter {
+  return {
+    async setCategories(userId, categories) {
+      const existing = await buyerProfilesRepo.findByUserId(client, userId)
+      const patch = { preferred_categories: categories }
+      const row = existing
+        ? await buyerProfilesRepo.update(client, userId, patch)
+        : await buyerProfilesRepo.create(client, userId, patch)
+      return toBuyerProfile(row, await hasLocation(client, userId))
     },
   }
 }

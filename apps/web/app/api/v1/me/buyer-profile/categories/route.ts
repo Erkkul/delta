@@ -11,64 +11,21 @@ import {
 import { type NextRequest, NextResponse } from "next/server"
 
 import {
-  getBuyerProfileAdapter,
+  getBuyerCategoriesAdapter,
   getBuyerRoleChecker,
-  getGeocodeAdapter,
 } from "@/lib/buyer/adapters"
 import { serializeError } from "@/lib/serialize-error"
 import { getServerSupabase } from "@/lib/supabase/server"
 import { getRateLimitStore } from "@/lib/upstash"
 
 /**
- * GET /api/v1/me/buyer-profile (KAN-25).
+ * PUT /api/v1/me/buyer-profile/categories (KAN-26 — KAN-83 onboarding +
+ * KAN-84 paramètres).
  *
- * Renvoie le snapshot du profil acheteur du caller, ou `null` si aucune zone
- * n'a encore été enregistrée. Codes : 200 / 401 / 403
- */
-export async function GET() {
-  const supabase = await getServerSupabase()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json(
-      { error: "Non authentifié.", code: BUYER_PROFILE_ERROR_CODES.Unknown },
-      { status: 401 },
-    )
-  }
-
-  const role = getBuyerRoleChecker(supabase)
-  if (!(await role.hasBuyerRole(user.id))) {
-    return NextResponse.json(
-      {
-        error: "Rôle acheteur requis.",
-        code: BUYER_PROFILE_ERROR_CODES.RoleForbidden,
-      },
-      { status: 403 },
-    )
-  }
-
-  const profile = await getBuyerProfileAdapter(supabase).findByUserId(user.id)
-  if (!profile) {
-    return NextResponse.json(null, { status: 200 })
-  }
-
-  const snapshot: BuyerProfileSnapshot = {
-    display_name: profile.display_name,
-    address_label: profile.address_label,
-    city: profile.city,
-    postcode: profile.postcode,
-    has_location: profile.has_location,
-    preferred_categories: profile.preferred_categories,
-  }
-  return NextResponse.json(snapshot, { status: 200 })
-}
-
-/**
- * PUT /api/v1/me/buyer-profile (KAN-25 — KAN-81 onboarding + KAN-82 édition).
- *
- * Upsert de la zone d'habitation (+ nom facultatif). Le géocodage est
- * best-effort et ne bloque jamais l'écriture du texte.
+ * Upsert des préférences catégories de l'acheteur (sous-ensemble de l'enum
+ * product_category). Endpoint dédié pour ne pas toucher au contrat d'upsert
+ * de la zone (qui exige `address_label`) ni risquer de réinitialiser la
+ * position — cf. specs/KAN-26/notes.md.
  *
  * Codes : 200 / 400 / 401 / 403 / 429
  */
@@ -96,12 +53,15 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const updated = await coreBuyerProfile.upsertBuyerProfile(body, user.id, {
-      ...getBuyerProfileAdapter(supabase),
-      ...getBuyerRoleChecker(supabase),
-      ...getGeocodeAdapter(),
-      store: getRateLimitStore(),
-    })
+    const updated = await coreBuyerProfile.updateBuyerCategories(
+      body,
+      user.id,
+      {
+        ...getBuyerCategoriesAdapter(supabase),
+        ...getBuyerRoleChecker(supabase),
+        store: getRateLimitStore(),
+      },
+    )
     const snapshot: BuyerProfileSnapshot = {
       display_name: updated.display_name,
       address_label: updated.address_label,
@@ -138,7 +98,7 @@ export async function PUT(req: NextRequest) {
         { status: 400 },
       )
     }
-    console.error("[api/v1/me/buyer-profile] PUT failed", {
+    console.error("[api/v1/me/buyer-profile/categories] PUT failed", {
       userId: user.id,
       error: serializeError(err),
     })

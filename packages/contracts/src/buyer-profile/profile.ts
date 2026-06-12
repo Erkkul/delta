@@ -1,11 +1,14 @@
 import { z } from "zod"
 
+import { ProductCategory } from "../product/shared"
+
 /**
- * Profil acheteur — zone d'habitation (KAN-25).
+ * Profil acheteur — zone d'habitation (KAN-25) + préférences catégories (KAN-26).
  *
  * Consommé par :
- *   - GET /api/v1/me/buyer-profile  (snapshot, null si non créé)
- *   - PUT /api/v1/me/buyer-profile  (upsert : onboarding KAN-81 + édition KAN-82)
+ *   - GET /api/v1/me/buyer-profile             (snapshot, null si non créé)
+ *   - PUT /api/v1/me/buyer-profile             (upsert zone : onboarding KAN-81 + édition KAN-82)
+ *   - PUT /api/v1/me/buyer-profile/categories  (préférences : onboarding KAN-83 + édition KAN-84)
  *
  * La zone est géocodée côté client via l'API Adresse Gouv.fr ; les
  * coordonnées (latitude/longitude) accompagnent le label retenu. Le serveur
@@ -67,8 +70,35 @@ export const BuyerProfileUpsertInput = z
 export type BuyerProfileUpsertInput = z.infer<typeof BuyerProfileUpsertInput>
 
 /**
+ * Nombre de catégories produit existantes (enum `product_category`). Borne
+ * haute de `preferred_categories` : une préférence ne peut excéder le
+ * catalogue de catégories.
+ */
+const PRODUCT_CATEGORY_COUNT = 8
+
+/**
+ * Input des préférences catégories acheteur (KAN-26 — KAN-83 onboarding +
+ * KAN-84 paramètres). Sous-ensemble de l'enum `product_category` ; liste vide
+ * autorisée (« aucune préférence »). Endpoint dédié
+ * `PUT /api/v1/me/buyer-profile/categories` pour ne pas toucher au contrat
+ * d'upsert de la zone (qui exige `address_label`) — cf. specs/KAN-26/notes.md.
+ */
+export const BuyerCategoriesInput = z
+  .object({
+    preferred_categories: z
+      .array(ProductCategory)
+      .max(
+        PRODUCT_CATEGORY_COUNT,
+        "Trop de catégories sélectionnées.",
+      ),
+  })
+  .strict()
+export type BuyerCategoriesInput = z.infer<typeof BuyerCategoriesInput>
+
+/**
  * Snapshot renvoyé par GET / PUT. `has_location` indique si une zone
  * géocodée est posée (la geography brute n'est jamais exposée).
+ * `preferred_categories` liste les centres d'intérêt déclarés (KAN-26).
  */
 export const BuyerProfileSnapshot = z.object({
   display_name: z.string().nullable(),
@@ -76,6 +106,7 @@ export const BuyerProfileSnapshot = z.object({
   city: z.string().nullable(),
   postcode: z.string().nullable(),
   has_location: z.boolean(),
+  preferred_categories: z.array(ProductCategory),
 })
 export type BuyerProfileSnapshot = z.infer<typeof BuyerProfileSnapshot>
 

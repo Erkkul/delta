@@ -9,7 +9,7 @@ import {
 type Client = SupabaseClient<Database>
 
 const SELECT_COLUMNS =
-  "user_id, display_name, address_label, city, postcode, created_at, updated_at, deleted_at"
+  "user_id, display_name, address_label, city, postcode, preferred_categories, created_at, updated_at, deleted_at"
 
 /**
  * Repo `buyer_profiles` (KAN-25). Profil acheteur minimal (nom + zone)
