@@ -351,6 +351,8 @@ export type BuyerProfileRow = {
   address_label: string | null
   city: string | null
   postcode: string | null
+  // Sous-ensemble de product_category déclaré comme centres d'intérêt (KAN-26).
+  preferred_categories: ProductCategory[]
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -362,6 +364,7 @@ export type BuyerProfileInsert = {
   address_label?: string | null
   city?: string | null
   postcode?: string | null
+  preferred_categories?: ProductCategory[]
   deleted_at?: string | null
 }
 
@@ -370,5 +373,6 @@ export type BuyerProfileUpdate = {
   address_label?: string | null
   city?: string | null
   postcode?: string | null
+  preferred_categories?: ProductCategory[]
   deleted_at?: string | null
 }

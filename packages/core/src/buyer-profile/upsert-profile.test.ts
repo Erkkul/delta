@@ -39,6 +39,7 @@ function makeProfile(overrides: Partial<BuyerProfile> = {}): BuyerProfile {
     city: "Paris",
     postcode: "75017",
     has_location: false,
+    preferred_categories: [],
     ...overrides,
   }
 }

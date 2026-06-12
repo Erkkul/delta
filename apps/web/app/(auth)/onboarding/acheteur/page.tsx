@@ -44,6 +44,7 @@ export default async function BuyerOnboardingPage() {
               city: profile.city,
               postcode: profile.postcode,
               has_location: false,
+              preferred_categories: profile.preferred_categories,
             }
           : null
       }

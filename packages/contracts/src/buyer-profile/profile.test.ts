@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { BuyerProfileUpsertInput } from "./profile"
+import { BuyerCategoriesInput, BuyerProfileUpsertInput } from "./profile"
 
 describe("BuyerProfileUpsertInput", () => {
   it("accepte une adresse seule (nom et coords facultatifs)", () => {
@@ -55,6 +55,52 @@ describe("BuyerProfileUpsertInput", () => {
     const r = BuyerProfileUpsertInput.safeParse({
       address_label: "14 rue de Lévis 75017 Paris",
       display_name: "M",
+    })
+    expect(r.success).toBe(false)
+  })
+})
+
+describe("BuyerCategoriesInput", () => {
+  it("accepte un sous-ensemble de catégories whitelistées", () => {
+    const r = BuyerCategoriesInput.safeParse({
+      preferred_categories: ["fruits", "legumes", "miel_et_ruche"],
+    })
+    expect(r.success).toBe(true)
+  })
+
+  it("accepte une liste vide", () => {
+    const r = BuyerCategoriesInput.safeParse({ preferred_categories: [] })
+    expect(r.success).toBe(true)
+  })
+
+  it("rejette une catégorie hors whitelist", () => {
+    const r = BuyerCategoriesInput.safeParse({
+      preferred_categories: ["fromage_frais"],
+    })
+    expect(r.success).toBe(false)
+  })
+
+  it("rejette plus de 8 catégories", () => {
+    const r = BuyerCategoriesInput.safeParse({
+      preferred_categories: [
+        "miel_et_ruche",
+        "fruits",
+        "legumes",
+        "cereales_legumineuses",
+        "conserves_confitures",
+        "pain_biscuits",
+        "huiles",
+        "boissons_non_alcoolisees",
+        "fruits",
+      ],
+    })
+    expect(r.success).toBe(false)
+  })
+
+  it("rejette une clé inconnue (strict)", () => {
+    const r = BuyerCategoriesInput.safeParse({
+      preferred_categories: ["fruits"],
+      foo: "bar",
     })
     expect(r.success).toBe(false)
   })

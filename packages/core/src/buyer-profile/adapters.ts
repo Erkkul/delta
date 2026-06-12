@@ -5,13 +5,16 @@
  * producer (même API Adresse Gouv.fr).
  */
 
+import { type ProductCategory } from "@delta/contracts/product"
+
 export type { GeocodeAdapter, GeocodeResult } from "../producer/adapters"
 
 /**
  * Forme métier du profil acheteur partagée entre core et adapters.
  * Doublonne volontairement `BuyerProfileRow` de `@delta/db`. `has_location`
  * indique si une zone géocodée est posée (la geography brute ne traverse
- * jamais le core).
+ * jamais le core). `preferred_categories` liste les centres d'intérêt
+ * déclarés (KAN-26 — clés de l'enum `product_category`).
  */
 export type BuyerProfile = {
   user_id: string
@@ -20,6 +23,7 @@ export type BuyerProfile = {
   city: string | null
   postcode: string | null
   has_location: boolean
+  preferred_categories: ProductCategory[]
 }
 
 /** Patch des champs non-géo. La `location` passe par `setLocation`. */
@@ -42,6 +46,22 @@ export type BuyerProfileAdapter = {
    * nuls réinitialisent la position.
    */
   setLocation(longitude: number | null, latitude: number | null): Promise<void>
+}
+
+/**
+ * Adapter d'écriture des préférences catégories (KAN-26). Séparé de
+ * `BuyerProfileAdapter` car le use case catégories n'a pas besoin du géocodage.
+ */
+export type BuyerCategoriesAdapter = {
+  /**
+   * Upsert idempotent de `preferred_categories` : crée la row acheteur si
+   * absente, sinon met à jour. Retourne le profil complet (avec `has_location`
+   * préservé — l'écriture des catégories ne touche jamais la zone).
+   */
+  setCategories(
+    userId: string,
+    categories: ProductCategory[],
+  ): Promise<BuyerProfile>
 }
 
 export type BuyerRoleChecker = {
