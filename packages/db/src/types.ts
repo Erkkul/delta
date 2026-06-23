@@ -41,7 +41,12 @@ export type Database = {
         Relationships: []
       }
     }
-    Views: Record<string, never>
+    Views: {
+      catalogue_products: {
+        Row: CatalogueProductRow
+        Relationships: []
+      }
+    }
     Functions: {
       reveal_pickup_address: {
         Args: { producer_id: string }
@@ -338,6 +343,27 @@ export type ProductUpdate = {
   labels?: ProductLabel[]
   photos?: ProductPhoto[]
   deleted_at?: string | null
+}
+
+// ─── Catalogue public (KAN-28) ───────────────────────────────────────────
+// Row de la vue `public.catalogue_products` (projection publique curée :
+// produit + producteur public). Voir migration 20260623180000. La colonne
+// `search_vector` (tsvector) existe sur la vue pour le FTS server-side
+// (`.textSearch`) mais n'est jamais projetée dans les SELECT applicatifs —
+// donc absente de la Row.
+export type CatalogueProductRow = {
+  id: string
+  producer_user_id: string
+  name: string
+  description: string | null
+  category: ProductCategory
+  packaging: ProductPackaging
+  unit_price_cents: number
+  labels: ProductLabel[]
+  photos: ProductPhoto[]
+  created_at: string
+  producer_display_name: string
+  producer_zone: string | null
 }
 
 // ─── Buyer profiles (KAN-25) ─────────────────────────────────────────────

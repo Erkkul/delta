@@ -9,27 +9,35 @@
 
 ## Tâches
 
-- [ ] **Décision DB** : arbitrer vue `public.catalogue_products` vs RPC
-      `catalogue_search` / `catalogue_get` (SECURITY DEFINER). Acter le choix et,
-      s'il est structurant, ajouter une entrée ARCHITECTURE.md §18.
+- [x] **Décision DB** : arbitrée → **vue `public.catalogue_products`**
+      (`security_invoker = off`, projection whitelistée) plutôt qu'un RPC.
+      Entrée ARCHITECTURE.md §18 (1.27) ajoutée.
 - [ ] Factoriser le **prédicat de visibilité** (`products_select_public`) en
-      fonction SQL réutilisable par la policy ET la vue/RPC (anti-divergence).
-- [ ] Migration : vue/RPC catalogue public (projection whitelistée produit +
-      producteur), tri FTS (`websearch_to_tsquery('french')` + `ts_rank`),
-      pagination cursor. + tests SQL de visibilité et de non-exposition.
-- [ ] `catalogueRepo` dans `packages/db` (+ types de projection, mapper DB→DTO).
-- [ ] Contracts `CatalogueQuery` + `CataloguePublicProduct` (+ tests).
-- [ ] Endpoint `GET /api/v1/catalogue` (validation Zod, pagination, codes
+      fonction SQL réutilisable par la policy ET la vue (anti-divergence).
+      *Différé* : prédicat dupliqué pour l'instant, risque documenté en §18 et
+      dans `design.md` (à factoriser si l'un des deux évolue).
+- [x] Migration `20260623180000_catalogue_public_read.sql` : vue catalogue
+      public (projection whitelistée produit + producteur), FTS via
+      `search_vector` exposé pour `.textSearch`. Tri keyset `created_at DESC`
+      (pas de `ts_rank` au MVP — FTS filtrante).
+- [x] `catalogueRepo` dans `packages/db` (`list` + `getById`) + type
+      `CatalogueProductRow` + mapper `mapCatalogueProduct` (4 tests).
+- [x] Contracts `CatalogueQuery` + `CataloguePublicProduct` / `CataloguePage`
+      + `CATALOGUE_ERROR_CODES` (6 tests).
+- [x] Endpoint `GET /api/v1/catalogue` (validation Zod, pagination, codes
       d'erreur).
-- [ ] **Shell** `acheteur/layout.tsx` + rétro-wrap `/acheteur/profil` et
-      `/acheteur/historique` ; vérifier non-régression gating KAN-25/27.
-- [ ] Composants `components/buyer/catalogue/*` (cards, search, chips filtres
-      actifs/différés) et `components/buyer/home/*` (sections AC-03 réelles +
-      différées).
-- [ ] Pages `acheteur/page.tsx`, `acheteur/catalogue/page.tsx`,
-      `acheteur/catalogue/[id]/page.tsx` (gating rôle acheteur).
+- [x] **Shell** `acheteur/layout.tsx` (header desktop + bottom-nav mobile) +
+      rétro-wrap `/acheteur/profil` et `/acheteur/historique` (gating centralisé,
+      non-régression vérifiée au build).
+- [x] Composants `components/buyer/shell/*` (chrome) et
+      `components/buyer/catalogue/*` (card, browser : search + chips catégorie
+      actives + chips différées). Sections AC-03 rendues dans `acheteur/page.tsx`.
+- [x] Pages `acheteur/page.tsx`, `acheteur/catalogue/page.tsx`,
+      `acheteur/catalogue/[id]/page.tsx` (gating rôle acheteur via layout).
 - [ ] Seeds/fixtures E2E : producteur vérifié (SIRET + payouts) + produits
-      `active` pour alimenter le catalogue de test.
+      `active` pour alimenter le catalogue de test. *Différé* : pas de harnais
+      fixtures acheteur connecté au MVP (cohérent KAN-18/20/27 — E2E « logged-in »
+      différés tant que le harnais auth+seed n'existe pas).
 
 ## Checklist pre-merge
 
