@@ -10,19 +10,23 @@
 
 ## Tâches
 
-- [ ] Vérifier la réutilisabilité des primitives empty state / cards posées en
-      KAN-18/19 (`<KpiCard />`, `<EmptyState />`, `<SectionCard />`) ; si trop
-      couplées au producteur, créer des équivalents locaux dans
-      `apps/web/components/buyer/history/`.
-- [ ] Factoriser le gating session + rôle acheteur si la duplication avec
-      `/acheteur/profil` devient gênante (helper `requireBuyer()` côté web) —
-      sinon laisser inline comme KAN-25.
-- [ ] Poser les composants `<HistoryStats />`, `<HistoryFilters />`,
-      `<HistoryList />` avec props prêtes à recevoir des données (typage de
-      `OrderHistoryRow` esquissé mais non câblé tant que les tables manquent).
-- [ ] Documenter dans le code (commentaire en tête de page) les sources futures
+- [x] Vérifier la réutilisabilité des primitives empty state / cards posées en
+      KAN-18/19 (`<KpiCard />`, `<EmptyState />`, `<SectionCard />`) → réutilisées
+      telles quelles depuis `apps/web/components/dashboard/` ; les composants
+      historique acheteur vivent dans `apps/web/components/buyer/history/`.
+- [x] Factoriser le gating session + rôle acheteur si la duplication avec
+      `/acheteur/profil` devient gênante → laissé inline comme KAN-25 (duplication
+      minime, pas de helper `requireBuyer()` au MVP).
+- [x] Poser les composants `<HistoryStats />`, `<HistoryFilters />`,
+      `<HistoryList />` en empty state, structure prête à recevoir des données
+      (typage `OrderHistoryRow` à introduire au câblage des tables).
+- [x] Documenter dans le code (commentaire en tête de page) les sources futures
       à câbler (missions / mission_buyers / paiements / KAN-36) — même convention
       que `/acheteur/profil`.
+
+> Note tests : `apps/web` n'embarque pas Vitest (Playwright uniquement) ; la
+> couverture suit le précédent KAN-19 — E2E de gating dans
+> `apps/web/e2e/buyer-history.spec.ts`, pas de tests unitaires RTL.
 
 ## Checklist pre-merge
 
