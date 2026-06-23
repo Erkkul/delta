@@ -52,7 +52,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | AC-08 Mes commandes | `ac-08-mes-commandes.html` | KAN-45 (Suivi mission & états) | KAN-55 (Notif in-app) |
 | AC-08b QR delivery | `ac-08b-qr-delivery.html` | KAN-48 (QR Delivery) | — |
 | AC-08bis Profil public producteur | `ac-08bis-profil-producteur.html` | KAN-53 (Profils publics & avis) | — |
-| AC-09 Historique commandes | `ac-09-historique.html` | KAN-27 (Historique commandes) | KAN-36 (Factures PDF) |
+| AC-09 Historique commandes | `ac-09-historique.html` | KAN-27 (Historique commandes) — [Cadrage tech](specs/KAN-27/) | KAN-36 (Factures PDF) |
 | AC-10 Évaluation post-livraison | `ac-10-evaluation.html` | KAN-52 (Notation post-livraison) | — |
 | AC-11 Profil + paramètres | `ac-11-profil.html` | KAN-26 (Préférences catégories), KAN-25 (Onboarding & zone) | [Cadrage KAN-25](specs/KAN-25/), [Cadrage KAN-26](specs/KAN-26/) |
 | AC-12 Zone non couverte | `ac-12-zone-non-couverte.html` | KAN-29 (Zone non couverte & liste d'attente) | — |
@@ -130,7 +130,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-6 | Epic | Ideas | Profil Acheteur |
 | KAN-25 | Feature | Examiner | Onboarding & zone — [Cadrage tech](specs/KAN-25/) — mergé sur main (PR #53) |
 | KAN-26 | Feature | Examiner | Préférences catégories — [Cadrage tech](specs/KAN-26/) — mergé sur main (PR #57) |
-| KAN-27 | Feature | Ideas | Historique commandes |
+| KAN-27 | Feature | Ideas | Historique commandes — [Cadrage tech](specs/KAN-27/) |
 
 ### KAN-7 — Wishlist & Matching
 
