@@ -11,7 +11,8 @@
     "./auth": "./src/auth/index.ts",
     "./producer": "./src/producer/index.ts",
     "./product": "./src/product/index.ts",
-    "./buyer-profile": "./src/buyer-profile/index.ts"
+    "./buyer-profile": "./src/buyer-profile/index.ts",
+    "./catalogue": "./src/catalogue/index.ts"
   },
   "scripts": {
     "lint": "eslint .",
