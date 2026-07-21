@@ -44,7 +44,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | AC-01 Inscription / connexion | `ac-01-authentication.html` | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
 | AC-02 Onboarding | `ac-02-onboarding.html` | KAN-25 (Onboarding & zone), KAN-26 (Préférences catégories) | [Cadrage KAN-25](specs/KAN-25/), [Cadrage KAN-26](specs/KAN-26/) |
 | AC-03 Accueil | `ac-03-accueil.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | — |
-| AC-04 Catalogue parcourable | `ac-04-catalogue.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-29 (Zone non couverte) |
+| AC-04 Catalogue parcourable | `ac-04-catalogue.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-29 (Zone non couverte) — [Cadrage tech](specs/KAN-29/) |
 | AC-05 Fiche produit | `ac-05-fiche-produit.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-30 (Wishlist privée) |
 | AC-06 Mes envies | `ac-06-mes-envies.html` | KAN-30 (Wishlist privée) | — |
 | AC-07 Notif match → confirmation | `ac-07-notification-match.html` | KAN-31 (Notification & confirmation match) | KAN-32 (Pénalités acheteur) |
@@ -55,7 +55,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | AC-09 Historique commandes | `ac-09-historique.html` | KAN-27 (Historique commandes) — [Cadrage tech](specs/KAN-27/) | KAN-36 (Factures PDF) |
 | AC-10 Évaluation post-livraison | `ac-10-evaluation.html` | KAN-52 (Notation post-livraison) | — |
 | AC-11 Profil + paramètres | `ac-11-profil.html` | KAN-26 (Préférences catégories), KAN-25 (Onboarding & zone) | [Cadrage KAN-25](specs/KAN-25/), [Cadrage KAN-26](specs/KAN-26/) |
-| AC-12 Zone non couverte | `ac-12-zone-non-couverte.html` | KAN-29 (Zone non couverte & liste d'attente) | — |
+| AC-12 Zone non couverte | `ac-12-zone-non-couverte.html` | KAN-29 (Zone non couverte & liste d'attente) — [Cadrage tech](specs/KAN-29/) | — |
 
 ### Parcours Rameneur (§10.4 PRD)
 
@@ -138,7 +138,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 |--------|------|--------|--------|
 | KAN-7 | Epic | Ideas | Wishlist & Matching |
 | KAN-28 | Feature | Examiner | Catalogue filtré — [Cadrage tech](specs/KAN-28/) — mergé sur main (PR #65) |
-| KAN-29 | Feature | Ideas | Zone non couverte & liste d'attente |
+| KAN-29 | Feature | Ideas | Zone non couverte & liste d'attente — [Cadrage tech](specs/KAN-29/) |
 | KAN-30 | Feature | Ideas | Wishlist privée |
 | KAN-31 | Feature | Ideas | Notification & confirmation match |
 | KAN-32 | Feature | Ideas | Pénalités acheteur |
