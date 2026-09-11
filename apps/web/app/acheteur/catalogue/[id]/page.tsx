@@ -5,9 +5,11 @@ import {
   type ProductLabel,
 } from "@delta/contracts/product"
 import { catalogueRepo, mapCatalogueProduct } from "@delta/db/catalogue"
+import { wishlistRepo } from "@delta/db/wishlist"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { WishlistToggleButton } from "@/components/buyer/wishlist/wishlist-toggle-button"
 import { formatPriceEur, packagingUnitLabel } from "@/lib/catalogue/format"
 import { getServerSupabase } from "@/lib/supabase/server"
 
@@ -24,8 +26,9 @@ function isKnownLabel(label: string): label is ProductLabel {
  * 404 si le produit n'est pas visible. Gating session + rôle assuré par
  * `acheteur/layout.tsx`.
  *
- * Différés : bouton « Ajouter aux envies » (rendu inerte → KAN-30) et le
- * bloc « match / trajets » (KAN-42). Cf. specs/KAN-28/proposal.md.
+ * Wishlist (KAN-30) : bouton toggle « Ajouter / Retirer de mes envies »,
+ * état initial lu server-side. Le bloc « match / trajets » reste différé
+ * (KAN-42). Cf. specs/KAN-30/proposal.md.
  */
 export default async function BuyerProductPage({
   params,
@@ -39,6 +42,13 @@ export default async function BuyerProductPage({
 
   const product = mapCatalogueProduct(row)
   const labels = product.labels.filter(isKnownLabel)
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const inWishlist = user
+    ? (await wishlistRepo.findActiveByProduct(supabase, user.id, id)) !== null
+    : false
 
   return (
     <main className="mx-auto w-full max-w-[760px] px-5 py-6">
@@ -110,21 +120,10 @@ export default async function BuyerProductPage({
             </p>
           )}
 
-          <div className="flex flex-col gap-2 border-t border-cream-100 pt-4">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              title="Ajouter à mes envies — bientôt"
-              className="cursor-not-allowed rounded-full bg-cream-100 px-5 py-3 font-body text-sm font-semibold text-cream-400"
-            >
-              Ajouter à mes envies
-            </button>
-            <p className="font-body text-xs text-cream-500">
-              Bientôt : ajoutez ce produit à vos envies et soyez prévenu·e
-              lorsqu&apos;un rameneur peut vous l&apos;apporter.
-            </p>
-          </div>
+          <WishlistToggleButton
+            productId={product.id}
+            initialInWishlist={inWishlist}
+          />
         </div>
       </div>
     </main>

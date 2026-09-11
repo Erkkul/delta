@@ -82,4 +82,23 @@ export const catalogueRepo = {
     if (error) throw error
     return data ?? null
   },
+
+  /**
+   * Rows catalogue *visibles* parmi une liste d'ids (au plus quelques dizaines
+   * — usage wishlist KAN-30). Un id absent = produit non visible (producteur en
+   * pause, produit non `active`, hors fenêtre) : simplement non renvoyé.
+   * L'ordre n'est pas garanti — le caller ré-ordonne selon son besoin.
+   */
+  async listByIds(
+    client: Client,
+    ids: string[],
+  ): Promise<CatalogueProductRow[]> {
+    if (ids.length === 0) return []
+    const { data, error } = await client
+      .from("catalogue_products")
+      .select(CATALOGUE_COLUMNS)
+      .in("id", ids)
+    if (error) throw error
+    return data ?? []
+  },
 }
