@@ -13,7 +13,8 @@
     "./product": "./src/product/index.ts",
     "./buyer-profile": "./src/buyer-profile/index.ts",
     "./catalogue": "./src/catalogue/index.ts",
-    "./wishlist": "./src/wishlist/index.ts"
+    "./wishlist": "./src/wishlist/index.ts",
+    "./mission-match": "./src/mission-match/index.ts"
   },
   "scripts": {
     "lint": "eslint .",

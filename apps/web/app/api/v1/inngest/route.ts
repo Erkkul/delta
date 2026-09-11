@@ -2,6 +2,7 @@ import { buildDeltaFunctions, inngest } from "@delta/jobs"
 import { serve } from "inngest/next"
 
 import { inseeEnv, inngestEnv } from "@/lib/env"
+import { getMissionMatchExpiryAdapter } from "@/lib/mission-match/adapters"
 import { getProducerAdapter } from "@/lib/producer/adapters"
 import { getAdminSupabase } from "@/lib/supabase/server"
 
@@ -45,6 +46,7 @@ function getHandler() {
   const functions = buildDeltaFunctions({
     producer: producerAdapter,
     insee: { apiKey: insee.INSEE_SIRENE_API_KEY },
+    missionMatch: getMissionMatchExpiryAdapter(admin),
   })
 
   cachedHandler = serve({ client: inngest, functions })

@@ -1,4 +1,7 @@
+import { type ExpirePendingMissionMatchesDeps } from "@delta/core/mission-match"
+
 import { createInseeClient, type InseeClientConfig } from "./integrations/insee"
+import { createExpirePendingMissionMatchesFunction } from "./mission-match/expire-pending-function"
 import {
   createVerifySiretFunction,
   type VerifySiretFunctionDeps,
@@ -19,6 +22,7 @@ export type ProducerJobDeps = Omit<VerifySiretFunctionDeps, "fetchSiretRecord">
 export function buildDeltaFunctions(deps: {
   producer: ProducerJobDeps
   insee: InseeClientConfig
+  missionMatch: ExpirePendingMissionMatchesDeps
 }) {
   const insee = createInseeClient(deps.insee)
 
@@ -27,5 +31,6 @@ export function buildDeltaFunctions(deps: {
       ...deps.producer,
       ...insee,
     }),
+    createExpirePendingMissionMatchesFunction(deps.missionMatch),
   ]
 }

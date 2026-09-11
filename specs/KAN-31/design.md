@@ -62,3 +62,53 @@ Reprend fidèlement `design/maquettes/acheteur/ac-07-notification-match.html` : 
 - Unit `packages/core` : transitions `mission_buyers`, calcul de deadline, règle de seuil
 - Unit `packages/contracts` : validation payloads confirm/decline
 - E2E Playwright : parcours confirmer / refuser depuis AC-07
+
+## Implémenté (2026-09-11) — écarts par rapport au cadrage ci-dessus
+
+Décision validée en chat le 2026-09-11 : KAN-31 pose lui-même le socle DB
+manquant (`trips`, `missions`, `mission_buyers`, `notifications`) plutôt
+que d'attendre les tickets amont, tous supprimés de Jira. Détail complet :
+migration `supabase/migrations/20260911120000_create_missions.sql`.
+
+Écarts constatés en implémentant, par rapport aux sections ci-dessus :
+
+- **Inngest était déjà câblé** (KAN-16) — la ligne "Dépendances" ci-dessus
+  et `tech/setup.md` § Inngest étaient stales, corrigées dans ce commit.
+  Le job de deadline n'est donc PAS bloqué.
+- **Pas d'event `mission_buyer.confirmation_requested`** : aucun flow
+  n'existe pour l'émettre (pas de réservation rameneur). Remplacé par un
+  **trigger DB** `AFTER INSERT ON mission_buyers` qui écrit directement la
+  notification (idempotent), indépendant de qui crée la row. Le timer
+  d'expiration est un **job cron Inngest** (`*/15 * * * *`,
+  `expire-pending-mission-matches`) plutôt qu'un `step.sleepUntil` par
+  event — auto-suffisant, ne dépend d'aucun producer.
+  `mission_buyer.confirmed` / `mission_buyer.declined` / `.expired` ne
+  sont pas des events Inngest : ce sont de simples transitions DB
+  synchrones (RPC `confirm_mission_match` pour l'acceptation, UPDATE
+  conditionnel pour le refus, UPDATE de sweep pour l'expiration).
+- **Transition `missions.status` (`awaiting_buyers → confirmed` /
+  `cancelled_no_buyer`) NON implémentée** — confirmé bloquant comme prévu
+  (seuil de confirmation non tranché). Seule `mission_buyers.status`
+  transitionne. `missions.status` doit être écrit explicitement par le
+  caller qui crée la mission (seed/test).
+- **Lecture producteur (`display_name`)** : `producers` n'a qu'une policy
+  RLS self-only (KAN-16) — un buyer ne peut pas la lire par simple
+  jointure RLS. Résolu par une vue `mission_match_details`
+  (`security_invoker = off`), même pattern que `catalogue_products`
+  (KAN-28), qui sert aussi de point de lecture composé unique pour
+  `findDetailForBuyer` (évite d'assembler trips/missions/products/producers
+  en 4 requêtes séparées côté adapter).
+- **`price_snapshot_cents` renommé `unit_price_cents`** + ajout de
+  `quantity` (la maquette affiche "1 × pot 500g" — un multiplicateur était
+  nécessaire pour retrouver `totalCents`).
+- **Pricing breakdown (85/10/5)** calculé par un helper pur
+  `computeMissionPricingBreakdown` (`packages/core`) — affichage seul
+  (arrondi reproduisant l'exemple maquette 8,50€ → 7,23/0,85/0,42), le
+  split Stripe réel (`transfer_data`) reste porté par le domaine paiement.
+- **CTA "Confirmer et payer"** : libellé maquette conservé tel quel, mais
+  n'appelle que `POST .../confirm` (pas de paiement déclenché) — conflit
+  documenté dans `specs/KAN-31/notes.md` plutôt que tranché seul.
+- **Notation producteur/rameneur** ("4.9 · 47 missions" sur la maquette) :
+  omise (aucune donnée réelle, épic Notations non livré) — cf.
+  `specs/KAN-31/notes.md`.
+- **`apps/mobile`** : toujours hors scope (web only), inchangé du cadrage.
