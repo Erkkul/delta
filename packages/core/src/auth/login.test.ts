@@ -31,6 +31,14 @@ function exhaustedStore(): RateLimitStore {
   }
 }
 
+function throwingStore(): RateLimitStore {
+  return {
+    incrementAndExpire() {
+      return Promise.reject(new Error("Upstash injoignable"))
+    },
+  }
+}
+
 describe("loginWithEmail", () => {
   it("renvoie { userId, roles } sur credentials valides", async () => {
     const signInWithPassword = vi.fn().mockResolvedValue({ userId: "u1" })
@@ -126,6 +134,33 @@ describe("loginWithEmail", () => {
       expect((err as RateLimitedError).retryAfterMs).toBe(5_000)
     }
     expect(signInWithPassword).not.toHaveBeenCalled()
+  })
+
+  it("fail-open : si le store rate-limit est injoignable, le login continue et le hook est notifié", async () => {
+    const signInWithPassword = vi.fn().mockResolvedValue({ userId: "u1" })
+    const loadRoles = vi.fn().mockResolvedValue(["acheteur"] as Role[])
+    const onRateLimitUnavailable = vi.fn()
+
+    const res = await loginWithEmail(VALID_INPUT, {
+      signInWithPassword,
+      loadRoles,
+      store: throwingStore(),
+      onRateLimitUnavailable,
+    })
+
+    expect(res).toEqual({ userId: "u1", roles: ["acheteur"] })
+    expect(signInWithPassword).toHaveBeenCalledOnce()
+    expect(onRateLimitUnavailable).toHaveBeenCalledOnce()
+    expect(onRateLimitUnavailable.mock.calls[0]?.[0]).toBeInstanceOf(Error)
+  })
+
+  it("fail-open sans hook : une panne du store ne fait pas échouer le login", async () => {
+    const res = await loginWithEmail(VALID_INPUT, {
+      signInWithPassword: vi.fn().mockResolvedValue({ userId: "u1" }),
+      loadRoles: vi.fn().mockResolvedValue([]),
+      store: throwingStore(),
+    })
+    expect(res).toEqual({ userId: "u1", roles: [] })
   })
 
   it("n'appelle pas loadRoles si le provider refuse", async () => {

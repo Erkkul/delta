@@ -8,6 +8,7 @@ import {
 import { usersRepo } from "@delta/db/users"
 import { type NextRequest, NextResponse } from "next/server"
 
+import { serializeError } from "@/lib/serialize-error"
 import { getAdminSupabase, getServerSupabase } from "@/lib/supabase/server"
 import { getRateLimitStore } from "@/lib/upstash"
 
@@ -42,6 +43,14 @@ export async function POST(req: NextRequest) {
   try {
     const result: LoginOutput = await coreAuth.loginWithEmail(body, {
       store: getRateLimitStore(),
+      onRateLimitUnavailable(err) {
+        // Fail-open : le login a été laissé passer malgré un store
+        // rate-limit injoignable. On trace pour que l'incident soit visible
+        // (Vercel runtime errors) au lieu de rester silencieux.
+        console.error("[api/v1/auth/login] rate-limit store indisponible — fail-open", {
+          error: serializeError(err),
+        })
+      },
       async signInWithPassword(input) {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: input.email,
@@ -93,6 +102,11 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       )
     }
+    // Filet : toute autre exception est désormais tracée (avant KAN-3 le 500
+    // était muet, ce qui a rendu un incident Upstash indiagnostiquable).
+    console.error("[api/v1/auth/login] POST failed", {
+      error: serializeError(err),
+    })
     return NextResponse.json(
       {
         error: "Erreur serveur, réessayez plus tard.",
