@@ -11,8 +11,8 @@ import { BUYER_NAV, type BuyerNavItem } from "@/lib/navigation/buyer-nav"
  *
  * `BuyerHeader` : header sticky + nav horizontale (desktop), masquée en
  * mobile. `BuyerBottomNav` : barre de navigation fixe (mobile uniquement).
- * Fidèle aux maquettes ac-03/ac-04. L'item « Mes envies » (href null) est
- * rendu inerte tant que la wishlist (KAN-30) n'est pas livrée.
+ * Fidèle aux maquettes ac-03/ac-04. Un item sans `href` (le cas échéant) est
+ * rendu inerte tant que sa destination n'est pas livrée.
  */
 
 function Icon({ name }: { name: BuyerNavItem["icon"] }): ReactNode {

@@ -9,28 +9,42 @@
 
 ## Tâches
 
-- [ ] **Décision plafond** : arbitrer garde applicative (COUNT dans le repo/route
-      + test de concurrence) vs. contrainte/trigger DB. Documenter le choix.
-- [ ] **Décision envie orpheline** : masquer (proposé) vs. carte grisée quand le
-      produit n'est plus visible via `catalogue_products`. Acter dans design.md.
-- [ ] Migration `2026XXXXXXXXXX_create_wishlist_items.sql` : table + FKs +
+- [x] **Décision plafond** : arbitrée → **garde applicative** (COUNT
+      `wishlistRepo.countActive` avant `add` dans le route handler POST). Le
+      risque de course sur le 20ᵉ ajout est documenté (design.md § Risques) et
+      jugé acceptable au MVP ; l'unicité produit reste, elle, garantie par
+      l'index unique partiel DB.
+- [x] **Décision envie orpheline** : arbitrée → **masquer**. La jointure
+      applicative `wishlist_items × catalogue_products` (`loadWishlistPage`) ne
+      renvoie que les envies dont le produit est encore visible ; `count` reste
+      le nombre d'envies actives (peut dépasser `items.length`). Documenté dans
+      design.md § Risques et contracts `WishlistPage`.
+- [x] Migration `20260911100000_create_wishlist_items.sql` : table + FKs +
       index unique partiel `(user_id, product_id) WHERE deleted_at IS NULL` +
-      index liste/comptage + RLS forcée self-only + trigger `set_updated_at`
-      si colonne `updated_at` retenue. Rollback documenté, idempotente.
-- [ ] Miroir `supabase/policies/wishlist_items.sql` (convention §14.2).
-- [ ] `wishlistRepo` dans `packages/db` (`list` avec jointure
-      `catalogue_products`, `add`, `remove`, `count`) + mapper + tests.
-- [ ] Contracts `WishlistAddInput` / `WishlistItem` / `WishlistPage` +
-      `WISHLIST_ERROR_CODES` + tests.
-- [ ] Endpoints `GET/POST /api/v1/wishlist` + `DELETE /api/v1/wishlist/[productId]`
-      (validation Zod, plafond, unicité, codes d'erreur).
-- [ ] Composants `components/buyer/wishlist/*` (carte envie, compteur/barre,
-      sections différées, empty state) + page `acheteur/envies/page.tsx`.
-- [ ] Toggle « Ajouter / Retirer de mes envies » sur la fiche AC-05 (état SSR
+      index liste/comptage + RLS forcée self-only. Pas d'`updated_at` (retrait =
+      soft delete via `deleted_at`). Rollback documenté, idempotente.
+- [x] Miroir `supabase/policies/wishlist_items.sql` (convention §14.2).
+- [x] `wishlistRepo` dans `packages/db` (`listActive`, `countActive`,
+      `findActiveByProduct`, `add` → `WishlistAlreadyExistsError`,
+      `softRemoveByProduct`) + `catalogueRepo.listByIds` (jointure).
+      *Tests repo/DB différés* : nécessitent un harnais Supabase live (cohérent
+      catalogue KAN-28, non testé unitairement).
+- [x] Contracts `WishlistAddInput` / `WishlistItem` / `WishlistPage` +
+      `WISHLIST_ERROR_CODES` + `WISHLIST_MAX` + tests (`wishlist.test.ts`).
+- [x] Endpoints `GET/POST /api/v1/wishlist` + `DELETE /api/v1/wishlist/[productId]`
+      (validation Zod, gating rôle acheteur, plafond, unicité, codes d'erreur).
+- [x] Composants `components/buyer/wishlist/*` (toggle AC-05, liste + retrait
+      optimiste, compteur/barre, empty state) + page `acheteur/envies/page.tsx`.
+      Sections `matchable`/`matched` et onglets non rendus (différés KAN-42),
+      pas de données mockées.
+- [x] Toggle « Ajouter / Retirer de mes envies » sur la fiche AC-05 (état SSR
       initial + optimistic update).
-- [ ] Câbler badge + lien « Mes envies » du shell acheteur (KAN-28) vers AC-06.
-- [ ] Seeds/fixtures E2E : *différé* si le harnais « acheteur connecté + seed »
-      n'existe toujours pas (cohérent posture KAN-28).
+- [x] Câbler le lien « Mes envies » du shell acheteur (KAN-28) vers AC-06 +
+      aperçu réel sur l'accueil AC-03. *Badge numérique nav différé* (couplé au
+      matching, cf. design.md § État UI).
+- [ ] Seeds/fixtures E2E : **différé** — pas de harnais « acheteur connecté +
+      seed » (cohérent KAN-25/27/28). Seul le gating de `/acheteur/envies` est
+      couvert (`e2e/buyer-wishlist.spec.ts`).
 
 ## Checklist pre-merge
 

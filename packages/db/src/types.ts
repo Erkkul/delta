@@ -40,6 +40,12 @@ export type Database = {
         Update: BuyerProfileUpdate
         Relationships: []
       }
+      wishlist_items: {
+        Row: WishlistItemRow
+        Insert: WishlistItemInsert
+        Update: WishlistItemUpdate
+        Relationships: []
+      }
     }
     Views: {
       catalogue_products: {
@@ -400,5 +406,28 @@ export type BuyerProfileUpdate = {
   city?: string | null
   postcode?: string | null
   preferred_categories?: ProductCategory[]
+  deleted_at?: string | null
+}
+
+// ─── Wishlist items (KAN-30) ─────────────────────────────────────────────
+// Wishlist privée acheteur (« Mes envies », AC-06). Une row = un produit
+// précis souhaité. RLS self-only (aucune lecture cross-user). Aucun statut ni
+// prix stocké (dérivé par le matching KAN-42 / appliqué au match KAN-31). Le
+// retrait est un soft delete (deleted_at). Voir migration 20260911100000.
+
+export type WishlistItemRow = {
+  id: string
+  user_id: string
+  product_id: string
+  created_at: string
+  deleted_at: string | null
+}
+
+export type WishlistItemInsert = {
+  user_id: string
+  product_id: string
+}
+
+export type WishlistItemUpdate = {
   deleted_at?: string | null
 }
