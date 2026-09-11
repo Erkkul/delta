@@ -4,12 +4,14 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 
 > Mis à jour automatiquement par les sessions Cowork. Ne pas éditer à la main sans cohérence avec Jira (utiliser `searchJiraIssuesUsingJql`).
 
+> ⚠️ **Suivi Jira en pause depuis le 2026-09-11** — tous les tickets du projet KAN ont été supprimés (confirmé via `searchJiraIssuesUsingJql` : plus aucun ticket KAN-XX résolu, y compris des tickets déjà mergés sur `main` comme KAN-30). Ce fichier documente donc un **état historique** (dernier état connu avant suppression) plutôt qu'un miroir Jira live. Les cadrages techniques dans `specs/KAN-XXX/` restent produits normalement, sans lien Jira actif (voir `specs/KAN-31/proposal.md` pour un exemple). Reprendre la synchronisation Jira normale dès que le projet KAN est reconstitué.
+
 ## Vue d'ensemble
 
 - **13 épics** (KAN-1, KAN-4 → KAN-15) — un épic par grand domaine fonctionnel
 - **50 features cataloguées** (KAN-2, KAN-3 sous KAN-1 ; KAN-16 → KAN-158 sous les autres épics — voir tables par épic ci-dessous)
 - **Subtasks** : voir le catalogue par épic ci-dessous. Le mapping peut être incomplet pour les subtasks les plus récentes — Jira fait foi pour la liste exhaustive.
-- État au 2026-09-11 : KAN-27 *Examiner* (implémentation mergée sur `main` — PR #61, cadrage `specs/KAN-27/` PR #59) ; KAN-26 *Examiner* (mergé sur `main` — PR #57, cadrage `specs/KAN-26/`) ; KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *Terminé* (mergé sur `main` — PR #10, cadrage `specs/KAN-16/`) ; KAN-17 *Terminé* (mergé sur `main` — PR #18, cadrage `specs/KAN-17/`) ; KAN-18 *Terminé* (mergé sur `main` — PR #21, cadrage `specs/KAN-18/`) ; KAN-158 *Terminé* (mergé sur `main` — PR #15, cadrage `specs/KAN-158/`) ; KAN-19 *Examiner* (mergé sur `main` — PR #25, cadrage `specs/KAN-19/`) ; KAN-20 *Examiner* (mergé sur `main` — PR #30, cadrage `specs/KAN-20/`) ; KAN-21 *Examiner* (mergé sur `main` — PR #34, cadrage `specs/KAN-21/`) ; KAN-22 *Examiner* (mergé sur `main` — PR #38, cadrage `specs/KAN-22/`) ; KAN-23 *Examiner* (mergé sur `main` — PR #42, cadrage `specs/KAN-23/`) ; KAN-24 *Examiner* (mergé sur `main` — PR #49, cadrage `specs/KAN-24/`) ; KAN-25 *Examiner* (mergé sur `main` — PR #53, cadrage `specs/KAN-25/`) ; KAN-28 *Examiner* (implémentation mergée sur `main` — PR #65, cadrage `specs/KAN-28/` PR #63) ; KAN-29 *À faire (cadrage)* (cadrage mergé sur `main` — PR #67, `specs/KAN-29/`) ; KAN-30 *Examiner* (implémentation mergée sur `main` — PR #71, cadrage `specs/KAN-30/` PR #69) ; autres *Ideas*
+- État au 2026-09-11 (figé — voir bannière de pause ci-dessus ; tickets supprimés depuis, statuts ci-dessous = dernier état connu) : KAN-31 *(ticket supprimé)* (cadrage ouvert sans lien Jira, `specs/KAN-31/`) ; KAN-27 *Examiner* (implémentation mergée sur `main` — PR #61, cadrage `specs/KAN-27/` PR #59) ; KAN-26 *Examiner* (mergé sur `main` — PR #57, cadrage `specs/KAN-26/`) ; KAN-1 *Examiner* (épic Authentication entièrement livré côté features, à clôturer manuellement si souhaité) ; KAN-2 / KAN-3 / KAN-157 *Terminé* (mergés sur `main` — PRs #2/#3/#4/#5 pour KAN-2, #8 pour KAN-3, #9 pour KAN-157) ; KAN-16 *Terminé* (mergé sur `main` — PR #10, cadrage `specs/KAN-16/`) ; KAN-17 *Terminé* (mergé sur `main` — PR #18, cadrage `specs/KAN-17/`) ; KAN-18 *Terminé* (mergé sur `main` — PR #21, cadrage `specs/KAN-18/`) ; KAN-158 *Terminé* (mergé sur `main` — PR #15, cadrage `specs/KAN-158/`) ; KAN-19 *Examiner* (mergé sur `main` — PR #25, cadrage `specs/KAN-19/`) ; KAN-20 *Examiner* (mergé sur `main` — PR #30, cadrage `specs/KAN-20/`) ; KAN-21 *Examiner* (mergé sur `main` — PR #34, cadrage `specs/KAN-21/`) ; KAN-22 *Examiner* (mergé sur `main` — PR #38, cadrage `specs/KAN-22/`) ; KAN-23 *Examiner* (mergé sur `main` — PR #42, cadrage `specs/KAN-23/`) ; KAN-24 *Examiner* (mergé sur `main` — PR #49, cadrage `specs/KAN-24/`) ; KAN-25 *Examiner* (mergé sur `main` — PR #53, cadrage `specs/KAN-25/`) ; KAN-28 *Examiner* (implémentation mergée sur `main` — PR #65, cadrage `specs/KAN-28/` PR #63) ; KAN-29 *À faire (cadrage)* (cadrage mergé sur `main` — PR #67, `specs/KAN-29/`) ; KAN-30 *Examiner* (implémentation mergée sur `main` — PR #71, cadrage `specs/KAN-30/` PR #69) ; autres *Ideas*
 - **Maquettes (2026-05-14)** : les 35 écrans des 3 parcours (Producteur, Acheteur, Rameneur) du sitemap PRD §10 sont maquettés. Restent à maquetter : transverses **TR-02** (centre notifications) et **TR-04** (signalement / litige) ; **TR-03** est couvert par `rm-09-chat.html`. Index navigable de toutes les maquettes : `design/maquettes/index.html`
 
 ## Convention de référencement
@@ -47,7 +49,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | AC-04 Catalogue parcourable | `ac-04-catalogue.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-29 (Zone non couverte) — [Cadrage tech](specs/KAN-29/) |
 | AC-05 Fiche produit | `ac-05-fiche-produit.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-30 (Wishlist privée) — [Cadrage tech](specs/KAN-30/) |
 | AC-06 Mes envies | `ac-06-mes-envies.html` | KAN-30 (Wishlist privée) — [Cadrage tech](specs/KAN-30/) | — |
-| AC-07 Notif match → confirmation | `ac-07-notification-match.html` | KAN-31 (Notification & confirmation match) | KAN-32 (Pénalités acheteur) |
+| AC-07 Notif match → confirmation | `ac-07-notification-match.html` | KAN-31 (Notification & confirmation match, ticket supprimé) — [Cadrage tech](specs/KAN-31/) | KAN-32 (Pénalités acheteur, ticket supprimé) |
 | AC-07b Paiement Stripe | `ac-07b-paiement.html` | KAN-33 (Paiement Stripe), KAN-34 (Escrow & libération) | — |
 | AC-08 Mes commandes | `ac-08-mes-commandes.html` | KAN-45 (Suivi mission & états) | KAN-55 (Notif in-app) |
 | AC-08b QR delivery | `ac-08b-qr-delivery.html` | KAN-48 (QR Delivery) | — |
@@ -140,8 +142,8 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-28 | Feature | Examiner | Catalogue filtré — [Cadrage tech](specs/KAN-28/) — mergé sur main (PR #65) |
 | KAN-29 | Feature | À faire | Zone non couverte & liste d'attente — [Cadrage tech](specs/KAN-29/) |
 | KAN-30 | Feature | Examiner | Wishlist privée — [Cadrage tech](specs/KAN-30/) — mergé sur main (PR #71) |
-| KAN-31 | Feature | Ideas | Notification & confirmation match |
-| KAN-32 | Feature | Ideas | Pénalités acheteur |
+| KAN-31 | Feature | *(ticket supprimé)* | Notification & confirmation match — [Cadrage tech](specs/KAN-31/) |
+| KAN-32 | Feature | *(ticket supprimé)* | Pénalités acheteur |
 
 ### KAN-8 — Paiement
 
