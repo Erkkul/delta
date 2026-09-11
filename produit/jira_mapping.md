@@ -45,8 +45,8 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | AC-02 Onboarding | `ac-02-onboarding.html` | KAN-25 (Onboarding & zone), KAN-26 (Préférences catégories) | [Cadrage KAN-25](specs/KAN-25/), [Cadrage KAN-26](specs/KAN-26/) |
 | AC-03 Accueil | `ac-03-accueil.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | — |
 | AC-04 Catalogue parcourable | `ac-04-catalogue.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-29 (Zone non couverte) — [Cadrage tech](specs/KAN-29/) |
-| AC-05 Fiche produit | `ac-05-fiche-produit.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-30 (Wishlist privée) |
-| AC-06 Mes envies | `ac-06-mes-envies.html` | KAN-30 (Wishlist privée) | — |
+| AC-05 Fiche produit | `ac-05-fiche-produit.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-30 (Wishlist privée) — [Cadrage tech](specs/KAN-30/) |
+| AC-06 Mes envies | `ac-06-mes-envies.html` | KAN-30 (Wishlist privée) — [Cadrage tech](specs/KAN-30/) | — |
 | AC-07 Notif match → confirmation | `ac-07-notification-match.html` | KAN-31 (Notification & confirmation match) | KAN-32 (Pénalités acheteur) |
 | AC-07b Paiement Stripe | `ac-07b-paiement.html` | KAN-33 (Paiement Stripe), KAN-34 (Escrow & libération) | — |
 | AC-08 Mes commandes | `ac-08-mes-commandes.html` | KAN-45 (Suivi mission & états) | KAN-55 (Notif in-app) |
@@ -139,7 +139,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-7 | Epic | Ideas | Wishlist & Matching |
 | KAN-28 | Feature | Examiner | Catalogue filtré — [Cadrage tech](specs/KAN-28/) — mergé sur main (PR #65) |
 | KAN-29 | Feature | À faire | Zone non couverte & liste d'attente — [Cadrage tech](specs/KAN-29/) |
-| KAN-30 | Feature | Ideas | Wishlist privée |
+| KAN-30 | Feature | Ideas | Wishlist privée — [Cadrage tech](specs/KAN-30/) |
 | KAN-31 | Feature | Ideas | Notification & confirmation match |
 | KAN-32 | Feature | Ideas | Pénalités acheteur |
 
