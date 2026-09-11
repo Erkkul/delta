@@ -46,10 +46,38 @@ export type Database = {
         Update: WishlistItemUpdate
         Relationships: []
       }
+      trips: {
+        Row: TripRow
+        Insert: TripInsert
+        Update: TripUpdate
+        Relationships: []
+      }
+      missions: {
+        Row: MissionRow
+        Insert: MissionInsert
+        Update: MissionUpdate
+        Relationships: []
+      }
+      mission_buyers: {
+        Row: MissionBuyerRow
+        Insert: MissionBuyerInsert
+        Update: MissionBuyerUpdate
+        Relationships: []
+      }
+      notifications: {
+        Row: NotificationRow
+        Insert: NotificationInsert
+        Update: NotificationUpdate
+        Relationships: []
+      }
     }
     Views: {
       catalogue_products: {
         Row: CatalogueProductRow
+        Relationships: []
+      }
+      mission_match_details: {
+        Row: MissionMatchDetailViewRow
         Relationships: []
       }
     }
@@ -66,6 +94,15 @@ export type Database = {
         Args: { p_longitude: number | null; p_latitude: number | null }
         Returns: undefined
       }
+      /**
+       * KAN-31 — confirmation atomique d'un match (transition
+       * `mission_buyers.status` → `accepted` + décrément stock produit).
+       * SECURITY DEFINER, cf. migration 20260911120000_create_missions.sql.
+       */
+      confirm_mission_match: {
+        Args: { p_mission_buyer_id: string }
+        Returns: MissionBuyerRow
+      }
     }
     Enums: {
       user_role: Role
@@ -77,6 +114,11 @@ export type Database = {
       product_packaging: ProductPackaging
       product_status: ProductStatus
       product_label: ProductLabel
+      trip_capacity: TripCapacity
+      trip_status: TripStatus
+      mission_status: MissionStatus
+      mission_buyer_status: MissionBuyerStatus
+      notification_channel: NotificationChannel
     }
     CompositeTypes: Record<string, never>
   }
@@ -430,4 +472,164 @@ export type WishlistItemInsert = {
 
 export type WishlistItemUpdate = {
   deleted_at?: string | null
+}
+
+// ─── Trips / Missions / Mission buyers / Notifications (KAN-31) ─────────
+// Socle DB minimal posé par KAN-31 (ticket sans lien Jira actif — projet
+// KAN supprimé le 2026-09-11). Voir migration 20260911120000 pour le détail
+// des colonnes, contraintes et RLS. `trips` n'a pas de géométrie PostGIS
+// (déférée à la feature de déclaration de trajet réelle) ; `missions` n'a
+// pas de state machine mission-level câblée (décision produit du seuil de
+// confirmation non tranchée) — cf. specs/KAN-31/design.md.
+
+export type TripCapacity = "sac" | "coffre" | "break"
+export type TripStatus = "active" | "completed" | "cancelled"
+
+export type TripRow = {
+  id: string
+  rameneur_user_id: string
+  rameneur_display_name: string | null
+  origin_label: string
+  destination_label: string
+  depart_date: string
+  return_date: string | null
+  capacity: TripCapacity
+  status: TripStatus
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export type TripInsert = {
+  rameneur_user_id: string
+  rameneur_display_name?: string | null
+  origin_label: string
+  destination_label: string
+  depart_date: string
+  return_date?: string | null
+  capacity: TripCapacity
+  status?: TripStatus
+}
+
+export type TripUpdate = {
+  status?: TripStatus
+  deleted_at?: string | null
+}
+
+/** Cf. ARCHITECTURE.md §6.1 pour le graphe complet de la state machine mission. */
+export type MissionStatus =
+  | "draft"
+  | "reserved"
+  | "awaiting_buyers"
+  | "confirmed"
+  | "picked_up"
+  | "delivered"
+  | "closed"
+  | "cancelled_no_buyer"
+  | "cancelled_no_stock"
+  | "cancelled_rameneur_dropout"
+
+export type MissionRow = {
+  id: string
+  trip_id: string
+  producer_user_id: string
+  status: MissionStatus
+  reserved_at: string
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export type MissionInsert = {
+  trip_id: string
+  producer_user_id: string
+  status: MissionStatus
+  reserved_at?: string
+}
+
+export type MissionUpdate = {
+  status?: MissionStatus
+  deleted_at?: string | null
+}
+
+export type MissionBuyerStatus = "pending" | "accepted" | "declined" | "expired"
+
+export type MissionBuyerRow = {
+  id: string
+  mission_id: string
+  buyer_id: string
+  product_id: string
+  quantity: number
+  unit_price_cents: number
+  status: MissionBuyerStatus
+  confirmation_deadline: string
+  responded_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type MissionBuyerInsert = {
+  mission_id: string
+  buyer_id: string
+  product_id: string
+  quantity?: number
+  unit_price_cents: number
+  status?: MissionBuyerStatus
+  confirmation_deadline?: string
+}
+
+export type MissionBuyerUpdate = {
+  status?: MissionBuyerStatus
+  responded_at?: string | null
+}
+
+export type NotificationChannel = "in_app" | "email" | "push"
+
+export type NotificationRow = {
+  id: string
+  user_id: string
+  type: string
+  channel: NotificationChannel
+  payload: Record<string, unknown>
+  idempotency_key: string
+  read_at: string | null
+  created_at: string
+}
+
+export type NotificationInsert = {
+  user_id: string
+  type: string
+  channel?: NotificationChannel
+  payload?: Record<string, unknown>
+  idempotency_key: string
+}
+
+export type NotificationUpdate = {
+  read_at?: string | null
+}
+
+/**
+ * Vue `mission_match_details` (KAN-31, migration 20260911120000). Lecture
+ * composée mission_buyers × products × missions × trips × producers,
+ * `security_invoker = off` avec prédicat `buyer_id = auth.uid()` embarqué
+ * (cf. commentaire de la vue en migration).
+ */
+export type MissionMatchDetailViewRow = {
+  id: string
+  buyer_id: string
+  status: MissionBuyerStatus
+  confirmation_deadline: string
+  responded_at: string | null
+  quantity: number
+  unit_price_cents: number
+  product_id: string
+  product_name: string
+  producer_user_id: string
+  producer_display_name: string | null
+  producer_zone: string | null
+  rameneur_user_id: string
+  rameneur_display_name: string | null
+  origin_label: string
+  destination_label: string
+  depart_date: string
 }

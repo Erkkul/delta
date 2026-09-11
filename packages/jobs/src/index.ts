@@ -1,4 +1,5 @@
 export * from "./inngest-client"
 export * from "./functions"
 export * from "./producer/index"
+export * from "./mission-match/index"
 export * from "./integrations/insee"

@@ -129,7 +129,7 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 ## Jobs et observabilité
 
 ### Inngest (jobs asynchrones)
-- **Statut** : Partiel — compte créé, env Production provisionné, clés récupérées et collées côté Vercel + `.env.local` (2026-05-16). Package `@delta/jobs` scaffolé avec premier event `producer.siret.requested` et client Sirene (2026-05-17, KAN-16). Reste : endpoint `/api/v1/inngest` côté apps/web et sync de l'app sur le dashboard Inngest (à faire dans la suite de KAN-16).
+- **Statut** : Partiel — compte créé, env Production provisionné, clés récupérées et collées côté Vercel + `.env.local` (2026-05-16). Package `@delta/jobs` scaffolé avec premier event `producer.siret.requested` et client Sirene (2026-05-17, KAN-16). Endpoint `apps/web/app/api/v1/inngest/route.ts` câblé (KAN-16, constaté le 2026-09-11 lors du cadrage KAN-31 — la mention "reste : endpoint" ci-dessous était stale). Second consommateur ajouté le 2026-09-11 (KAN-31, sans lien Jira actif) : job cron `expire-pending-mission-matches`. Reste : sync manuelle de l'app sur le dashboard Inngest (opération hors repo, non vérifiable depuis le code).
 - **Dashboard** : https://app.inngest.com
 - **Plan** : Free (50 000 step executions / mois, suffisant au MVP — cf. ARCHITECTURE.md §13.2)
 - **Env vars produites** : `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY` (Sensitive côté Vercel pour la signing key, qui permet de forger des appels signés vers `/api/v1/inngest`)
@@ -141,9 +141,7 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
   - **Signing Key** récupérée → exposée en `INNGEST_SIGNING_KEY` côté Vercel (*Sensitive*) + `.env.local`
   - Onboarding wizard fermé via « I already have an Inngest app » (pas de Dev Server lancé tant que `packages/jobs/` n'existe pas)
 - **À faire** :
-  - **Scaffold `packages/jobs/`** (manifest pnpm, deps `inngest`, exports, tsconfig) — premier package jobs du monorepo, attaché à KAN-16 cf. cadrage `specs/KAN-16/`
-  - **Endpoint `apps/web/app/api/v1/inngest/route.ts`** — utilise `serve({ client, functions })` du package `inngest/next` pour exposer les fonctions à Inngest cloud
-  - **Sync de l'app** côté dashboard Inngest → menu **Apps** → **Sync new app** → coller `https://delta-web-gamma.vercel.app/api/v1/inngest` (Inngest détecte alors les fonctions exportées via fetch HTTP)
+  - **Sync de l'app** côté dashboard Inngest → menu **Apps** → **Sync new app** → coller `https://delta-web-gamma.vercel.app/api/v1/inngest` (Inngest détecte alors les fonctions exportées via fetch HTTP). Seule étape manuelle restante — le scaffold `packages/jobs/` et l'endpoint route handler sont faits (KAN-16).
   - **Sentry pour les jobs** : `SENTRY_DSN_JOBS` à provisionner en même temps que Sentry (cf. § Sentry, *À faire*)
 - **Notes** : Inngest **ne fait pas tourner du code chez eux**, il invoque ton endpoint via HTTP avec retry exponentiel natif et orchestration des `step.run(...)`. Voir ARCHITECTURE.md §7 (matching pipeline) et le cadrage `specs/KAN-16/design.md` pour le premier event consommateur `producer.siret.requested`.
 

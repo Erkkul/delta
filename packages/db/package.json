@@ -13,6 +13,7 @@
     "./products": "./src/products/index.ts",
     "./catalogue": "./src/catalogue/index.ts",
     "./wishlist": "./src/wishlist/index.ts",
+    "./mission-match": "./src/mission-match/index.ts",
     "./client": "./src/client.ts",
     "./types": "./src/types.ts"
   },
