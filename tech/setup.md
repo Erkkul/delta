@@ -46,7 +46,8 @@ Checklist vivante des services externes à provisionner pour Delta. Source uniqu
 - **Notes** : RLS-on par défaut activée à la création du projet. Voir ARCHITECTURE.md §5 (modélisation), §9 (sécurité), §13 (stratégie free-tier).
 
 ### Upstash Redis (rate-limit + cache)
-- **Statut** : Fait le 2026-05-12.
+- **Statut** : Fait le 2026-05-12. **Base recréée le 2026-09-11** (l'ancienne base free avait été désactivée après inactivité prolongée → 500 sur `/auth/login`, cf. ARCHITECTURE.md §18 entrée 1.28). Nouvelles `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` mises à jour dans Vercel (Production + Preview + Development) + redeploy.
+- ⚠️ **Pas de keepalive Upstash** (contrairement à Supabase, cf. § GitHub Actions). Une base free peut être à nouveau désactivée après inactivité — le login est désormais **fail-open** (une panne du store ne bloque plus les connexions, cf. ARCHITECTURE.md §9.4 / §18 1.28), mais surveiller la santé de la base reste souhaitable.
 - **Dashboard** : https://console.upstash.com
 - **Plan** : Free (10 000 commandes/jour, 256 MB, 1 connexion). Pas de carte requise. Bascule payante quand le trafic réel s'en approchera (cf. ARCHITECTURE.md §13.2).
 - **Env vars produites** : `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (interface REST plutôt que TCP natif — compatible serverless Vercel, contrairement au port 6379 qui ne passe pas en Edge).

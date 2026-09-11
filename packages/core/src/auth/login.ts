@@ -35,6 +35,14 @@ export type LoadRolesAdapter = {
 export type LoginDeps = SignInAdapter &
   LoadRolesAdapter & {
     store: RateLimitStore
+    /**
+     * Appelé quand le store rate-limit est **injoignable** (Upstash down,
+     * quota dépassé, env manquante…). Le login continue quand même
+     * (fail-open) : une panne du rate-limiter ne doit pas bloquer 100 % des
+     * connexions. Le hook permet au caller de tracer l'incident (log/alerte).
+     * Optionnel — absent, l'échec du store est silencieusement toléré.
+     */
+    onRateLimitUnavailable?: (error: unknown) => void
   }
 
 /**
@@ -80,14 +88,27 @@ export async function loginWithEmail(
 
   // L'email est déjà normalisé (trim + lowercase via Zod), la clé de
   // rate-limit est donc stable malgré la casse fournie par l'utilisateur.
-  const limit = await rateLimit(
-    `auth:login:${email}`,
-    LOGIN_RATE_LIMIT.attempts,
-    LOGIN_RATE_LIMIT.windowMs,
-    deps.store,
-  )
-  if (!limit.allowed) {
-    throw new RateLimitedError(limit.retryAfterMs)
+  //
+  // Fail-open : si le store rate-limit est injoignable (Upstash down, quota,
+  // env manquante), on NE bloque PAS toutes les connexions. On trace via
+  // `onRateLimitUnavailable` et on laisse passer. La protection anti
+  // brute-force ne saute que le temps de la panne (compromis disponibilité
+  // vs. protection assumé — cf. ARCHITECTURE.md §9.4).
+  try {
+    const limit = await rateLimit(
+      `auth:login:${email}`,
+      LOGIN_RATE_LIMIT.attempts,
+      LOGIN_RATE_LIMIT.windowMs,
+      deps.store,
+    )
+    if (!limit.allowed) {
+      throw new RateLimitedError(limit.retryAfterMs)
+    }
+  } catch (err) {
+    // Un dépassement de limite reste une réponse métier légitime : on le
+    // propage. Seule une panne du store est absorbée (fail-open).
+    if (err instanceof RateLimitedError) throw err
+    deps.onRateLimitUnavailable?.(err)
   }
 
   const signed = await deps.signInWithPassword({ email, password })
