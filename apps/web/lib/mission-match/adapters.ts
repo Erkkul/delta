@@ -3,6 +3,7 @@ import {
   type ExpirePendingMissionMatchesDeps,
   type MissionMatchAdapter,
   MissionMatchAlreadyRespondedError,
+  MissionMatchBuyerSuspendedError,
   MissionMatchExpiredError,
   MissionMatchNotFoundError,
   MissionMatchOutOfStockError,
@@ -10,6 +11,7 @@ import {
 } from "@delta/core/mission-match"
 import {
   MissionMatchAlreadyRespondedDbError,
+  MissionMatchBuyerSuspendedDbError,
   MissionMatchExpiredDbError,
   MissionMatchNotFoundDbError,
   MissionMatchOutOfStockDbError,
@@ -61,6 +63,9 @@ function rethrowAsCoreError(err: unknown): never {
   if (err instanceof MissionMatchOutOfStockDbError) {
     throw new MissionMatchOutOfStockError()
   }
+  if (err instanceof MissionMatchBuyerSuspendedDbError) {
+    throw new MissionMatchBuyerSuspendedError()
+  }
   throw err
 }
 
@@ -97,7 +102,7 @@ export function getMissionMatchAdapter(client: Client): MissionMatchAdapter {
 
     async decline(missionMatchId, buyerId) {
       try {
-        await missionMatchRepo.decline(client, missionMatchId, buyerId)
+        await missionMatchRepo.decline(client, missionMatchId)
       } catch (err) {
         rethrowAsCoreError(err)
       }

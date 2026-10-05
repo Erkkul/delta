@@ -70,6 +70,8 @@ export const MISSION_MATCH_ERROR_CODES = {
   AlreadyResponded: "MISSION_MATCH_ALREADY_RESPONDED",
   Expired: "MISSION_MATCH_EXPIRED",
   OutOfStock: "MISSION_MATCH_OUT_OF_STOCK",
+  /** KAN-32 — confirmation refusée, compte temporairement suspendu (D7). */
+  BuyerSuspended: "MISSION_MATCH_BUYER_SUSPENDED",
   Unknown: "MISSION_MATCH_UNKNOWN",
 } as const
 export type MissionMatchErrorCode =

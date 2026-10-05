@@ -21,6 +21,9 @@ const MissionMatchId = z.string().uuid()
  * DB). Ne déclenche PAS le paiement Stripe — hors scope KAN-31, cf.
  * specs/KAN-31/proposal.md § Hypothèses.
  *
+ * 403 également renvoyé si l'acheteur est suspendu (pénalité D7, KAN-32 —
+ * `MISSION_MATCH_BUYER_SUSPENDED`), en plus du rôle manquant.
+ *
  * Codes : 200 / 400 / 401 / 403 / 404 / 409 / 500
  */
 export async function POST(

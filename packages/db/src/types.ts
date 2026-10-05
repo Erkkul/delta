@@ -103,6 +103,16 @@ export type Database = {
         Args: { p_mission_buyer_id: string }
         Returns: MissionBuyerRow
       }
+      /**
+       * KAN-32 — refus atomique d'un match (transition
+       * `mission_buyers.status` → `declined` + comptage des refus sur
+       * fenêtre glissante + pénalité crescendo D7 éventuelle). SECURITY
+       * DEFINER, cf. migration 20261005120000_buyer_penalty.sql.
+       */
+      decline_mission_match: {
+        Args: { p_mission_buyer_id: string }
+        Returns: MissionBuyerRow
+      }
     }
     Enums: {
       user_role: Role
@@ -129,6 +139,8 @@ export type UserRow = {
   email: string
   roles: Role[]
   metadata: Record<string, unknown>
+  /** Pénalité acheteur (KAN-32, D7). NULL ou date passée = pas de restriction. */
+  suspended_until: string | null
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -145,6 +157,8 @@ export type UserUpdate = {
   email?: string
   roles?: Role[]
   metadata?: Record<string, unknown>
+  /** Écrit exclusivement par la RPC `decline_mission_match` (KAN-32) — jamais par un self-update client, cf. policy `users_update_self`. */
+  suspended_until?: string | null
   deleted_at?: string | null
 }
 
