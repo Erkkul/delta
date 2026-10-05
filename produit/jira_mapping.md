@@ -49,7 +49,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | AC-04 Catalogue parcourable | `ac-04-catalogue.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-29 (Zone non couverte) — [Cadrage tech](specs/KAN-29/) |
 | AC-05 Fiche produit | `ac-05-fiche-produit.html` | KAN-28 (Catalogue filtré) — [Cadrage tech](specs/KAN-28/) | KAN-30 (Wishlist privée) — [Cadrage tech](specs/KAN-30/) |
 | AC-06 Mes envies | `ac-06-mes-envies.html` | KAN-30 (Wishlist privée) — [Cadrage tech](specs/KAN-30/) | — |
-| AC-07 Notif match → confirmation | `ac-07-notification-match.html` | KAN-31 (Notification & confirmation match, ticket supprimé) — [Cadrage tech](specs/KAN-31/) | KAN-32 (Pénalités acheteur, ticket supprimé) |
+| AC-07 Notif match → confirmation | `ac-07-notification-match.html` | KAN-31 (Notification & confirmation match, ticket supprimé) — [Cadrage tech](specs/KAN-31/) | KAN-32 (Pénalités acheteur, ticket supprimé) — [Cadrage tech](specs/KAN-32/) |
 | AC-07b Paiement Stripe | `ac-07b-paiement.html` | KAN-33 (Paiement Stripe), KAN-34 (Escrow & libération) | — |
 | AC-08 Mes commandes | `ac-08-mes-commandes.html` | KAN-45 (Suivi mission & états) | KAN-55 (Notif in-app) |
 | AC-08b QR delivery | `ac-08b-qr-delivery.html` | KAN-48 (QR Delivery) | — |
@@ -83,7 +83,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | TR-01 Auth & gestion compte | voir PR-01 / AC-01 / RM-01 | KAN-2 (Création de compte), KAN-3 (Connexion), KAN-157 (Récup. mot de passe) | [Cadrage KAN-2](specs/KAN-2/), [Cadrage KAN-3](specs/KAN-3/), [Cadrage KAN-157](specs/KAN-157/) |
 | TR-02 Centre notifications | — *(à maquetter)* | KAN-54 (Notifications push), KAN-55 (Notifications in-app) | KAN-56 |
 | TR-03 Chat par mission | voir `rm-09-chat.html` | KAN-50 (Chat par mission) | KAN-51 |
-| TR-04 Signalement / litige | — *(à maquetter)* | KAN-60 (Gestion litiges & signalements) | KAN-32 (Pénalités acheteur) |
+| TR-04 Signalement / litige | — *(à maquetter)* | KAN-60 (Gestion litiges & signalements) | KAN-32 (Pénalités acheteur, ticket supprimé) — [Cadrage tech](specs/KAN-32/) |
 
 ---
 
@@ -143,7 +143,7 @@ Source de vérité pour la correspondance entre tickets Jira (projet **KAN**, `e
 | KAN-29 | Feature | À faire | Zone non couverte & liste d'attente — [Cadrage tech](specs/KAN-29/) |
 | KAN-30 | Feature | Examiner | Wishlist privée — [Cadrage tech](specs/KAN-30/) — mergé sur main (PR #71) |
 | KAN-31 | Feature | *(ticket supprimé)* | Notification & confirmation match — [Cadrage tech](specs/KAN-31/) — mergé sur main (PR #76, cadrage PR #74) |
-| KAN-32 | Feature | *(ticket supprimé)* | Pénalités acheteur |
+| KAN-32 | Feature | *(ticket supprimé)* | Pénalités acheteur — [Cadrage tech](specs/KAN-32/) |
 
 ### KAN-8 — Paiement
 
