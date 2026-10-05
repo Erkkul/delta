@@ -11,18 +11,31 @@ type Client = SupabaseClient<Database>
 const DETAIL_COLUMNS =
   "id, buyer_id, status, confirmation_deadline, responded_at, quantity, unit_price_cents, product_id, product_name, producer_user_id, producer_display_name, producer_zone, rameneur_user_id, rameneur_display_name, origin_label, destination_label, depart_date"
 
-/** Postgres error codes levés par la fonction RPC `confirm_mission_match`. */
+/**
+ * Postgres error codes levés par les fonctions RPC `confirm_mission_match`
+ * et `decline_mission_match` (P0001/P0002 partagés entre les deux, cf.
+ * migrations 20260911120000 et 20261005120000_buyer_penalty).
+ */
 export const CONFIRM_MISSION_MATCH_PG_CODES = {
   AlreadyResponded: "P0001",
   NotFound: "P0002",
   Expired: "P0003",
   OutOfStock: "P0004",
+  /** KAN-32 — acheteur suspendu (pénalité D7). */
+  BuyerSuspended: "P0005",
+} as const
+
+export const DECLINE_MISSION_MATCH_PG_CODES = {
+  AlreadyResponded: "P0001",
+  NotFound: "P0002",
 } as const
 
 export class MissionMatchNotFoundDbError extends Error {}
 export class MissionMatchAlreadyRespondedDbError extends Error {}
 export class MissionMatchExpiredDbError extends Error {}
 export class MissionMatchOutOfStockDbError extends Error {}
+/** KAN-32 — levée par `confirm_mission_match` quand `users.suspended_until` est dans le futur. */
+export class MissionMatchBuyerSuspendedDbError extends Error {}
 
 /**
  * Repo mission-match (KAN-31). Caller : toujours le client utilisateur — la
@@ -74,6 +87,8 @@ export const missionMatchRepo = {
           throw new MissionMatchExpiredDbError(error.message)
         case CONFIRM_MISSION_MATCH_PG_CODES.OutOfStock:
           throw new MissionMatchOutOfStockDbError(error.message)
+        case CONFIRM_MISSION_MATCH_PG_CODES.BuyerSuspended:
+          throw new MissionMatchBuyerSuspendedDbError(error.message)
         default:
           throw error
       }
@@ -82,35 +97,31 @@ export const missionMatchRepo = {
   },
 
   /**
-   * Refuse le match : UPDATE conditionnel `WHERE status = 'pending'`. Si
-   * aucune row n'est retournée, une lecture de suivi distingue "introuvable"
-   * de "déjà répondu" (le caller lève l'erreur typée adéquate).
+   * Refuse le match via la fonction RPC atomique `decline_mission_match`
+   * (KAN-32 — transition + comptage des refus + pénalité crescendo D7
+   * éventuelle dans la même transaction, migration
+   * 20261005120000_buyer_penalty.sql). Remplace l'UPDATE self direct de
+   * KAN-31 : la policy `mission_buyers_update_self` a été supprimée pour
+   * qu'aucun chemin ne puisse contourner le comptage de pénalité.
    */
   async decline(
     client: Client,
     missionMatchId: string,
-    buyerId: string,
   ): Promise<MissionBuyerRow> {
-    const { data, error } = await client
-      .from("mission_buyers")
-      .update({ status: "declined", responded_at: new Date().toISOString() })
-      .eq("id", missionMatchId)
-      .eq("buyer_id", buyerId)
-      .eq("status", "pending")
-      .select("*")
-      .maybeSingle()
-    if (error) throw error
-    if (data) return data
-
-    const { data: existing, error: findError } = await client
-      .from("mission_buyers")
-      .select("*")
-      .eq("id", missionMatchId)
-      .eq("buyer_id", buyerId)
-      .maybeSingle()
-    if (findError) throw findError
-    if (!existing) throw new MissionMatchNotFoundDbError()
-    throw new MissionMatchAlreadyRespondedDbError()
+    const { data, error } = await client.rpc("decline_mission_match", {
+      p_mission_buyer_id: missionMatchId,
+    })
+    if (error) {
+      switch (error.code) {
+        case DECLINE_MISSION_MATCH_PG_CODES.NotFound:
+          throw new MissionMatchNotFoundDbError(error.message)
+        case DECLINE_MISSION_MATCH_PG_CODES.AlreadyResponded:
+          throw new MissionMatchAlreadyRespondedDbError(error.message)
+        default:
+          throw error
+      }
+    }
+    return data
   },
 
   /**

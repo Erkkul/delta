@@ -60,3 +60,36 @@ Aucune maquette dédiée. `ac-07-notification-match.html` référence KAN-32 en 
 - Unit `packages/core` : 1er refus (aucun effet), 2e (avertissement), 3e (suspension), refus hors fenêtre (reset), refus pendant suspension active
 - Unit/integration `packages/db` : requête de comptage, écriture `suspended_until` via la fonction SECURITY DEFINER
 - Contracts : si un contrat de lecture de statut est ajouté
+
+## Implémenté (2026-10-05) — écarts par rapport au cadrage ci-dessus
+
+Détail complet : migration `supabase/migrations/20261005120000_buyer_penalty.sql`,
+ARCHITECTURE.md §18 entrée 1.30, `specs/KAN-32/notes.md`.
+
+Écarts constatés en implémentant, par rapport aux sections ci-dessus :
+
+- **Option A confirmée** (modèle de données) : pas d'écart, mise en œuvre
+  telle que recommandée.
+- **Comptage + décision factorisés en fonction core pure** — pas prévu
+  explicitement ci-dessus (la section Packages touchés mentionnait un hook
+  dans `declineMissionMatch` sans préciser la forme). `computeBuyerPenaltyOutcome`
+  / `isBuyerSuspended` (`packages/core/src/mission-match/compute-buyer-penalty-outcome.ts`)
+  documentent et testent la règle de seuil ; la fenêtre glissante elle-même
+  reste calculée côté SQL (atomicité), dupliquée avec cross-référence en
+  commentaire plutôt que partagée (impossible entre SQL et TS).
+- **Suppression de la policy `mission_buyers_update_self`** — non anticipée
+  dans "RLS sur la/les nouvelle(s) colonne(s)" ci-dessus, qui ne parlait que
+  de `users`. S'est avérée nécessaire : sans elle, un client pouvait
+  continuer à décliner un match par UPDATE self direct (chemin KAN-31),
+  contournant le comptage de pénalité. Les deux transitions passent
+  maintenant exclusivement par des RPC SECURITY DEFINER. Cf. notes.md.
+- **Decline devient une RPC** (comme confirm) plutôt qu'un UPDATE
+  conditionnel côté repo : nécessaire pour l'atomicité comptage + écriture
+  pénalité + notification (§ Impact state machine / events ci-dessus
+  l'anticipait sans préciser que cela changerait le mécanisme `decline`
+  lui-même, pas seulement `confirm`).
+- **Pas de nouvel endpoint, confirmé** : `confirm_mission_match` existant
+  étend simplement son gate (nouveau code d'erreur `P0005`
+  `MISSION_MATCH_BUYER_SUSPENDED`, mappé en HTTP 403).
+- **Aucune UI implémentée**, conformément à la section État UI — signalé
+  dans notes.md plutôt qu'improvisé.

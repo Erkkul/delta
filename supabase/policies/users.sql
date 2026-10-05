@@ -1,19 +1,24 @@
 -- Policies RLS pour public.users (cf. ARCHITECTURE.md §5.2, §9.2)
--- Ticket : KAN-2
+-- Ticket : KAN-2, modifié par KAN-32 (Pénalités acheteur, sans lien Jira actif)
 --
 -- ⚠️ Ce fichier est un MIROIR documentaire. La source de vérité appliquée
 -- en DB est la migration `supabase/migrations/20260512090000_create_users.sql`
--- (qui contient les mêmes CREATE POLICY inline). `supabase db push`
--- n'applique que les migrations — il ne lit pas ce dossier.
+-- (policy initiale KAN-2), modifiée par
+-- `supabase/migrations/20261005120000_buyer_penalty.sql` (KAN-32 — verrou
+-- `suspended_until`). `supabase db push` n'applique que les migrations — il
+-- ne lit pas ce dossier.
 --
 -- Toute évolution des policies passe par une NOUVELLE migration, qui
 -- doit être miroitée ici dans le même commit (cf. ARCHITECTURE.md §14.2).
 --
--- Règles (décision 2026-05-13 multi-rôle) :
+-- Règles (décision 2026-05-13 multi-rôle, étendues par KAN-32) :
 --   1. SELECT : self uniquement (auth.uid() = id).
 --   2. UPDATE : self uniquement. Le user peut modifier `roles` (multi-
---      sélection via /onboarding/role) et `metadata`. `email` et `id`
---      sont verrouillés par WITH CHECK + ownership Supabase Auth.
+--      sélection via /onboarding/role) et `metadata`. `email`, `id` et
+--      `suspended_until` sont verrouillés par WITH CHECK (`suspended_until`
+--      écrit exclusivement par la fonction RPC `decline_mission_match`,
+--      SECURITY DEFINER — un acheteur ne peut ni poser ni lever sa propre
+--      suspension).
 --   3. INSERT : aucune insertion via client utilisateur. Le trigger
 --      SECURITY DEFINER et le client admin (secret key, qui bypass RLS)
 --      sont les seuls chemins légitimes.
@@ -44,6 +49,7 @@ CREATE POLICY "users_update_self"
     auth.uid() = id
     AND id = (SELECT u.id FROM public.users u WHERE u.id = auth.uid())
     AND email = (SELECT u.email FROM public.users u WHERE u.id = auth.uid())
+    AND suspended_until IS NOT DISTINCT FROM (SELECT u.suspended_until FROM public.users u WHERE u.id = auth.uid())
   );
 
 ----------------------------------------------------------------------

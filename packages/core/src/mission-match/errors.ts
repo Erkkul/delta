@@ -41,8 +41,23 @@ export class MissionMatchOutOfStockError extends Error {
   }
 }
 
+/**
+ * L'acheteur est actuellement suspendu (KAN-32, pénalité D7 après refus
+ * répétés) — bloque la confirmation d'un nouveau match pendant la
+ * suspension. Ne bloque PAS le refus (toujours autorisé).
+ */
+export class MissionMatchBuyerSuspendedError extends Error {
+  readonly code = "MISSION_MATCH_BUYER_SUSPENDED" as const
+
+  constructor() {
+    super("Compte temporairement suspendu suite à des refus répétés.")
+    this.name = "MissionMatchBuyerSuspendedError"
+  }
+}
+
 export type MissionMatchErrorCode =
   | MissionMatchNotFoundError["code"]
   | MissionMatchAlreadyRespondedError["code"]
   | MissionMatchExpiredError["code"]
   | MissionMatchOutOfStockError["code"]
+  | MissionMatchBuyerSuspendedError["code"]

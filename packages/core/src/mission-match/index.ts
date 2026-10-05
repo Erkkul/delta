@@ -1,4 +1,5 @@
 export * from "./adapters"
+export * from "./compute-buyer-penalty-outcome"
 export * from "./compute-confirmation-deadline"
 export * from "./compute-pricing-breakdown"
 export * from "./confirm-mission-match"

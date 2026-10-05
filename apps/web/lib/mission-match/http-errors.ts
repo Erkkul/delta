@@ -1,6 +1,7 @@
 import { MISSION_MATCH_ERROR_CODES } from "@delta/contracts/mission-match"
 import {
   MissionMatchAlreadyRespondedError,
+  MissionMatchBuyerSuspendedError,
   MissionMatchExpiredError,
   MissionMatchNotFoundError,
   MissionMatchOutOfStockError,
@@ -35,6 +36,12 @@ export function mapMissionMatchError(err: unknown): NextResponse | null {
     return NextResponse.json(
       { error: err.message, code: MISSION_MATCH_ERROR_CODES.OutOfStock },
       { status: 409 },
+    )
+  }
+  if (err instanceof MissionMatchBuyerSuspendedError) {
+    return NextResponse.json(
+      { error: err.message, code: MISSION_MATCH_ERROR_CODES.BuyerSuspended },
+      { status: 403 },
     )
   }
   return null

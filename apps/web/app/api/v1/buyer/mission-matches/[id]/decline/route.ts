@@ -17,8 +17,11 @@ const MissionMatchId = z.string().uuid()
  * POST /api/v1/buyer/mission-matches/[id]/decline (KAN-31 — action
  * "Refuser cette mission" de AC-07).
  *
- * Ne gère PAS les pénalités en cas de refus répété (D7, ex-KAN-32) — hors
- * scope KAN-31.
+ * Applique la pénalité crescendo acheteur (D7, KAN-32) de façon transparente
+ * via la RPC `decline_mission_match` — aucun changement de contrat ou de
+ * code HTTP ici, l'escalade (avertissement / suspension) est notifiée
+ * séparément (table `notifications`) et n'est pas reflétée dans la réponse
+ * de ce endpoint.
  *
  * Codes : 200 / 400 / 401 / 403 / 404 / 409 / 500
  */
